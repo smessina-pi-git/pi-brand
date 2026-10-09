@@ -142,6 +142,8 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
 .wr-ready video { width: 100%; border-radius: 8px; background: #000; }
 .wr-reply { display: grid; gap: 10px; }
 .wr-replyhead { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.wr-count { text-align: right; font-variant-numeric: tabular-nums; }
+.wr-count.over { color: #FF8A8A; }
 .wr-spec { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12.5px; color: var(--bab-ink-faint); font-variant-numeric: tabular-nums; }
 .wr-spec b { font-weight: 500; color: var(--bab-ink-soft); }
 .wr-foot { margin-top: 48px; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px 40px; font-size: 13.5px; color: var(--bab-ink-faint); max-width: 1000px; }
@@ -165,7 +167,7 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
       <span id="article">a</span> <span class="bab-slot"><button id="profileBtn" class="bab-pick" type="button" aria-label="Your Reference Profile"><img id="profileIcon" alt=""><span id="profileName">Persuader</span><svg class="bab-chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg></button></span>.
     </h1>
     <div id="profilePop" class="bab-pop"></div>
-    <p class="bab-sub">Enter your name, pick your Reference Profile, and the video makes itself.</p>
+    <p class="bab-sub">Enter your name, pick your Reference Profile, and the video makes itself. Customize your Waiting Room in Zoom.</p>
   </section>
 
   <main class="wr-main">
@@ -206,13 +208,11 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
       </div>
       <p id="status" class="wr-status" role="status" aria-live="polite"></p>
       <div id="ready" class="wr-ready" hidden></div>
-      <p class="bab-hint">Made right here in your browser (Chrome or Edge). Then use Upload to Zoom: under Security, find Waiting Room, choose Customize Waiting Room, and upload the MP4.</p>
-      <div class="wr-spec" id="spec"><span><b>1920 × 1080</b> HD</span><span><b>30</b> fps</span><span><b id="specLoop">27.6 s</b> loop</span><span><b>MP4</b> H.264</span></div>
 
       <div class="bab-card wr-reply">
         <div class="wr-replyhead"><label class="bab-label" for="reply">Obi’s reply</label><button id="replyReset" class="bab-link" type="button" hidden>Use the suggested reply</button></div>
         <textarea id="reply" class="bab-text" rows="6" maxlength="280" spellcheck="true" aria-describedby="replyHint replyNote"></textarea>
-        <p class="bab-hint" id="replyHint"></p>
+        <p class="bab-hint wr-count" id="replyHint"></p>
         <p class="bab-fineprint" id="replyNote">Do not input text that disregards PI science. Always use Obi output for text shown here. You are responsible for what is put here.</p>
       </div>
     </aside>
@@ -965,6 +965,7 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
   showProfile(false);
 
   // ---------- preview ----------
+  var MAX_WORDS = 37;
   var scene = null, t0 = performance.now(), offset = 0, playing = !reduced, pausedAt = 0;
   function rebuild(){
     var p = profile();
@@ -972,13 +973,11 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     scene = WR.layout(vctx, {name: cleanName(), profile: p.name, reply: reply}, images);
     if (document.activeElement !== replyEl) replyEl.value = fillName(state.replies[p.name] || p.reply);
     $('replyReset').hidden = !edited;
-    var h = $('replyHint'); h.textContent = '';
-    var hasBold = shown.split(' ').some(function(w){ return w.indexOf(p.name) === 0; });
-    h.appendChild(document.createTextNode(n + ' words. ' + (hasBold ? 'The word ' : 'Include the word ')));
-    var b = document.createElement('b'); b.textContent = p.name; h.appendChild(b);
-    h.appendChild(document.createTextNode((hasBold ? ' shows in bold. ' : ' to show it in bold. ') + (n > scene.fitWords ? 'Over ' + scene.fitWords + ' words, the video runs ' + scene.LOOP.toFixed(1) + ' s so there’s time to read it.' : 'Up to ' + scene.fitWords + ' words fit the ' + scene.LOOP.toFixed(1) + ' s loop.')));
+    // a quiet word count against the limit; over it, the count turns red and the download waits
+    var h = $('replyHint'), over = n > MAX_WORDS;
+    h.textContent = n + ' / ' + MAX_WORDS + ' words'; h.classList.toggle('over', over);
+    $('mp4').disabled = over || !!busy;
     $('wrTopic').textContent = (cleanName() || 'Your host') + '’s meeting';
-    $('specLoop').textContent = scene.LOOP.toFixed(1) + ' s';
     $('scrub').setAttribute('aria-valuemax', scene.LOOP.toFixed(1));
     dirty = true;
   }
@@ -1094,7 +1093,7 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     }
     return null;
   }
-  function lock(on){ busy = on ? {cancelled:false} : null; $('mp4').disabled = !!on; nameEl.disabled = !!on; replyEl.disabled = !!on; picker.disable(on); return busy; }
+  function lock(on){ busy = on ? {cancelled:false} : null; $('mp4').disabled = !!on || $('replyHint').classList.contains('over'); nameEl.disabled = !!on; replyEl.disabled = !!on; picker.disable(on); return busy; }
   $('cancel').addEventListener('click', function(){ if (busy) busy.cancelled = true; });
 
   $('mp4').addEventListener('click', async function(){
