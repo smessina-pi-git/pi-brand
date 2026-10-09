@@ -137,8 +137,11 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
 .wr-side { display: grid; gap: 14px; position: sticky; top: 72px; }
 .wr-side .bab-btn { width: 100%; }
 .wr-actions { display: grid; gap: 10px; }
-.wr-title { margin: 0; text-align: center; font-size: clamp(12.5px, 1.1vw, 14px); line-height: 1.4; color: #a9a6ad; }
+.wr-title { margin: 0; text-align: center; font-size: clamp(12.5px, 1.1vw, 14px); line-height: 1.4; color: #232129; }
 .wr-topic { margin: 1px 0 0; text-align: center; font-size: 12px; color: #6f6c74; }
+/* the waiting room window is light, like Zoom's, so the dark video stands out; a soft violet glow sits behind it */
+.wr-main .bab-frame-body { background: #F4F3F7; }
+.wr-main .bab-frame canvas { box-shadow: 0 0 0 1px rgba(80,0,168,.18), 0 10px 34px -6px rgba(80,0,168,.38), 0 0 60px -10px rgba(51,168,211,.28); }
 .wr-status { margin: 0; font-size: 13px; color: var(--bab-ink-soft); }
 .wr-status.ok { color: #4cc38a; }
 .wr-status:empty { display: none; }
