@@ -2,7 +2,7 @@
 
 The shared look for PI Brand's builder tools and "video editor" style tools. The Zoom waiting room builder is the first one built on it. The kit provides:
 
-- the branded top bar: the PI logo plus "Brand Asset Builder", with the tool's name on the right
+- the branded top bar: the red PI mark, "Brand Asset Builder", a divider, then the tool's name
 - the dark tokens and type
 - a big sentence-style form, for example "I'm [ Steve ], a [ Persuader ▾ ]."
 - a picker popover
@@ -15,7 +15,7 @@ The shared look for PI Brand's builder tools and "video editor" style tools. The
 |---|---|
 | `kit.css` | Tokens and components. Everything is prefixed `bab-`, and the base resets use `:where()`, so a tool's own CSS always wins. |
 | `kit.js` | No dependencies. `BAB.bar()`, `BAB.autosize()`, `BAB.picker()`, `BAB.swap()`. |
-| `pi-mark.svg` | The bar logo (96 px tall, shown at 22 px). |
+| `pi-mark.svg` | The red PI mark for the bar (shown at 24 px) and the favicon. |
 
 ## Use it in a new tool
 
