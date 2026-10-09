@@ -1,8 +1,8 @@
-# Branded Asset Builder kit
+# Brand Asset Builder kit
 
 The shared look for PI Brand's builder tools and "video editor" style tools. The Zoom waiting room builder is the first one built on it. The kit provides:
 
-- the branded top bar: the PI logo plus "Branded Asset Builder", with the tool's name on the right
+- the branded top bar: the PI logo plus "Brand Asset Builder", with the tool's name on the right
 - the dark tokens and type
 - a big sentence-style form, for example "I'm [ Steve ], a [ Persuader ▾ ]."
 - a picker popover
@@ -15,7 +15,7 @@ The shared look for PI Brand's builder tools and "video editor" style tools. The
 |---|---|
 | `kit.css` | Tokens and components. Everything is prefixed `bab-`, and the base resets use `:where()`, so a tool's own CSS always wins. |
 | `kit.js` | No dependencies. `BAB.bar()`, `BAB.autosize()`, `BAB.picker()`, `BAB.swap()`. |
-| `pi-logo-white.png` | The bar logo (96 px tall, shown at 22 px). |
+| `pi-mark.svg` | The bar logo (96 px tall, shown at 22 px). |
 
 ## Use it in a new tool
 
@@ -27,7 +27,7 @@ The shared look for PI Brand's builder tools and "video editor" style tools. The
 <header id="bar"></header>
 <div class="bab-page"> … </div>
 <script src="../../shared/asset-builder/kit.js"></script>
-<script>BAB.bar(document.getElementById('bar'), {logo: '../../shared/asset-builder/pi-logo-white.png', tool: 'My tool', home: '../../'});</script>
+<script>BAB.bar(document.getElementById('bar'), {logo: '../../shared/asset-builder/pi-mark.svg', tool: 'My tool', home: '../../'});</script>
 ```
 
 **A self-contained file** (a claude.ai artifact, or anything that must work offline): inline `kit.css` and `kit.js` at build time, and pass the logo as a data URI. The Zoom waiting room builder does this. Its `scripts/build.py` reads this folder (`--kit <path>`) and fills `__KIT_CSS__` and `__KIT_JS__` in its page template. Change the kit here, rebuild the tool, then republish it.

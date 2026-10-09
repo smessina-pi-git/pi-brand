@@ -30,7 +30,7 @@ git add -A && git commit -m "Add <title>" && git push
 
 ## Builder tools: use the shared kit
 
-Builder and "video editor" style tools share one look: the Branded Asset Builder kit in `shared/asset-builder/`. It covers the PI logo bar, tokens, the sentence-style form, the picker, buttons, the preview frame and fine print. See `shared/asset-builder/README.md`.
+Builder and "video editor" style tools share one look: the Brand Asset Builder kit in `shared/asset-builder/`. It covers the PI logo bar, tokens, the sentence-style form, the picker, buttons, the preview frame and fine print. See `shared/asset-builder/README.md`.
 
 - **Hosted here:** a hosted tool links `../../shared/asset-builder/kit.css` and `kit.js`.
 - **Self-contained files:** a file that must stand alone, such as a claude.ai artifact, inlines the kit at build time. The Zoom waiting room builder's `build.py` is the example.

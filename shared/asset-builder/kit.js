@@ -1,5 +1,5 @@
-// Branded Asset Builder kit: small helpers that go with kit.css. No dependencies. See README.md.
-//   BAB.bar(el, {logo, tool, home})     fill a <header class="bab-bar"> with the PI logo, "Branded Asset Builder", tool name
+// Brand Asset Builder kit: small helpers that go with kit.css. No dependencies. See README.md.
+//   BAB.bar(el, {logo, tool, home})     fill a <header class="bab-bar"> with the PI logo, "Brand Asset Builder", tool name
 //   BAB.autosize(input)                 an inline .bab-input grows and shrinks with its text
 //   BAB.picker(button, pop, opts)       a .bab-pick button that opens a .bab-pop listbox of {value, label, icon}
 (function (root) {
@@ -11,11 +11,15 @@
     el.textContent = '';
     var a = document.createElement(o.home ? 'a' : 'span');
     if (o.home) { a.href = o.home; a.style.display = 'flex'; }
-    var img = document.createElement('img'); img.src = o.logo || 'pi-logo-white.png'; img.alt = 'The Predictive Index';
-    a.appendChild(img); el.appendChild(a);
-    var sep = document.createElement('span'); sep.className = 'bab-sep'; sep.setAttribute('aria-hidden', 'true'); el.appendChild(sep);
-    var nm = document.createElement('span'); nm.className = 'bab-name'; nm.textContent = 'Branded Asset Builder'; el.appendChild(nm);
-    if (o.tool) { var t = document.createElement('span'); t.className = 'bab-tool'; t.textContent = o.tool; el.appendChild(t); }
+    // [PI mark] Brand Asset Builder | Tool name
+    var img = document.createElement('img'); img.src = o.logo || 'pi-mark.svg'; img.alt = 'The Predictive Index';
+    a.appendChild(img);
+    var nm = document.createElement('span'); nm.className = 'bab-name'; nm.textContent = 'Brand Asset Builder'; a.appendChild(nm);
+    el.appendChild(a);
+    if (o.tool) {
+      var sep = document.createElement('span'); sep.className = 'bab-sep'; sep.setAttribute('aria-hidden', 'true'); el.appendChild(sep);
+      var t = document.createElement('span'); t.className = 'bab-tool'; t.textContent = o.tool; el.appendChild(t);
+    }
     return el;
   };
 
