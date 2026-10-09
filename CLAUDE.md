@@ -2,7 +2,6 @@
 
 This repo is the PI Brand launch hub (GitHub Pages, static, no build step).
 Live: https://smessina-pi-git.github.io/pi-brand/  ·  Repo: smessina-pi-git/pi-brand
-Local: `Shared drives/Marketing/Brand Marketing/05_Marketing Operations/Tools & Automation/pi-brand`
 
 The page renders entirely from `projects.json`. A project is a folder under `projects/<slug>/` plus one manifest entry.
 
@@ -42,3 +41,8 @@ Builder and "video editor" style tools share one look: the Brand Asset Builder k
 - Blurbs are one plain sentence. Dates are the ship date, YYYY-MM-DD.
 - Tool pages must work from a static host with no server.
 - Never commit secrets or customer data.
+
+## Zoom waiting room
+- `projects/zoom-waiting-room/builder.html` is the live builder and its own source (single file, kit inlined). Edit it here and push.
+- `projects/zoom-waiting-room/source/` is the master video animation (v13), with render steps in its README and the design history in NOTES.md.
+- Public repo: never commit rendered frames, old video cuts, internal links, or anyone's personal data.

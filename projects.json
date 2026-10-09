@@ -10,7 +10,10 @@
       "launch": "projects/zoom-waiting-room/builder.html",
       "launchLabel": "Open the builder",
       "downloads": [
-        { "label": "Steve's waiting room (MP4)", "file": "projects/zoom-waiting-room/Obi waiting room - Steve.mp4" }
+        {
+          "label": "Steve's waiting room (MP4)",
+          "file": "projects/zoom-waiting-room/Obi waiting room - Steve.mp4"
+        }
       ],
       "video": "projects/zoom-waiting-room/Obi waiting room - Steve.mp4",
       "featured": true
@@ -24,24 +27,12 @@
       "launch": "projects/obi-chat-animator/index.html",
       "launchLabel": "Open the animator",
       "downloads": [
-        { "label": "Source (ZIP)", "file": "projects/obi-chat-animator/obi-chat-animator.zip" }
+        {
+          "label": "Source (ZIP)",
+          "file": "projects/obi-chat-animator/obi-chat-animator.zip"
+        }
       ],
       "featured": true
-    },
-    {
-      "slug": "waiting-room-videos",
-      "title": "Obi Waiting Room Cuts",
-      "category": "videos",
-      "blurb": "Every cut of the Obi waiting room loop, v3 to v7. v7 is current: black canvas, purple and blue haze, PI logo resolve.",
-      "date": "2026-10-08",
-      "downloads": [
-        { "label": "v7 (current)", "file": "projects/waiting-room-videos/Obi waiting room - Steve v7.mp4" },
-        { "label": "v6", "file": "projects/waiting-room-videos/Obi waiting room - Steve v6.mp4" },
-        { "label": "v5", "file": "projects/waiting-room-videos/Obi waiting room - Steve v5.mp4" },
-        { "label": "v4", "file": "projects/waiting-room-videos/Obi waiting room - Steve v4.mp4" },
-        { "label": "v3", "file": "projects/waiting-room-videos/Obi waiting room - Steve v3.mp4" }
-      ],
-      "video": "projects/waiting-room-videos/Obi waiting room - Steve v7.mp4"
     }
   ]
 }

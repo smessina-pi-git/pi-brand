@@ -148,13 +148,13 @@ input[type=range]{flex:1;min-width:0;accent-color:var(--ink)}
       <section class="card" aria-labelledby="convHead">
         <div class="card-head"><h2 id="convHead">Conversation</h2><button class="link" id="pasteToggle" type="button" aria-expanded="false" aria-controls="pasteBox">Paste a transcript</button></div>
         <div class="paste" id="pasteBox" hidden>
-          <textarea id="paste" rows="5" aria-label="Transcript" placeholder="User: @Steve and @Julia don't work well together. Help!&#10;Obi: The friction is a communication mismatch…"></textarea>
+          <textarea id="paste" rows="5" aria-label="Transcript" placeholder="User: @Alex and @Jordan don't work well together. Help!&#10;Obi: The friction is a communication mismatch…"></textarea>
           <div><button class="btn" type="button" id="pasteGo">Fill the lines</button></div>
         </div>
         <ol class="lines" id="lines"></ol>
         <div class="row-actions">
           <button class="btn" id="addLine" type="button">+ Add line</button>
-          <p class="hint">Put @ before a name to make it bold: @Julia or @[Julia Park].</p>
+          <p class="hint">Put @ before a name to make it bold: @Jordan or @[Jordan Park].</p>
         </div>
       </section>
 
@@ -709,8 +709,8 @@ var X={signature:"GIF",version:"89a",trailer:59,extensionIntroducer:33,applicati
   var GLYPHS = JSON.parse(document.getElementById('glyph-data').textContent);
   var FPS = 24;
   var DEFAULT_LINES = [
-    { role: 'user', text: "@Steve and @Julia don't work well together. Help!" },
-    { role: 'obi', text: 'The friction is a communication mismatch: Steve moves fast and verbally, Julia needs space to process, and both dig in when they disagree.' }
+    { role: 'user', text: "@Alex and @Jordan don't work well together. Help!" },
+    { role: 'obi', text: 'The friction is a communication mismatch: Alex moves fast and verbally, Jordan needs space to process, and both dig in when they disagree.' }
   ];
   var SIZE_TAG = { square: '1x1', wide: '16x9', tall: '9x16' };
   // email GIF canvas per size: 600px is the standard email body width

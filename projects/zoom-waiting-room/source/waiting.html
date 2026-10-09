@@ -1,0 +1,292 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+:root{--surface:#000000;--soft:#0E0E10;--bubble:#161618;--ink:#FFFFFF;--muted:#9A9AA0;--rule:#26262A;--red:#EF3340;--blue:#33A8D3;--purple:#5000A8}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1920px;height:1080px;overflow:hidden;background:var(--surface);color:var(--ink);font-family:Roboto,sans-serif}
+.mono{font-family:"Roboto Mono",monospace;font-size:20px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.lbl{font-size:24px;color:var(--muted)}
+:root{--chat:44px}
+#logo{position:absolute;left:64px;top:56px;height:54px}
+#bar{position:absolute;left:64px;right:64px;top:136px;height:1px;background:var(--rule);overflow:visible}
+#fill{position:absolute;left:0;top:-1px;height:3px;width:260px;background:linear-gradient(90deg,rgba(239,51,64,0),#EF3340 50%,rgba(239,51,64,0))}
+#status{position:absolute;right:64px;top:70px;display:flex;align-items:center;gap:16px}
+#status .dot{position:relative;width:10px;height:10px;border-radius:50%;background:var(--red)}
+#status .dot::after{content:'';position:absolute;left:50%;top:50%;width:10px;height:10px;border-radius:50%;border:1.5px solid var(--red);transform:translate(-50%,-50%) scale(var(--ps,1));opacity:var(--po,0)}
+#status .dots span{display:inline-block;width:1.2ch;text-align:left}
+#stage{position:absolute;left:320px;top:0;width:1280px;height:1080px}
+#box{position:absolute;left:0;top:415px;width:1280px;height:250px;background:var(--soft);border-radius:14px}
+#box::before{content:'';position:absolute;inset:-2px;border-radius:16px;padding:2px;background:linear-gradient(var(--ga,90deg),var(--blue) var(--gs0,0%),var(--purple) var(--gs1,100%));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:var(--bo,1)}
+#box::after{content:'';position:absolute;inset:-2px;border-radius:16px;box-shadow:calc(-1px*var(--gx,30)) calc(-1px*var(--gy,0)) 40px -8px rgba(51,168,211,.45),calc(1px*var(--gx,30)) calc(1px*var(--gy,0)) 40px -8px rgba(80,0,168,.70);opacity:var(--bo,1);pointer-events:none}
+#q{position:absolute;left:44px;top:40px;width:1120px;font-size:var(--chat);line-height:1.4;color:var(--ink);white-space:pre-wrap}
+#caret{position:absolute;width:3px;height:50px;background:var(--blue);top:40px;left:36px}
+#send{position:absolute;right:26px;bottom:26px;width:68px;height:68px;background:var(--purple);border-radius:10px;display:grid;place-items:center}
+#send svg{width:30px;height:30px;fill:#fff}
+#send::after{content:'';position:absolute;inset:0;border-radius:10px;background:#fff;opacity:var(--fl,0)}
+#youLbl{position:absolute;left:44px;top:371px}
+#obi{position:absolute;left:0;top:0;width:1280px}
+#obiLbl{position:absolute;left:0;top:0;display:flex;align-items:center;gap:14px;transform-origin:left center}
+#obiLbl img{width:40px;height:40px}
+#ob{position:absolute;left:0;top:58px;width:140px;height:84px;transform-origin:0 0;border-radius:8px 32px 32px 32px;background:#100D19}
+/* same drifting blue -> purple gradient edge and glow as the input box */
+#ob::before{content:'';position:absolute;inset:-2px;border-radius:10px 34px 34px 34px;padding:2px;background:linear-gradient(var(--ga,90deg),var(--blue) var(--gs0,0%),var(--purple) var(--gs1,100%));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+#ob::after{content:'';position:absolute;inset:-2px;border-radius:10px 34px 34px 34px;box-shadow:calc(-1px*var(--gx,30)) calc(-1px*var(--gy,0)) 40px -8px rgba(51,168,211,.45),calc(1px*var(--gx,30)) calc(1px*var(--gy,0)) 40px -8px rgba(80,0,168,.70);pointer-events:none}
+#a{position:absolute;left:40px;top:28px;width:1180px;font-size:var(--chat);line-height:1.4;color:var(--ink)}
+#tdots{position:absolute;left:38px;top:36px;display:flex;gap:12px}
+#tdots i{width:13px;height:13px;border-radius:50%;background:#CFC4FF}
+#a .w{display:inline-block;opacity:0;transform:translateY(8px)}
+#a b{font-weight:700}
+#glow,#amb{position:absolute;left:0;top:0;width:1920px;height:1080px;pointer-events:none}
+#bloom{position:absolute;left:110px;top:90px;width:1700px;height:900px;pointer-events:none}
+#title{position:absolute;left:0;top:0;width:1920px;height:1080px;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+#title .ln{position:relative;white-space:nowrap;font-family:"Roboto Serif",serif;font-size:124px;line-height:1.12;letter-spacing:-.015em}
+#title .l1{font-weight:500}
+#title .l2{font-weight:300;font-style:italic}
+#title .c{display:inline-block;-webkit-background-clip:text;background-clip:text;color:transparent;will-change:transform,filter,opacity}
+#title .gw{position:absolute;left:0;top:0;white-space:nowrap;color:#6A3BFF;filter:blur(30px);pointer-events:none}
+#title .l2 .gw{color:#2F8FD8}
+#title .ph{display:inline-block;width:34px;height:18px}
+#fd i{position:absolute;left:0;top:0;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;background:#D9CFFF;
+  box-shadow:0 0 14px 2px rgba(150,110,255,.85),0 0 34px 6px rgba(80,0,168,.55);opacity:0}
+#edge{position:absolute;top:415px;width:4px;height:250px;margin-left:-2px;border-radius:2px;pointer-events:none;opacity:0;
+  background:linear-gradient(180deg,rgba(255,255,255,0),#fff 30%,#fff 70%,rgba(255,255,255,0));
+  box-shadow:0 0 18px 4px rgba(150,110,255,.9),0 0 50px 12px rgba(51,168,211,.45)}
+#mark{position:absolute;left:0;top:0;width:1920px;height:1080px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px;opacity:0}
+#mark span{font-size:60px;font-weight:500;line-height:1;letter-spacing:-.01em;color:var(--ink)}
+#mark img{width:660px;height:auto;display:block}
+</style></head><body>
+<canvas id="amb" width="1920" height="1080"></canvas>
+<canvas id="glow" width="1920" height="1080"></canvas>
+<div id="bloom"></div>
+<img id="logo" src="data:image/png;base64,__LOGO__" alt="">
+<div id="bar"><div id="fill"></div></div>
+<div id="status"><span class="dot"></span><span class="mono">Meeting initiating<span class="dots"><span>.</span><span>.</span><span>.</span></span></span></div>
+
+<div id="stage">
+  <div id="youLbl" class="lbl">You</div>
+  <div id="box">
+    <div id="q"></div><div id="caret"></div>
+    <div id="send"><svg viewBox="0 0 24 24"><path d="M2.5 11.2L21 3.3a.6.6 0 01.8.8L13.9 22.6a.6.6 0 01-1.1-.1l-2.6-7.3-7.6-2.9a.6.6 0 01-.1-1.1zm9.3 3.3l1.8 5.1 5.3-13.5-7.1 8.4zm-1-1l7.1-8.4-13.3 5.7 6.2 2.7z"/></svg></div>
+  </div>
+  <div id="obi">
+    <div id="obiLbl"><img src="data:image/svg+xml;base64,__CIRCLE__" alt=""><span class="lbl">Obi by The Predictive Index</span></div>
+    <div id="ob"><div id="tdots"><i></i><i></i><i></i></div><div id="a"></div></div>
+  </div>
+  <div id="edge"></div>
+</div>
+<div id="title"><div class="ln l1"></div><div class="ln l2"></div></div>
+<div id="fd"><i></i><i></i><i></i></div>
+<div id="mark"><span>Obi by</span><img src="data:image/png;base64,__MARK__" alt=""></div>
+
+<script>
+// Tokens: {name} and {profile}. build.py fills NAME and PROFILE and picks the matching icon.
+var NAME='__NAME__', PROFILE='__PROFILE__';
+var QUESTION="I'm about to meet with {name}. Help me prepare for the meeting before I leave this waiting room.";
+var REPLY="{name}'s a {profile}, which means {name} is energized by people, influence, and the chance to talk ideas through. Make space for dialogue and connect the topic to a compelling outcome.";
+function fillTokens(x){return x.replace(/\{name\}/g,NAME).replace(/\{profile\}/g,PROFILE).replace(/'/g,'’');}
+var Q=fillTokens(QUESTION);
+var A=fillTokens(REPLY).split(' ');
+var aEl=document.getElementById('a');
+// the profile word, if any, is bold
+A.forEach(function(w,i){var s=document.createElement('span');s.className='w';
+  // bold the profile name itself, not the punctuation after it
+  if(PROFILE&&w.indexOf(PROFILE)===0){var b=document.createElement('b');b.textContent=w.replace(/[.,;:!?]+$/,'');s.appendChild(b);s.appendChild(document.createTextNode(w.slice(b.textContent.length)));}
+  else s.textContent=w;
+  aEl.appendChild(s);aEl.appendChild(document.createTextNode(' '));});
+var W=[].slice.call(aEl.querySelectorAll('.w'));
+// ambient cycles are whole fractions of the loop (6 sweeps, 10 pulses, 32 dot steps), so each closes on the seam
+var LOOP=27.6, SWEEP=LOOP/10, PULSE=LOOP/16;
+function cl(x){return Math.max(0,Math.min(1,x));}
+function eo(x){x=cl(x);return 1-Math.pow(1-x,3);}
+function ei(x){x=cl(x);return x*x*x;}
+function eio(x){x=cl(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;}
+function seg(t,a,b){return cl((t-a)/(b-a));}
+var $=function(id){return document.getElementById(id);};
+var box=$('box'),q=$('q'),caret=$('caret'),send=$('send'),you=$('youLbl'),obi=$('obi'),mark=$('mark'),logo=$('logo'),fill=$('fill'),dots=document.querySelectorAll('#status .dots span');
+// size the sent bubble to the question, however many lines it wraps to
+q.textContent=Q; var qH=q.scrollHeight; q.textContent='';
+var bubH=qH+80;
+// reply bubble size: measured with every word laid out (they are only transparent)
+var aEl2=document.getElementById('a'), obW=1260, obH=aEl2.scrollHeight+60;
+function eob(x){x=cl(x);var c1=1.3,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2);}
+// Sequence: a glowing serif title rises out of a bloom of light; its ellipsis dots arc down into the input
+// box and become the caret while the box draws itself open; the question types; Obi answers in a bubble;
+// the "Obi by" card closes, then dissolves back into the bloom the title rises from (t = LOOP == t = 0).
+var T={ttl0:.3,ttlStag1:.042,ttl2:1.15,ttlStag2:.05,dot0:2.5,dotGap:.16,sweep0:2.95,sweep1:4.15,bounce0:3.1,
+       tOut0:4.75,fly0:4.85,fly1:5.6,wipe0:5.72,wipe1:6.65,caretIn:5.8,
+       typeStart:6.85,typeEnd:12.35,press:12.65,morph0:12.85,morph1:13.45,obi:13.65,scroll0:14.55,scroll1:15.45,grow0:14.75,grow1:15.45,
+       words0:15.5,wordGap:.085,out0:23.0,out1:23.6,mk0:23.5,mk1:24.4,end0:26.35,end1:27.25};
+
+// ---- title: per-character spans so letters can glide in, plus a soft blurred copy behind for the glow
+var TITLE=[{el:document.querySelector('#title .l1'),text:'Behavioral intelligence',t0:T.ttl0,st:T.ttlStag1,
+            grad:'linear-gradient(90deg,#FFFFFF 0%,#F3EEFF 55%,#DCD0FF 100%)'},
+           {el:document.querySelector('#title .l2'),text:'for this meeting',t0:T.ttl2,st:T.ttlStag2,
+            grad:'linear-gradient(90deg,#D8CCFF 0%,#BFB2FF 45%,#9ED7F2 100%)'}];
+var wordIx=0;
+TITLE.forEach(function(L,li){
+  var gw=document.createElement('span'); gw.className='gw'; gw.textContent=L.text; L.el.appendChild(gw); L.gw=gw;
+  L.cs=[]; var chars=L.text.split('');
+  chars.forEach(function(ch,k){
+    if(ch===' '){wordIx++; L.el.appendChild(document.createTextNode(' ')); return;}
+    var c=document.createElement('span'); c.className='c'; c.textContent=ch; c.word=wordIx; c.k=k; L.el.appendChild(c); L.cs.push(c);
+  });
+  wordIx++;
+  if(li===1){L.ph=[];for(var i=0;i<3;i++){var ph=document.createElement('span');ph.className='ph';L.el.appendChild(ph);L.ph.push(ph);}}
+});
+// each letter's gradient is offset by its x so the line reads as one continuous fill
+TITLE.forEach(function(L){L.w=L.el.scrollWidth; L.cs.forEach(function(c){c.x=c.offsetLeft;});});
+// bloom: eased falloff in many stops (no visible rim), violet core fading through deep purple
+(function(){var st=[];for(var i=0;i<=16;i++){var d=i/16,f=Math.pow(1-d*d*(3-2*d),2.2),r=Math.round(112-32*d),g=Math.round(64-64*d),b=Math.round(255-87*d);
+  st.push('rgba('+r+','+g+','+b+','+(.55*f).toFixed(4)+') '+(d*100).toFixed(1)+'%');}
+  document.getElementById('bloom').style.background='radial-gradient(closest-side,'+st.join(',')+')';})();
+var FD=[].slice.call(document.querySelectorAll('#fd i')), CARET={x:320+46,y:415+46+25};
+function bez(a,c,b,u){return (1-u)*(1-u)*a+2*(1-u)*u*c+u*u*b;}
+function eob2(x){x=cl(x);var c1=1.7,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2);}
+function drawTitle(t){
+  TITLE.forEach(function(L,li){
+    var n=L.cs.length, prog=0;
+    var sx=-400+(L.w+800)*eio(seg(t,T.sweep0+li*.18,T.sweep1+li*.18));
+    L.cs.forEach(function(c,i){
+      var p=eo(seg(t,L.t0+i*L.st,L.t0+i*L.st+.8)); prog+=p/n;
+      var w0=T.tOut0+c.word*.07, po=eio(seg(t,w0,w0+.65));
+      var spread=(1-p)*(i-(n-1)/2)*7;
+      c.style.opacity=p*(1-po);
+      c.style.transform='translate('+spread+'px,'+((1-p)*42-46*po)+'px)';
+      c.style.filter='blur('+((1-p)*16+12*po).toFixed(2)+'px)';
+      c.style.backgroundImage='linear-gradient(100deg,rgba(255,255,255,0) '+(sx-150)+'px,rgba(255,255,255,.95) '+sx+'px,rgba(255,255,255,0) '+(sx+150)+'px),'+L.grad;
+      c.style.backgroundSize=L.w+'px 100%,'+L.w+'px 100%';
+      c.style.backgroundPosition=(-c.x)+'px 0,'+(-c.x)+'px 0';
+    });
+    var out=1-eio(seg(t,T.tOut0,T.tOut0+.9));
+    L.gw.style.opacity=(.62*prog*prog*out).toFixed(3);
+  });
+  // ellipsis: three glowing dots pop in, bounce like Obi typing, then arc down into the input box as the caret
+  var ph=TITLE[1].ph;
+  FD.forEach(function(d,i){
+    var r=ph[i].getBoundingClientRect(), hx=r.left+9, hy=r.bottom-9;
+    var pop=seg(t,T.dot0+i*T.dotGap,T.dot0+i*T.dotGap+.45);
+    var env=seg(t,T.bounce0,T.bounce0+.4)*(1-seg(t,T.fly0-.25,T.fly0));
+    var bp=((t-T.bounce0)*1.25-i*.17)%1; bp=bp<0?bp+1:bp; var bb=bp<.5?Math.sin(bp*2*Math.PI):0;
+    var f=eio(seg(t,T.fly0+i*.08,T.fly1+i*.08));
+    var x=bez(hx,(hx+CARET.x)/2+60,CARET.x,f), y=bez(hy,Math.min(hy,CARET.y)-190,CARET.y,f)-14*bb*env;
+    var sc=eob2(pop)*(1-.45*f), op=cl(pop*3)*(1-seg(f,.8,1));
+    d.style.left=x+'px'; d.style.top=y+'px'; d.style.transform='scale('+sc+')'; d.style.opacity=op;
+  });
+}
+
+// Haze: drawn once into a canvas. Eased (smoothstep) falloff, purple core blending to a blue fringe,
+// triangular dither against banding; exactly 0 outside the ellipse, so frame edges stay true black.
+var glow=$('glow');
+(function(){
+  var W=1920,H=1080,RX=820,RY=520,cx=960,cy=540,g=glow.getContext('2d'),img=g.createImageData(W,H),D=img.data;
+  var P=[80,0,168],B=[51,168,211],K=.40;
+  for(var y=0;y<H;y++)for(var x=0;x<W;x++){
+    var i=(y*W+x)*4, dx=(x+.5-cx)/RX, dy=(y+.5-cy)/RY, d=Math.sqrt(dx*dx+dy*dy); D[i+3]=255;
+    if(d>=1)continue;
+    var f=1-d*d*(3-2*d); f=Math.pow(f,1.7)*K;
+    var b=d*d*(3-2*d), mb=Math.min(1,b*1.6);
+    for(var c=0;c<3;c++){var v=(P[c]+(B[c]-P[c])*mb)*f+(Math.random()+Math.random()-1);D[i+c]=Math.max(0,Math.round(v));}
+  }
+  g.putImageData(img,0,0);
+})();
+// Ambient field: three soft lights drift on closed orbits (one or two turns per loop). They tint the black
+// very faintly and light up a fine dot grid as they pass, so the background is never a dead flat black.
+var amb=$('amb'), ac=amb.getContext('2d');
+function layer(){var c=document.createElement('canvas');c.width=1920;c.height=1080;return c;}
+var lightC=layer(), lc=lightC.getContext('2d'), dotsC=layer(), dc=dotsC.getContext('2d'), litC=layer(), tc=litC.getContext('2d');
+(function(){var G=36; dc.fillStyle='#fff'; for(var y=G/2;y<1080;y+=G)for(var x=G/2;x<1920;x+=G){dc.beginPath();dc.arc(x,y,1.4,0,Math.PI*2);dc.fill();}})();
+var LIGHTS=[{c:'80,0,168',a:.85,r:860,ax:560,ay:250,k:1,ph:0},
+            {c:'51,168,211',a:.55,r:720,ax:620,ay:300,k:1,ph:Math.PI},
+            {c:'190,170,255',a:.35,r:520,ax:420,ay:220,k:2,ph:1.9}];
+function drawAmbient(t){
+  var w=t/LOOP*Math.PI*2;
+  lc.globalCompositeOperation='source-over'; lc.clearRect(0,0,1920,1080); lc.globalCompositeOperation='lighter';
+  LIGHTS.forEach(function(L){
+    var x=960+L.ax*Math.cos(w*L.k+L.ph), y=540+L.ay*Math.sin(w*L.k+L.ph), g=lc.createRadialGradient(x,y,0,x,y,L.r);
+    for(var i=0;i<=8;i++){var d=i/8, f=Math.pow(1-d*d*(3-2*d),1.6); g.addColorStop(d,'rgba('+L.c+','+(L.a*f).toFixed(4)+')');}
+    lc.fillStyle=g; lc.fillRect(0,0,1920,1080);
+  });
+  // dots: a faint silver grid everywhere, brightened and tinted where the lights pass
+  tc.globalCompositeOperation='source-over'; tc.clearRect(0,0,1920,1080);
+  tc.fillStyle='rgba(150,150,170,1)'; tc.fillRect(0,0,1920,1080);
+  tc.globalCompositeOperation='lighter'; tc.drawImage(lightC,0,0); tc.drawImage(lightC,0,0);
+  tc.globalCompositeOperation='destination-in'; tc.drawImage(dotsC,0,0);
+  ac.clearRect(0,0,1920,1080);
+  ac.globalAlpha=.16; ac.drawImage(lightC,0,0);
+  ac.globalAlpha=.17; ac.globalCompositeOperation='lighter'; ac.drawImage(litC,0,0);
+  ac.globalAlpha=1; ac.globalCompositeOperation='source-over';
+}
+// keystroke times: one unit per character, plus a pause after , . ? so it reads like someone typing
+var KT=(function(){var w=[],sum=0;for(var i=0;i<Q.length;i++){sum+=1+(/[,.?!]/.test(Q[i-1]||'')?4:0);w.push(sum);}
+  return w.map(function(x){return T.typeStart+(T.typeEnd-T.typeStart)*x/sum;});})();
+function seek(t){
+  t=((t%LOOP)+LOOP)%LOOP;
+  drawAmbient(t);
+  var sw=(t%SWEEP)/SWEEP; fill.style.left=(-260+(1792+260)*eio(sw))+'px'; fill.style.opacity=Math.sin(sw*Math.PI)*0.9+0.1;
+  var pu=(t%PULSE)/PULSE; var dot=document.querySelector('#status .dot'); dot.style.setProperty('--ps',1+pu*2.2); dot.style.setProperty('--po',(1-pu)*.8);
+  var d=Math.floor(t/(LOOP/32))%4; dots.forEach(function(s,i){s.style.opacity=i<d?1:0;});
+  drawTitle(t);
+  var first=t<T.out1;
+  var vis=1-ei(seg(t,T.out0,T.out1));
+  var n=0; if(first) while(n<Q.length&&KT[n]<=t) n++;
+  q.textContent=Q.slice(0,n);
+  var range=document.createRange();
+  if(q.firstChild&&n>0){range.setStart(q.firstChild,n);range.setEnd(q.firstChild,n);var rr=range.getClientRects()[0]||q.getBoundingClientRect();caret.style.left=(rr.left-box.getBoundingClientRect().left+2)+'px';caret.style.top=(rr.top-box.getBoundingClientRect().top+6)+'px';}
+  else{caret.style.left='46px';caret.style.top='46px';}
+  var typing=t>=T.typeStart&&t<=T.typeEnd;
+  var blink=Math.floor(t/(LOOP/68))%2===0?1:0;
+  caret.style.opacity=(t<T.caretIn||t>=T.morph0)?0:(typing?1:(t<T.caretIn+.5?eo(seg(t,T.caretIn,T.caretIn+.2)):blink));
+  // the box draws itself open from the caret, a line of light leading the edge; send pops in as it lands
+  var wp=eio(seg(t,T.wipe0,T.wipe1));
+  box.style.visibility=(t<T.wipe0||!first)?'hidden':'visible';
+  box.style.clipPath=wp<1?'inset(-90px '+(1240-wp*1330)+'px -90px -90px)':'none';
+  var edge=$('edge'); edge.style.left=(40+wp*1240)+'px'; edge.style.opacity=(t>T.wipe0&&wp<1)?Math.sin(wp*Math.PI)*.95:0;
+  var sp=seg(t,T.wipe1-.2,T.wipe1+.25);
+  var ps=seg(t,T.press-.14,T.press), pr=seg(t,T.press,T.press+.28);
+  send.style.transform='scale('+((.5+.5*eob(sp))*(1-.16*eo(ps)+.16*eo(pr)))+')';
+  send.style.setProperty('--fl',(ps>=1?(1-pr)*.55:0));
+  send.style.opacity=eo(sp)*(1-eo(seg(t,T.morph0,T.morph0+.25)));
+  var m=eio(seg(t,T.morph0,T.morph1));
+  var bh=250+(bubH-250)*m, btop=415;
+  box.style.width='1280px'; box.style.left='0px';
+  box.style.height=bh+'px'; box.style.top=btop+'px';
+  // gradient drifts: angle sways and the blue/purple blend slides, twice per loop
+  var gp=t/LOOP*Math.PI*4, gs=Math.sin(gp), gc=Math.cos(gp*.5+.6);
+  [box,$('ob')].forEach(function(el){el.style.setProperty('--ga',(90+16*gs)+'deg');
+  el.style.setProperty('--gs0',(10*gc)+'%'); el.style.setProperty('--gs1',(100+10*gc)+'%');
+  el.style.setProperty('--gx',30+6*gc); el.style.setProperty('--gy',-14*gs);});
+  box.style.setProperty('--bo',(1-m)); var br=14+14*m; box.style.borderRadius=br+'px '+br+'px '+(14-6*m)+'px '+br+'px'; box.style.background=m>0?'#1B1B20':'var(--soft)';
+  // once Obi starts typing, the conversation scrolls: the question leaves and Obi's bubble lands centred
+  // (y 540). It all happens before the first word, so nothing moves while it's read.
+  var obiTop=btop+bubH+44, sc=eio(seg(t,T.scroll0,T.scroll1));
+  var drift=(540-(58+obH)/2-obiTop)*sc, qv=1-eo(seg(t,T.scroll0,T.scroll1-.15));
+  box.style.opacity=vis*qv; box.style.transform='translateY('+drift+'px)';
+  you.style.top=(btop-44)+'px'; you.style.opacity=m*vis*qv; you.style.transform='translateY('+drift+'px)';
+  obi.style.top=obiTop+'px'; obi.style.transform='translateY('+drift+'px)';
+  var o=first?seg(t,T.obi,T.obi+.5):0; obi.style.opacity=eo(o)*vis;
+  $('obiLbl').style.transform='translateY('+((1-eo(o))*10)+'px)';
+  // bubble pops from its tail corner, holds the typing dots, then opens out to fit the reply
+  var ob=$('ob'), g=eio(seg(t,T.grow0,T.grow1));
+  ob.style.transform='scale('+(.55+.45*eob(o))+')';
+  ob.style.width=(140+(obW-140)*g)+'px'; ob.style.height=(84+(obH-84)*g)+'px';
+  var td=[].slice.call(document.querySelectorAll('#tdots i')), dv=1-eo(seg(t,T.grow0-.05,T.grow0+.15));
+  td.forEach(function(d,i){var ph=((t-T.obi)*1.25-i*.17)%1; ph=ph<0?ph+1:ph; var b=ph<.5?Math.sin(ph*2*Math.PI):0;
+    d.style.transform='translateY('+(-9*b)+'px)'; d.style.opacity=dv*(.5+.5*b);});
+  W.forEach(function(w,i){var t0=T.words0+i*T.wordGap; var k=eo(seg(t,t0,t0+.5)); w.style.opacity=k; w.style.transform='translateY('+((1-k)*8)+'px)';});
+  // PI logo: settles in at centre as the chat clears, then hands off to the box opening out around it
+  // end card: settles in, holds, then dissolves (shrink + blur) back into the bloom the title rises from
+  var mi=eo(seg(t,T.mk0,T.mk1)), me=eio(seg(t,T.end0,T.end1));
+  mark.style.opacity=mi*(1-me); mark.style.transform='scale('+((.94+.06*mi)*(1-.08*me))+')'; mark.style.filter='blur('+(12*me).toFixed(2)+'px)';
+  var hl=1-eo(seg(t,T.out0,T.out1))*(1-eo(seg(t,T.end0+.2,T.end1)));
+  logo.style.opacity=hl;
+  // haze follows the action: swells as Obi answers, eases down for the PI logo, returns as the box opens;
+  // flat at both ends of the loop, plus a slow breath twice per loop, so there is no step at the seam
+  var hz=.72-.14*eio(seg(t,T.out0-.2,T.mk1))+.14*eio(seg(t,T.end0,T.end1));
+  // bloom behind the title: .3 at the seam, full under the title, gone for the chat, back for the end card
+  var bl=.3+.7*eio(seg(t,.1,2.4))-1*eio(seg(t,T.tOut0,T.wipe1))+.55*eio(seg(t,T.mk0,T.mk1))-.25*eio(seg(t,T.end0,T.end1));
+  $('bloom').style.opacity=cl(bl).toFixed(3);
+  glow.style.opacity=hz*(.93+.07*Math.sin(t/LOOP*Math.PI*4));
+}
+window.seek=seek; seek(0);
+</script>
+</body></html>
