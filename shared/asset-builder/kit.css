@@ -48,7 +48,8 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
 .bab-measure { position: absolute; visibility: hidden; white-space: pre; pointer-events: none; }
 .bab-pick { display: inline-flex; align-items: center; gap: .22em; color: var(--bab-ink); padding: 0 .04em; }
 .bab-pick img { width: .78em; height: .78em; object-fit: contain; align-self: center; }
-.bab-pick .bab-chev { width: .42em; height: .42em; fill: none; stroke: var(--bab-ink-faint); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; transition: transform .2s var(--bab-ease); align-self: center; }
+.bab-pick .bab-chev { width: .44em; height: .44em; padding: .13em; box-sizing: content-box; border-radius: 50%; background: rgba(150,120,255,.16); fill: none; stroke: #E6DEFF; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; align-self: center; margin-left: .12em; transition: transform .2s var(--bab-ease), background .2s var(--bab-ease); }
+.bab-pick:hover .bab-chev, .bab-pick:focus-visible .bab-chev { background: rgba(150,120,255,.30); }
 .bab-pick[aria-expanded="true"] .bab-chev { transform: rotate(180deg); }
 .bab-pick:focus-visible, .bab-input:focus-visible { outline: none; }   /* the slot's glowing underline shows focus */
 .bab-swap { animation: bab-swap .28s var(--bab-ease); }

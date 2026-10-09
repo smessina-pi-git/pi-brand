@@ -54,7 +54,8 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
 .bab-measure { position: absolute; visibility: hidden; white-space: pre; pointer-events: none; }
 .bab-pick { display: inline-flex; align-items: center; gap: .22em; color: var(--bab-ink); padding: 0 .04em; }
 .bab-pick img { width: .78em; height: .78em; object-fit: contain; align-self: center; }
-.bab-pick .bab-chev { width: .42em; height: .42em; fill: none; stroke: var(--bab-ink-faint); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; transition: transform .2s var(--bab-ease); align-self: center; }
+.bab-pick .bab-chev { width: .44em; height: .44em; padding: .13em; box-sizing: content-box; border-radius: 50%; background: rgba(150,120,255,.16); fill: none; stroke: #E6DEFF; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; align-self: center; margin-left: .12em; transition: transform .2s var(--bab-ease), background .2s var(--bab-ease); }
+.bab-pick:hover .bab-chev, .bab-pick:focus-visible .bab-chev { background: rgba(150,120,255,.30); }
 .bab-pick[aria-expanded="true"] .bab-chev { transform: rotate(180deg); }
 .bab-pick:focus-visible, .bab-input:focus-visible { outline: none; }   /* the slot's glowing underline shows focus */
 .bab-swap { animation: bab-swap .28s var(--bab-ease); }
@@ -153,6 +154,10 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
 .wr-ready video { width: 100%; border-radius: 8px; background: #000; }
 .wr-reply { display: grid; gap: 10px; }
 .wr-replyhead { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.wr-zoom { display: grid; gap: 12px; padding: 16px 18px; }
+.wr-zoom ol { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 13.5px; line-height: 1.45; color: var(--bab-ink-soft); }
+.wr-zoom b { font-weight: 500; color: var(--bab-ink); }
+.wr-zoom .bab-btn { width: 100%; }
 .wr-count { text-align: right; font-variant-numeric: tabular-nums; }
 .wr-count.over { color: #FF8A8A; }
 .wr-spec { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12.5px; color: var(--bab-ink-faint); font-variant-numeric: tabular-nums; }
@@ -207,10 +212,23 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/><path d="M12 4v11"/><path d="M7.5 10.5 12 15l4.5-4.5"/></svg>
           Download video
         </button>
-        <a class="bab-btn" href="https://predictiveindex.zoom.us/profile/setting#tab-meeting" target="_blank" rel="noopener noreferrer">
+        <button id="zoomBtn" class="bab-btn" type="button" aria-expanded="false" aria-controls="zoomGuide">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/><g class="bab-nudge"><path d="M12 15V4"/><path d="M7.5 8.5 12 4l4.5 4.5"/></g></svg>
           Upload to Zoom
-        </a>
+        </button>
+      </div>
+      <!-- Zoom's PI sign-in hands straight to Google, which shows a bare 403 to anyone not signed into a PI
+           Google account. So the button opens these steps, and the link goes through Zoom's own sign-in page
+           (SSO or Google, with an account chooser) and on to the settings. -->
+      <div id="zoomGuide" class="bab-card wr-zoom" hidden>
+        <ol>
+          <li>Download your video.</li>
+          <li>Open Zoom settings and sign in with your PI account. Choose <b>SSO</b> (company domain <b>predictiveindex</b>) or <b>Google</b>.</li>
+          <li>Under <b>Security</b>, find <b>Waiting Room</b>, choose <b>Customize Waiting Room</b>, and upload the MP4.</li>
+        </ol>
+        <a class="bab-btn" href="https://zoom.us/profile/setting?tab=meeting" target="_blank" rel="noopener noreferrer">Open Zoom settings
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5"/><path d="M19 5l-8 8"/><path d="M18 14v4a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h4"/></svg></a>
+        <p class="bab-fineprint">Seeing a Google “403” page? Your browser is signed into a different Google account. Switch to your PI account and try again.</p>
       </div>
       <div id="progress" class="bab-progress" hidden>
         <div class="bab-meter"><i id="barFill"></i></div>
@@ -1109,6 +1127,9 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     return null;
   }
   function lock(on){ busy = on ? {cancelled:false} : null; $('mp4').disabled = !!on || $('replyHint').classList.contains('over'); nameEl.disabled = !!on; replyEl.disabled = !!on; picker.disable(on); return busy; }
+  $('zoomBtn').addEventListener('click', function(){
+    var g = $('zoomGuide'), open = g.hidden; g.hidden = !open; this.setAttribute('aria-expanded', String(open));
+  });
   $('cancel').addEventListener('click', function(){ if (busy) busy.cancelled = true; });
 
   $('mp4').addEventListener('click', async function(){
