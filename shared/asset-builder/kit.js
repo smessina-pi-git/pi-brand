@@ -1,5 +1,5 @@
 // Brand Asset Builder kit: small helpers that go with kit.css. No dependencies. See README.md.
-//   BAB.bar(el, {logo, tool, home, badge})     fill a <header class="bab-bar"> with the PI logo, "Brand Asset Builder", tool name
+//   BAB.bar(el, {logo, tool, home, note, badge})     fill a <header class="bab-bar"> with the PI logo, "Brand Asset Builder", tool name
 //   BAB.autosize(input)                 an inline .bab-input grows and shrinks with its text
 //   BAB.picker(button, pop, opts)       a .bab-pick button that opens a .bab-pop listbox of {value, label, icon}
 (function (root) {
@@ -20,6 +20,7 @@
       var sep = document.createElement('span'); sep.className = 'bab-sep'; sep.setAttribute('aria-hidden', 'true'); el.appendChild(sep);
       var t = document.createElement('span'); t.className = 'bab-tool'; t.textContent = o.tool; el.appendChild(t);
     }
+    if (o.note) { var nt = document.createElement('span'); nt.className = 'bab-note'; nt.textContent = o.note; el.appendChild(nt); }
     if (o.badge) { var bd = document.createElement('span'); bd.className = 'bab-badge'; bd.textContent = o.badge; el.appendChild(bd); }
     return el;
   };
