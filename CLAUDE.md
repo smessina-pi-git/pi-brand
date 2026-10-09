@@ -28,6 +28,14 @@ git add -A && git commit -m "Add <title>" && git push
 
    Pages redeploys from `main` in about a minute.
 
+## Builder tools: use the shared kit
+
+Builder and "video editor" style tools share one look: the Branded Asset Builder kit in `shared/asset-builder/`. It covers the PI logo bar, tokens, the sentence-style form, the picker, buttons, the preview frame and fine print. See `shared/asset-builder/README.md`.
+
+- **Hosted here:** a hosted tool links `../../shared/asset-builder/kit.css` and `kit.js`.
+- **Self-contained files:** a file that must stand alone, such as a claude.ai artifact, inlines the kit at build time. The Zoom waiting room builder's `build.py` is the example.
+- **Changing the kit:** after a kit change, rebuild and republish the tools that inline it.
+
 ## Rules
 
 - Look: dark launch showcase (black, purple #5000A8 actions, blue #33A8D3 haze, PI red #EF3340 only as UI intent). Serif only for the page title. Edit tokens in `css/site.css`.

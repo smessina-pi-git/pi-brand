@@ -1,0 +1,118 @@
+/* Branded Asset Builder kit: the shared look for PI Brand's builder and "video editor" style tools.
+   Dark launch look (the waiting room's tokens): near-black surfaces, warm off-white ink, purple #5000A8
+   for the one primary action, blue #33A8D3 → purple for focus and live edges, PI red #EF3340 only as UI
+   intent. Everything is prefixed bab- so a tool's own CSS can't collide with it. See README.md. */
+:root {
+  --bab-bg: #050506; --bab-surface: #0b0b0d; --bab-raise: #121216; --bab-line: #1f1e24; --bab-line-hi: #34333b;
+  --bab-ink: #f2f0ed; --bab-ink-soft: #b3aea8; --bab-ink-faint: #75717a;
+  --bab-blue: #33a8d3; --bab-purple: #5000a8; --bab-purple-hi: #6a1ed0; --bab-red: #ef3340;
+  --bab-edge: linear-gradient(90deg, var(--bab-blue), var(--bab-purple));
+  --bab-glow: 0 0 0 1px rgba(80,0,168,.55), -10px 0 28px -10px rgba(51,168,211,.55), 10px 0 28px -10px rgba(80,0,168,.8);
+  --bab-sans: Roboto, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --bab-serif: 'Roboto Serif', Georgia, serif;
+  --bab-ease: cubic-bezier(.2, .7, .2, 1);
+  color-scheme: dark;
+}
+.bab, .bab * { box-sizing: border-box; }
+body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 400 15px/1.55 var(--bab-sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+.bab [hidden] { display: none !important; }
+/* resets use :where() so they never outrank a component class */
+.bab :where(button) { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+.bab :where(:focus-visible) { outline: 2px solid var(--bab-red); outline-offset: 2px; }
+
+/* ---- brand bar: PI logo + "Branded Asset Builder", optional tool name on the right ---- */
+.bab-bar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 14px; height: 52px; padding: 0 clamp(16px, 3vw, 32px);
+  background: rgba(5,5,6,.82); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border-bottom: 1px solid var(--bab-line); }
+.bab-bar img { height: 22px; width: auto; display: block; }
+.bab-bar .bab-sep { width: 1px; height: 18px; background: var(--bab-line-hi); }
+.bab-bar .bab-name { font-size: 13px; font-weight: 500; letter-spacing: .02em; color: var(--bab-ink); white-space: nowrap; }
+.bab-bar .bab-tool { margin-left: auto; font-size: 12.5px; color: var(--bab-ink-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ---- page ---- */
+.bab-page { max-width: 1240px; margin: 0 auto; padding: clamp(28px, 5vh, 56px) clamp(16px, 3vw, 32px) 72px; }
+.bab-eyebrow { margin: 0 0 14px; font-size: 12px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--bab-ink-faint); }
+.bab-sub { margin: 14px 0 0; font-size: 16px; color: var(--bab-ink-soft); max-width: 60ch; }
+
+/* ---- sentence form: "I'm [ Steve ], a [ Persuader ▾ ]." The inputs sit inline in big type. ---- */
+.bab-sentence { margin: 0; font: 500 clamp(30px, 4.6vw, 58px)/1.25 var(--bab-sans); letter-spacing: -.015em; color: var(--bab-ink-soft); }
+.bab-slot { position: relative; display: inline-block; vertical-align: baseline; }
+.bab-slot::after { content: ''; position: absolute; left: 0; right: 0; bottom: -.06em; height: 2px; border-radius: 2px; background: var(--bab-line-hi);
+  transition: background-color .25s var(--bab-ease), box-shadow .25s var(--bab-ease), height .2s var(--bab-ease); }
+.bab-slot:hover::after { background: var(--bab-ink-faint); }
+.bab-slot:focus-within::after, .bab-slot.bab-active::after { height: 3px; background: var(--bab-edge); box-shadow: 0 0 18px rgba(80,0,168,.9), 0 0 8px rgba(51,168,211,.6); }
+.bab-input { font: inherit; letter-spacing: inherit; color: var(--bab-ink); background: none; border: 0; padding: 0 .04em; margin: 0; outline: none; min-width: 2ch; caret-color: var(--bab-blue);
+  transition: width .12s var(--bab-ease); }
+.bab-input::placeholder { color: var(--bab-ink-faint); }
+.bab-measure { position: absolute; visibility: hidden; white-space: pre; pointer-events: none; }
+.bab-pick { display: inline-flex; align-items: center; gap: .22em; color: var(--bab-ink); padding: 0 .04em; }
+.bab-pick img { width: .78em; height: .78em; object-fit: contain; align-self: center; }
+.bab-pick .bab-chev { width: .42em; height: .42em; fill: none; stroke: var(--bab-ink-faint); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; transition: transform .2s var(--bab-ease); align-self: center; }
+.bab-pick[aria-expanded="true"] .bab-chev { transform: rotate(180deg); }
+.bab-pick:focus-visible, .bab-input:focus-visible { outline: none; }   /* the slot's glowing underline shows focus */
+.bab-swap { animation: bab-swap .28s var(--bab-ease); }
+@keyframes bab-swap { from { opacity: 0; transform: translateY(.18em); } to { opacity: 1; transform: none; } }
+
+/* ---- picker popover (listbox of icon + label options) ---- */
+.bab-pop { position: absolute; z-index: 30; width: min(600px, calc(100vw - 32px)); max-height: min(440px, 70vh); overflow: auto; padding: 10px;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; background: var(--bab-raise); border: 1px solid var(--bab-line-hi); border-radius: 14px;
+  box-shadow: 0 24px 60px -12px rgba(0,0,0,.8), var(--bab-glow); transform-origin: top left; opacity: 0; transform: translateY(-4px) scale(.98); pointer-events: none;
+  transition: opacity .16s var(--bab-ease), transform .16s var(--bab-ease); font: 400 14px/1.2 var(--bab-sans); letter-spacing: 0; }
+.bab-pop.bab-open { opacity: 1; transform: none; pointer-events: auto; }
+.bab-opt { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: var(--bab-ink-soft); cursor: pointer; white-space: nowrap; overflow: hidden; }
+.bab-opt img { width: 26px; height: 26px; object-fit: contain; flex: none; }
+.bab-opt:hover, .bab-opt.bab-cur { background: #1b1a21; color: var(--bab-ink); }
+.bab-opt[aria-selected="true"] { color: var(--bab-ink); font-weight: 500; box-shadow: inset 0 0 0 1px var(--bab-purple-hi); }
+@media (max-width: 560px) { .bab-pop { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* ---- buttons ---- */
+.bab-btn { display: inline-flex; justify-content: center; align-items: center; gap: 10px; padding: 13px 18px; border-radius: 10px; font: 500 15px/1 var(--bab-sans);
+  text-decoration: none; color: var(--bab-ink); border: 1px solid var(--bab-line-hi); background: transparent; cursor: pointer;
+  transition: background-color .15s, border-color .15s, transform .15s var(--bab-ease); }
+.bab-btn:hover { border-color: var(--bab-ink-faint); background: rgba(255,255,255,.04); }
+.bab-btn:active { transform: translateY(1px); }
+.bab-btn.bab-primary { background: var(--bab-purple); border-color: var(--bab-purple); color: #fff; }
+.bab-btn.bab-primary:hover { background: var(--bab-purple-hi); border-color: var(--bab-purple-hi); }
+.bab-btn:disabled { opacity: .45; cursor: default; }
+.bab-btn svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; overflow: visible; }
+.bab-nudge { animation: bab-nudge 1.8s ease-in-out infinite; }
+@keyframes bab-nudge { 0%, 55%, 100% { transform: translateY(0); } 25% { transform: translateY(-2.5px); } }
+.bab-link { color: var(--bab-ink); font-size: 13px; text-decoration: underline; text-decoration-color: var(--bab-red); text-underline-offset: 3px; }
+
+/* ---- cards, labels, text fields, fine print ---- */
+.bab-card { background: var(--bab-surface); border: 1px solid var(--bab-line); border-radius: 14px; padding: 18px 20px; }
+.bab-label { font-size: 14px; font-weight: 500; color: var(--bab-ink); }
+.bab-hint { margin: 0; font-size: 13px; color: var(--bab-ink-faint); }
+.bab-hint b { color: var(--bab-ink-soft); font-weight: 700; }
+.bab-fineprint { margin: 0; font-size: 11.5px; line-height: 1.45; color: #5d5a63; }
+.bab-text { width: 100%; resize: vertical; font: 400 15px/1.6 var(--bab-sans); color: var(--bab-ink); background: var(--bab-bg); border: 1px solid var(--bab-line-hi); border-radius: 10px; padding: 10px 12px;
+  transition: border-color .2s var(--bab-ease), box-shadow .2s var(--bab-ease); }
+.bab-text:hover { border-color: var(--bab-ink-faint); }
+.bab-text:focus { outline: none; border-color: transparent; box-shadow: var(--bab-glow); }
+
+/* ---- preview frame: a quiet app window around a live 16:9 canvas, with a transport row ---- */
+.bab-frame { background: var(--bab-surface); border: 1px solid var(--bab-line); border-radius: 12px; overflow: hidden; }
+.bab-frame-bar { position: relative; display: flex; align-items: center; height: 28px; padding: 0 12px; background: #0f0f12; border-bottom: 1px solid var(--bab-line); font-size: 12px; color: #6f6c74; }
+.bab-frame-bar i { width: 9px; height: 9px; border-radius: 50%; background: #26252b; margin-right: 6px; }
+.bab-frame-bar span { position: absolute; left: 0; right: 0; text-align: center; pointer-events: none; }
+.bab-frame-body { padding: clamp(12px, 2vw, 22px) clamp(12px, 3vw, 36px) clamp(14px, 2.2vw, 26px); display: grid; gap: clamp(10px, 1.4vw, 14px); }
+.bab-frame canvas, .bab-frame video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; background: #000; border-radius: 4px; }
+.bab-transport { display: flex; align-items: center; gap: 14px; padding: 12px 2px 0; }
+.bab-play { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--bab-line-hi); display: grid; place-items: center; flex: none; }
+.bab-play:hover { border-color: var(--bab-ink-faint); }
+.bab-play svg { width: 12px; height: 12px; fill: var(--bab-ink); }
+.bab-scrub { position: relative; flex: 1; height: 24px; cursor: pointer; touch-action: none; }
+.bab-scrub .bab-track { position: absolute; left: 0; right: 0; top: 11px; height: 2px; background: var(--bab-line-hi); border-radius: 1px; }
+.bab-scrub .bab-done { position: absolute; left: 0; top: 11px; height: 2px; background: var(--bab-ink); border-radius: 1px; }
+.bab-scrub .bab-head { position: absolute; top: 6px; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; background: var(--bab-bg); border: 2px solid var(--bab-ink); }
+.bab-scrub:hover .bab-head, .bab-scrub:focus-visible .bab-head { border-color: var(--bab-blue); }
+.bab-time { font-size: 13px; color: var(--bab-ink-soft); font-variant-numeric: tabular-nums; flex: none; min-width: 9ch; text-align: right; }
+
+/* ---- progress ---- */
+.bab-progress { display: grid; gap: 8px; }
+.bab-meter { height: 4px; background: var(--bab-line-hi); border-radius: 2px; overflow: hidden; }
+.bab-meter i { display: block; height: 100%; width: 0; background: var(--bab-edge); transition: width .2s; }
+.bab-row { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--bab-ink-soft); font-variant-numeric: tabular-nums; }
+
+@media (prefers-reduced-motion: reduce) {
+  .bab *, .bab *::after { transition: none !important; animation: none !important; }
+}
