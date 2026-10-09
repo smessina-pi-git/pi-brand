@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>Waiting Room Builder</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1078,9 +1079,14 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
   // v9's x264 file, but loses it entirely at 6 Mbps; 20-40 Mbps only makes the file bigger. The software
   // encoder (OpenH264, used when there is no hardware one) flattens the grid on every keyframe whatever the
   // bitrate, so it gets a single keyframe at the start rather than a blink every 2 s.
-  var ENCODERS = [{hardwareAcceleration: 'prefer-hardware', bitrate: 12e6, gop: FPS * 2},
+  // Zoom takes waiting room videos up to 30 MB, so the bitrate is capped to fit about 26 MB over the loop
+  // (about 7.5 Mbps at 27.6 s). Fewer keyframes (one every 10 s) leave more of that budget for the dot grid.
+  // If a file still lands over MAX_BYTES it is re-encoded at a lower bitrate.
+  var ZOOM_TARGET = 26e6, MAX_BYTES = 29e6;
+  var ENCODERS = [{hardwareAcceleration: 'prefer-hardware', bitrate: 12e6, gop: FPS * 10},
                   {bitrate: 20e6, gop: 0}];
-  function encConfig(codec, e){ return {codec: codec, width: WR.W, height: WR.H, framerate: FPS, bitrate: e.bitrate, avc: {format: 'avc'}, hardwareAcceleration: e.hardwareAcceleration || 'no-preference'}; }
+  function capBitrate(e, loop, scale){ return Math.round(Math.min(e.bitrate, ZOOM_TARGET * 8 / loop) * (scale || 1)); }
+  function encConfig(codec, e, bitrate){ return {codec: codec, width: WR.W, height: WR.H, framerate: FPS, bitrate: bitrate || e.bitrate, avc: {format: 'avc'}, hardwareAcceleration: e.hardwareAcceleration || 'no-preference'}; }
   async function pickCodec(){
     var opts = [['avc1.640028','avc'],['avc1.4d0028','avc'],['avc1.42002a','avc']];
     for (var k=0;k<ENCODERS.length;k++) for (var i=0;i<opts.length;i++){
@@ -1101,10 +1107,13 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     var name = fileName(), sc = scene, total = Math.round(sc.LOOP * FPS);
     try {
       var c = document.createElement('canvas'); c.width = WR.W; c.height = WR.H; var ctx = c.getContext('2d', {alpha:false});
+      var blob = null;
+      for (var attempt = 0, scale = 1; attempt < 3; attempt++, scale *= .72) {
+      var bitrate = capBitrate(pick.enc, sc.LOOP, scale);
       var muxer = new Mp4Muxer.Muxer({target: new Mp4Muxer.ArrayBufferTarget(), video: {codec: pick.mux, width: WR.W, height: WR.H, frameRate: FPS}, fastStart: 'in-memory'});
       var encErr = null;
       enc = new VideoEncoder({output: function(ch, meta){ muxer.addVideoChunk(ch, meta); }, error: function(e){ encErr = e; }});
-      enc.configure(encConfig(pick.codec, pick.enc));
+      enc.configure(encConfig(pick.codec, pick.enc, bitrate));
       var gop = pick.enc.gop;
       var tStart = performance.now();
       for (var f = 0; f < total; f++) {
@@ -1121,11 +1130,14 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
           await new Promise(function(r){ setTimeout(r, 0); });
         }
       }
-      await enc.flush(); muxer.finalize();
+      await enc.flush(); muxer.finalize(); enc.close();
       if (encErr) throw encErr;
+      blob = new Blob([muxer.target.buffer], {type: 'video/mp4'});
+      if (blob.size <= MAX_BYTES) break;
+      $('progText').textContent = 'Making it smaller for Zoom…';
+      }
       $('progText').textContent = 'Saving…';
-      var blob = new Blob([muxer.target.buffer], {type: 'video/mp4'});
-      window.__lastExport = {name: name, size: blob.size, frames: total, codec: pick.codec, encoder: pick.enc.hardwareAcceleration || 'default'};
+      window.__lastExport = {name: name, size: blob.size, frames: total, codec: pick.codec, bitrate: bitrate, attempts: attempt + 1, encoder: pick.enc.hardwareAcceleration || 'default'};
       await save(name, blob);
     } catch (e) {
       setStatus(e && e.cancel ? 'Export cancelled.' : 'The MP4 couldn’t be made (' + ((e && e.message) || 'encoder error') + '). Try again in Chrome or Edge.');
