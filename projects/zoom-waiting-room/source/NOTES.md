@@ -206,3 +206,18 @@ Build a tool (like the chat animator) where someone enters their own name, Refer
 - Errors show next to the field (a red count, edge and line) and again under Download, saying why it waits. Input edges are neutral-400 (3.4:1) rather than the lighter border token, for WCAG 1.4.11.
 - Phones: a viewport meta was missing, so phones laid the page out at 980 px. Narrow screens now get one column: Customize, Preview, Download, Zoom.
 - Built through the wr-ui gauntlet (now in `.claude/agents/wr-ui.md`): two rounds, with the independent review passing in round 2. `studio/check-motion.js` passes in both modes, and the renderer is unchanged.
+
+## v15 (2026-10-13): larger copy, fuller frame
+
+- Steve: "I want the copy larger. The text box at the beginning of the chat and the Obi reply can both be taller, with more room. There's too much dark space."
+- **Type:** one chat size, 60 px on an 84 px line (was 44). Labels ("You", "Obi by The Predictive Index") are 30 px with a 48 px avatar in both modes (the partner sizes became the standard).
+- **Column:** 1600 px (stage left 160; was 1280 at left 320), with text inset 64 px in the box and the bubble, so the wrap width is 1472. The default reply wraps to 4 lines and the question to 2.
+- **Input box:** 360 px tall (was 250), still centred on y 540. The question sits 52 px below the top. The send button is 84 px (was 68), inset 44 px. The caret is 4 × 66, and the title's dots fly to its new rest point.
+- **Obi's bubble:** 1600 wide, 40 px above the text and 38 below. It pops from 180 × 108, with 16 px typing dots. Corners are 40 px with a 10 px tail. The sent bubble keeps 52 px above and below the question.
+- **End card:** "Obi by" is 68 px over a 760 px PI logo (was 60 over 660).
+- **Partner end card:** 64 px on an 80 px line (was 56). "The Predictive Index" never splits across lines, and lines are balanced (the narrowest width that keeps the line count), so no word sits alone.
+- **Fit:** timings are unchanged, so `fitWords` stays 32 (`RATE` 5) and `MAX_WORDS` stays 37. The longest default reply (Scholar) with a long name takes 5 lines; a 34-word custom reply takes 6. If a very long custom reply would push Obi's block above y 160, the builder steps the one shared chat size down 2 px at a time (never below 44 px). Up to 7 lines fit at 60 px.
+- **Gauntlet:** three rounds. An independent reviewer found nothing significant after round 1. Fixes along the way: the end-card scale, the partner line breaks, the bubble's bottom padding and the send inset. "Move the chat 40 px below centre" was left for Steve, because it would break the centred rule.
+- **Checks:**
+  - `studio/check-motion.js` passes on the builder in both modes and on the master: all counters 0; seam step 0.028 (builder) and 0.025 (master).
+  - Builder vs master: mean difference 0.3–0.7/255, antialiasing only.
