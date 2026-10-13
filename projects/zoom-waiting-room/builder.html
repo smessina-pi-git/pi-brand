@@ -101,10 +101,11 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
 .bab-text:focus { outline: none; border-color: transparent; box-shadow: var(--bab-glow); }
 
 /* ---- steps: a builder's side panel as numbered steps, each with a big title, labeled fields and lists ---- */
-.bab-step { display: grid; gap: 16px; background: var(--bab-surface); border: 1px solid var(--bab-line); border-radius: 16px; padding: 20px 20px 22px; }
+.bab-step { display: grid; gap: 16px; }
+.bab-step + .bab-step { border-top: 1px solid var(--bab-line); padding-top: 24px; }
 .bab-step-head { display: flex; align-items: center; gap: 12px; }
-.bab-step-num { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font: 600 14px/1 var(--bab-sans); color: #fff;
-  background: var(--bab-edge); box-shadow: 0 0 14px -2px rgba(80,0,168,.8); }
+.bab-step-num { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font: 600 14px/1 var(--bab-sans); color: var(--bab-ink);
+  background: #26252c; border: 1px solid var(--bab-line-hi); }
 .bab-step-title { margin: 0; font: 600 20px/1.2 var(--bab-sans); letter-spacing: -.01em; color: #fff; }
 .bab-field { position: relative; display: grid; gap: 7px; }
 .bab-control { width: 100%; font: 500 16px/1.3 var(--bab-sans); color: var(--bab-ink); background: var(--bab-bg); border: 1px solid var(--bab-line-hi); border-radius: 10px;
@@ -117,9 +118,8 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
 .bab-field > .bab-pop { width: 100%; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .bab-subtitle { margin: 0; font: 600 15px/1.3 var(--bab-sans); color: #fff; }
 .bab-steps { margin: 0; padding: 0; list-style: none; counter-reset: bab-step; display: grid; gap: 9px; }
-.bab-steps li { counter-increment: bab-step; position: relative; padding-left: 30px; font-size: 14px; line-height: 1.45; color: var(--bab-ink-soft); }
-.bab-steps li::before { content: counter(bab-step); position: absolute; left: 0; top: 0; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center;
-  font: 600 11.5px/1 var(--bab-sans); color: var(--bab-ink); background: #1d1c23; border: 1px solid var(--bab-line-hi); }
+.bab-steps li { counter-increment: bab-step; position: relative; padding-left: 22px; font-size: 14px; line-height: 1.45; color: var(--bab-ink-soft); }
+.bab-steps li::before { content: counter(bab-step) "."; position: absolute; left: 0; top: 0; font-weight: 500; color: var(--bab-ink-faint); font-variant-numeric: tabular-nums; }
 .bab-steps b { font-weight: 500; color: var(--bab-ink); }
 
 /* ---- preview frame: a quiet app window around a live 16:9 canvas, with a transport row ---- */
@@ -154,17 +154,18 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
 <style>
 /* Waiting Room Builder on the Brand Asset Builder kit (pi-brand/shared/asset-builder). The kit gives the
    brand bar, tokens, steps, fields, buttons and the preview frame; this sheet only lays the page out.
-   A builder: the live video sits front and center on the left; the right column walks through two steps,
-   1 Customize your video (name, Reference Profile, Obi's reply) and 2 Download and install. */
+   Read left to right: the steps on the left (1 Customize your video, 2 Download and install), the live
+   video on the right where the eye lands, sticky while the steps scroll. Open sections, not stacked cards. */
 .bab-page { max-width: 1560px; }
 .wr-intro { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; }
 .wr-h1 { margin: 0; font: 600 clamp(22px, 2.2vw, 28px)/1.2 var(--bab-sans); letter-spacing: -.015em; color: #fff; }
 .wr-intro .bab-sub { margin: 0; font-size: 15px; max-width: none; }
-.wr-main { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 24px; margin-top: clamp(16px, 2.6vh, 24px); align-items: start;
-  /* preview width follows the viewport height so the video and its transport sit above the fold */
-  max-width: max(780px, calc((100vh - 340px) * 16 / 9 + 72px + 384px)); }
-.wr-preview { position: sticky; top: 72px; }
-.wr-side { display: grid; gap: 16px; }
+.wr-main { display: grid; grid-template-columns: 380px minmax(0, 1fr); grid-template-areas: "side preview"; gap: clamp(28px, 3vw, 48px);
+  margin-top: clamp(20px, 3vh, 32px); align-items: start;
+  /* video width follows the viewport height so the video and its transport sit above the fold */
+  max-width: max(780px, calc((100vh - 330px) * 16 / 9 + 72px + 428px)); }
+.wr-preview { grid-area: preview; position: sticky; top: 76px; }
+.wr-side { grid-area: side; display: grid; gap: 24px; }
 .wr-side .bab-btn { width: 100%; }
 .wr-title { margin: 0; text-align: center; font-size: clamp(12.5px, 1.1vw, 14px); line-height: 1.4; color: #c9c6cf; }
 .wr-topic { margin: 1px 0 0; text-align: center; font-size: 12px; color: #7d7a83; }
@@ -189,7 +190,7 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
 .wr-foot h2 { font-size: 14px; font-weight: 500; color: var(--bab-ink-soft); margin: 0 0 4px; }
 .wr-foot p { margin: 0; }
 @media (max-width: 980px) {
-  .wr-main { grid-template-columns: minmax(0, 1fr); }
+  .wr-main { grid-template-columns: minmax(0, 1fr); grid-template-areas: "preview" "side"; }
   .wr-preview { position: static; }
 }
 </style>
@@ -988,12 +989,12 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
 
   // ---------- state ----------
   var state = {name: 'Steve', profile: 'Persuader', replies: {}};
-  try { var saved = JSON.parse(localStorage.getItem('wrb12') || 'null'); if (saved && saved.profile) state = saved; } catch(e){}
+  try { var saved = JSON.parse(localStorage.getItem('wrb14') || 'null'); if (saved && saved.profile) state = saved; } catch(e){}
   if (!state.replies) state.replies = {};
   nameEl.value = state.name;
   function profile(){ return PROFILES.filter(function(p){ return p.name === state.profile; })[0] || PROFILES[0]; }
   function cleanName(){ return nameEl.value.replace(/\s+/g,' ').trim(); }
-  function remember(){ try { localStorage.setItem('wrb12', JSON.stringify(state)); } catch(e){} }
+  function remember(){ try { localStorage.setItem('wrb14', JSON.stringify(state)); } catch(e){} }
   // Obi's reply: the suggested one for the profile, unless someone has edited it (edits are kept per profile).
   // Replies are stored as templates with {name}, so changing the name later updates an edited reply too;
   // the box shows them with the name filled in.

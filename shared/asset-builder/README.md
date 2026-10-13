@@ -42,7 +42,7 @@ The shared look for PI Brand's builder tools and "video editor" style tools. The
 - **Steps.** The builder layout: the preview on the left, steps on the right. Each step is a `<section class="bab-step">` with a `.bab-step-head` (`.bab-step-num` badge plus `<h2 class="bab-step-title">`). Inside a step:
   - Fields are `.bab-field`: a `.bab-label`, then a `.bab-control` (a text input, or a `.bab-control.bab-pick` button for the picker, with its `.bab-pop` inside the same field).
   - Instructions are a `.bab-subtitle` over an `<ol class="bab-steps">`, with numbered dots.
-  - The Zoom waiting room builder uses "Customize your video", then "Download and install".
+  - Steps are open sections split by a rule, with flat gray number badges (no gradients). The Zoom waiting room builder puts the steps on the left ("Customize your video", then "Download and install") and the live preview on the right.
 - **Picker.** `BAB.picker(button, popEl, {items: [{value, label, icon}], value, onChange, label})`. Place `popEl` (a `.bab-pop`) inside a `position: relative` container.
   - It's a keyboard-accessible listbox: arrow keys, Home/End, typing a letter, Enter or Space, and Esc.
   - It returns `{set, close, disable, value}`.

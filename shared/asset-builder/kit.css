@@ -95,10 +95,11 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
 .bab-text:focus { outline: none; border-color: transparent; box-shadow: var(--bab-glow); }
 
 /* ---- steps: a builder's side panel as numbered steps, each with a big title, labeled fields and lists ---- */
-.bab-step { display: grid; gap: 16px; background: var(--bab-surface); border: 1px solid var(--bab-line); border-radius: 16px; padding: 20px 20px 22px; }
+.bab-step { display: grid; gap: 16px; }
+.bab-step + .bab-step { border-top: 1px solid var(--bab-line); padding-top: 24px; }
 .bab-step-head { display: flex; align-items: center; gap: 12px; }
-.bab-step-num { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font: 600 14px/1 var(--bab-sans); color: #fff;
-  background: var(--bab-edge); box-shadow: 0 0 14px -2px rgba(80,0,168,.8); }
+.bab-step-num { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font: 600 14px/1 var(--bab-sans); color: var(--bab-ink);
+  background: #26252c; border: 1px solid var(--bab-line-hi); }
 .bab-step-title { margin: 0; font: 600 20px/1.2 var(--bab-sans); letter-spacing: -.01em; color: #fff; }
 .bab-field { position: relative; display: grid; gap: 7px; }
 .bab-control { width: 100%; font: 500 16px/1.3 var(--bab-sans); color: var(--bab-ink); background: var(--bab-bg); border: 1px solid var(--bab-line-hi); border-radius: 10px;
@@ -111,9 +112,8 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
 .bab-field > .bab-pop { width: 100%; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .bab-subtitle { margin: 0; font: 600 15px/1.3 var(--bab-sans); color: #fff; }
 .bab-steps { margin: 0; padding: 0; list-style: none; counter-reset: bab-step; display: grid; gap: 9px; }
-.bab-steps li { counter-increment: bab-step; position: relative; padding-left: 30px; font-size: 14px; line-height: 1.45; color: var(--bab-ink-soft); }
-.bab-steps li::before { content: counter(bab-step); position: absolute; left: 0; top: 0; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center;
-  font: 600 11.5px/1 var(--bab-sans); color: var(--bab-ink); background: #1d1c23; border: 1px solid var(--bab-line-hi); }
+.bab-steps li { counter-increment: bab-step; position: relative; padding-left: 22px; font-size: 14px; line-height: 1.45; color: var(--bab-ink-soft); }
+.bab-steps li::before { content: counter(bab-step) "."; position: absolute; left: 0; top: 0; font-weight: 500; color: var(--bab-ink-faint); font-variant-numeric: tabular-nums; }
 .bab-steps b { font-weight: 500; color: var(--bab-ink); }
 
 /* ---- preview frame: a quiet app window around a live 16:9 canvas, with a transport row ---- */
