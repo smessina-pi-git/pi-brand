@@ -1133,11 +1133,11 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
   // v9's x264 file, but loses it entirely at 6 Mbps; 20-40 Mbps only makes the file bigger. The software
   // encoder (OpenH264, used when there is no hardware one) flattens the grid on every keyframe whatever the
   // bitrate, so it gets a single keyframe at the start rather than a blink every 2 s.
-  // Zoom takes waiting room videos up to 30 MB. The bitrate is 8 Mbps (the dot grid held up at 7.5 Mbps with
-  // 10 s keyframes), and never more than fits about 26 MB over the loop, so the 21.2 s loop is about 21 MB.
+  // Zoom's waiting room upload is safest under 20 MB. The bitrate is capped to fit about 17 MB over the loop
+  // (about 6.4 Mbps at 21.2 s); one keyframe per loop on the hardware encoder leaves that budget for the dot grid.
   // If a file still lands over MAX_BYTES it is re-encoded at a lower bitrate.
-  var ZOOM_TARGET = 26e6, MAX_BYTES = 29e6;
-  var ENCODERS = [{hardwareAcceleration: 'prefer-hardware', bitrate: 8e6, gop: FPS * 10},
+  var ZOOM_TARGET = 17e6, MAX_BYTES = 19e6;
+  var ENCODERS = [{hardwareAcceleration: 'prefer-hardware', bitrate: 8e6, gop: FPS * 30},
                   {bitrate: 8e6, gop: 0}];
   function capBitrate(e, loop, scale){ return Math.round(Math.min(e.bitrate, ZOOM_TARGET * 8 / loop) * (scale || 1)); }
   function encConfig(codec, e, bitrate){ return {codec: codec, width: WR.W, height: WR.H, framerate: FPS, bitrate: bitrate || e.bitrate, avc: {format: 'avc'}, hardwareAcceleration: e.hardwareAcceleration || 'no-preference'}; }
