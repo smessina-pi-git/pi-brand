@@ -221,3 +221,4 @@ Build a tool (like the chat animator) where someone enters their own name, Refer
 - **Checks:**
   - `studio/check-motion.js` passes on the builder in both modes and on the master: all counters 0; seam step 0.028 (builder) and 0.025 (master).
   - Builder vs master: mean difference 0.3–0.7/255, antialiasing only.
+- **Shipped** (2026-10-13, Steve approved): merged to main on top of the builder light redesign (only these notes conflicted), with the featured MP4 replaced by the v15 cut. The motion check passed again on the merged builder in both modes, and the claude.ai copy of the builder was republished from the same commit.
