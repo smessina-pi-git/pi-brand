@@ -156,14 +156,13 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
    brand bar, tokens, steps, fields, buttons and the preview frame; this sheet only lays the page out.
    Read left to right: the steps on the left (1 Customize your video, 2 Download and install), the live
    video on the right where the eye lands, sticky while the steps scroll. Open sections, not stacked cards. */
-.bab-page { max-width: 1560px; }
+.bab-page { /* one width for the whole page, centred: wide enough for the steps plus a video that fits above the fold */
+  max-width: min(1560px, max(844px, calc((100vh - 348px) * 16 / 9 + 72px + 428px + 64px))); }
 .wr-intro { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; }
 .wr-h1 { margin: 0; font: 600 clamp(22px, 2.2vw, 28px)/1.2 var(--bab-sans); letter-spacing: -.015em; color: #fff; }
 .wr-intro .bab-sub { margin: 0; font-size: 15px; max-width: none; }
 .wr-main { display: grid; grid-template-columns: 380px minmax(0, 1fr); grid-template-areas: "side preview"; gap: clamp(28px, 3vw, 48px);
-  margin-top: clamp(20px, 3vh, 32px); align-items: start;
-  /* video width follows the viewport height so the video and its transport sit above the fold */
-  max-width: max(780px, calc((100vh - 330px) * 16 / 9 + 72px + 428px)); }
+  margin-top: clamp(20px, 3vh, 32px); align-items: start; }
 .wr-preview { grid-area: preview; position: sticky; top: 76px; }
 .wr-side { grid-area: side; display: grid; gap: 24px; }
 .wr-side .bab-btn { width: 100%; }
