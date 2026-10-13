@@ -13,7 +13,7 @@ const { chromium } = require('playwright-core'); const fs = require('fs'); const
   await p.goto('file://' + path.resolve(file)); await p.evaluate(() => document.fonts.ready); await p.waitForTimeout(500);
   const LOOP = await p.evaluate(() => LOOP);
   fs.mkdirSync(out, {recursive: true});
-  const ts = mode === 'preview' ? [0, 2.5, 3.5, 5.3, 5.85, 6.2, 9.0, 14.0, 15.0, 16.5, 20.0, 24.8, 26.8, LOOP - .01] : null;
+  const ts = mode === 'preview' ? [0, 1.2, 2.2, 3.0, 3.6, 4.3, 5.0, 7.0, 9.5, 10.4, 11.3, 12.5, 15.0, 17.9, 18.8, 20.0, 20.6, LOOP - .01] : null;
   const FPS = 30, N = Math.round(LOOP * FPS);
   const list = ts || Array.from({length: N}, (_, i) => i / FPS);
   for (let i = 0; i < list.length; i++) {

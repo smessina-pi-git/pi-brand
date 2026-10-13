@@ -5,6 +5,7 @@ The shared look for PI Brand's builder tools and "video editor" style tools. The
 - the branded top bar: the red PI mark, "Brand Asset Builder", a divider, then the tool's name
 - the dark tokens and type
 - a big sentence-style form, for example "I'm [ Steve ], a [ Persuader ▾ ]."
+- numbered steps for a builder's side panel, with labeled fields and numbered lists
 - a picker popover
 - buttons, cards and text fields
 - small, muted fine print
@@ -38,6 +39,10 @@ The shared look for PI Brand's builder tools and "video editor" style tools. The
   - name slot: `<span class="bab-slot"><input class="bab-input"></span>`, then `BAB.autosize(input)` so the field grows with the text
   - picker slot: `<span class="bab-slot"><button class="bab-pick">…<svg class="bab-chev">…</svg></button></span>`
   - Focus lights the slot's underline with the blue → purple edge. Add `bab-active` to a slot to show that state without focus, for example on first load.
+- **Steps.** The builder layout: the preview on the left, steps on the right. Each step is a `<section class="bab-step">` with a `.bab-step-head` (`.bab-step-num` badge plus `<h2 class="bab-step-title">`). Inside a step:
+  - Fields are `.bab-field`: a `.bab-label`, then a `.bab-control` (a text input, or a `.bab-control.bab-pick` button for the picker, with its `.bab-pop` inside the same field).
+  - Instructions are a `.bab-subtitle` over an `<ol class="bab-steps">`, with numbered dots.
+  - The Zoom waiting room builder uses "Customize your video", then "Download and install".
 - **Picker.** `BAB.picker(button, popEl, {items: [{value, label, icon}], value, onChange, label})`. Place `popEl` (a `.bab-pop`) inside a `position: relative` container.
   - It's a keyboard-accessible listbox: arrow keys, Home/End, typing a letter, Enter or Space, and Esc.
   - It returns `{set, close, disable, value}`.

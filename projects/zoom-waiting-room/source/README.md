@@ -1,6 +1,6 @@
 # Zoom waiting room video: source
 
-The master animation for the Zoom waiting room video (v13). The builder (`../builder.html`) is a canvas port of this page and is what people use to make their own video. Use this folder to change the animation itself and render reference MP4s. `NOTES.md` has the design history and every timing decision.
+The master animation for the Zoom waiting room video (v14, a 21.2 s loop). The builder (`../builder.html`) is a canvas port of this page and is what people use to make their own video. Use this folder to change the animation itself and render reference MP4s. `NOTES.md` has the design history and every timing decision.
 
 | File | What it is |
 |---|---|

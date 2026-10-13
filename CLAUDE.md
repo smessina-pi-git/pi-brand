@@ -44,5 +44,5 @@ Builder and "video editor" style tools share one look: the Brand Asset Builder k
 
 ## Zoom waiting room
 - `projects/zoom-waiting-room/builder.html` is the live builder and its own source (single file, kit inlined). Edit it here and push.
-- `projects/zoom-waiting-room/source/` is the master video animation (v13), with render steps in its README and the design history in NOTES.md.
+- `projects/zoom-waiting-room/source/` is the master video animation (v14), with render steps in its README and the design history in NOTES.md.
 - Public repo: never commit rendered frames, old video cuts, internal links, or anyone's personal data.
