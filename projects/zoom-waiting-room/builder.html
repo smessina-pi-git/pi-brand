@@ -210,39 +210,27 @@ body.bab:not([data-mode="partner"]) .wr-partner, body.bab[data-mode="partner"] .
 .wr-logodrop.has-logo .wr-logo-empty { display: none; }
 .wr-logodrop.has-logo .bab-thumb, .wr-logodrop.has-logo .wr-logo-has { display: grid; }
 .wr-logo-has { font-size: 14px; color: var(--bab-ink-soft); }
-/* the "branded" moment: a light ring runs once around the preview, a BRANDED badge rises over the video */
-@property --wr-a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+/* the "branded" moment: flat. A brief white flash over the video as the logo lands, then a solid white
+   BRANDED pill pops in under the content, holds and goes. No outlines, glows or gradients. */
 .wr-framewrap { position: relative; }
 .wr-celebrate { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
-.wr-ring { position: absolute; inset: -3px; border-radius: 15px; padding: 3px; opacity: 0;
-  background: conic-gradient(from var(--wr-a), rgba(255,255,255,0) 0deg, rgba(255,255,255,0) 250deg, rgba(255,255,255,.95) 345deg, rgba(255,255,255,0) 360deg);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
-.wr-halo { position: absolute; inset: 0; border-radius: 12px; opacity: 0;
-  box-shadow: 0 0 0 1px rgba(255,255,255,.35), 0 0 36px 2px rgba(255,255,255,.12); }
-.wr-celebrate.go .wr-ring { animation: wr-spin 1.5s cubic-bezier(.45,.05,.25,1) forwards, wr-ring-fade 1.9s ease forwards; }
-.wr-celebrate.go .wr-halo { animation: wr-halo 2.6s ease forwards; }
-@keyframes wr-spin { from { --wr-a: 0deg; } to { --wr-a: 720deg; } }
-@keyframes wr-ring-fade { 0% { opacity: 0; } 12% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; } }
-@keyframes wr-halo { 0% { opacity: 0; } 35% { opacity: 1; } 100% { opacity: 0; } }
-.wr-badge { position: absolute; left: 50%; top: 80%; transform: translate(-50%, 10px) scale(.92); opacity: 0; filter: blur(6px);
-  display: inline-flex; align-items: center; gap: 12px; padding: 12px 22px 12px 14px; border-radius: 999px;
-  background: rgba(8,10,16,.72); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.28), 0 12px 36px -10px rgba(0,0,0,.8);
-  font: 600 15px/1 var(--bab-sans); letter-spacing: .32em; color: #fff; white-space: nowrap; }
-.wr-badge i { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: #fff; }
-.wr-badge i svg { width: 14px; height: 14px; fill: none; stroke: #0b0b0d; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 24; stroke-dashoffset: 24; }
-.wr-celebrate.go .wr-badge { animation: wr-badge 2.8s cubic-bezier(.2,.7,.2,1) .45s forwards; }
-.wr-celebrate.go .wr-badge i svg { animation: wr-tick .45s ease .85s forwards; }
-@keyframes wr-badge { 0% { opacity: 0; transform: translate(-50%, 10px) scale(.92); filter: blur(6px); }
-  16% { opacity: 1; transform: translate(-50%, 0) scale(1); filter: blur(0); }
-  78% { opacity: 1; transform: translate(-50%, 0) scale(1); filter: blur(0); }
-  100% { opacity: 0; transform: translate(-50%, -8px) scale(.98); filter: blur(4px); } }
+.wr-flash { position: absolute; inset: 0; border-radius: 12px; background: #fff; opacity: 0; }
+.wr-celebrate.go .wr-flash { animation: wr-flash .55s ease-out forwards; }
+@keyframes wr-flash { 0% { opacity: .14; } 100% { opacity: 0; } }
+.wr-badge { position: absolute; left: 50%; top: 80%; transform: translate(-50%, 0) scale(.86); opacity: 0;
+  display: inline-flex; align-items: center; gap: 10px; padding: 11px 20px 11px 14px; border-radius: 999px; background: #fff;
+  font: 700 14px/1 var(--bab-sans); letter-spacing: .28em; color: #0b0b0d; white-space: nowrap; }
+.wr-badge svg { width: 16px; height: 16px; fill: none; stroke: #0b0b0d; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 24; stroke-dashoffset: 24; }
+.wr-celebrate.go .wr-badge { animation: wr-badge 2.4s cubic-bezier(.2,.9,.3,1.25) .1s forwards; }
+.wr-celebrate.go .wr-badge svg { animation: wr-tick .35s ease .35s forwards; }
+@keyframes wr-badge { 0% { opacity: 0; transform: translate(-50%, 0) scale(.86); } 12% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  80% { opacity: 1; transform: translate(-50%, 0) scale(1); } 100% { opacity: 0; transform: translate(-50%, 0) scale(1); } }
 @keyframes wr-tick { to { stroke-dashoffset: 0; } }
 .wr-flylogo { position: fixed; z-index: 50; pointer-events: none; object-fit: contain; filter: drop-shadow(0 6px 18px rgba(0,0,0,.6)); }
 .wr-logodrop.has-logo .bab-thumb img.wr-pop { animation: wr-pop .5s cubic-bezier(.2,.9,.3,1.4); }
 @keyframes wr-pop { from { transform: scale(.6); opacity: 0; } to { transform: none; opacity: 1; } }
 @media (prefers-reduced-motion: reduce) {
-  .wr-celebrate.go .wr-ring, .wr-celebrate.go .wr-halo { animation: none; }
+  .wr-celebrate.go .wr-flash { animation: none; }
   .wr-celebrate.go .wr-badge { animation: wr-badge 2.4s linear forwards; }
 }
 .wr-logo-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
@@ -295,8 +283,8 @@ body.bab:not([data-mode="partner"]) .wr-partner, body.bab[data-mode="partner"] .
           <canvas id="view" width="1920" height="1080" aria-label="Preview of the waiting room video"></canvas>
         </div>
       </div>
-        <div class="wr-celebrate" id="celebrate" aria-hidden="true"><span class="wr-halo"></span><span class="wr-ring"></span>
-          <span class="wr-badge"><i><svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></i>BRANDED</span></div>
+        <div class="wr-celebrate" id="celebrate" aria-hidden="true"><span class="wr-flash"></span>
+          <span class="wr-badge"><svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg>BRANDED</span></div>
       </div>
       <div class="bab-transport">
         <button id="play" class="bab-play" type="button" aria-label="Pause"><svg id="playIcon" viewBox="0 0 12 12"></svg></button>
