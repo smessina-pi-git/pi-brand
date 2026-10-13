@@ -543,12 +543,15 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
   var ASC = 0.927734375, DESC = 0.244140625, MONO_ASC = 1.047852, MONO_LH = 1.318848;
   var SANS = 'Roboto, "Helvetica Neue", Arial, sans-serif', MONO = '"Roboto Mono", Menlo, monospace';
   var SEND = new (root.Path2D || function () {})('M2.5 11.2L21 3.3a.6.6 0 01.8.8L13.9 22.6a.6.6 0 01-1.1-.1l-2.6-7.3-7.6-2.9a.6.6 0 01-.1-1.1zm9.3 3.3l1.8 5.1 5.3-13.5-7.1 8.4zm-1-1l7.1-8.4-13.3 5.7 6.2 2.7z');
-  var STAGE_X = 320, STAGE_W = 1280;            // v11: a 1280 px column, centred on the frame
-  // v9: one type size for the chat. Question and reply are both 44 px on a 1.4 line; labels are 24 px.
-  // LH is 1.4 × 44 in Chrome's 1/64 px layout units; LBL_H is a 24 px label's line box (line-height normal).
-  var CHAT = 44, LH = Math.floor(CHAT * 1.4 * 64) / 64, LBL = 24, LBL_H = Math.round(LBL * ASC) + Math.round(LBL * DESC);
-  // partner mode: a 30 px Obi label with a 48 px avatar, and the end-card message at 56 px on a 70 px line
-  var PLBL = 30, PLBL_H = Math.round(PLBL * ASC) + Math.round(PLBL * DESC), PMSG = 56, PMSG_LH = 70;
+  var STAGE_X = 160, STAGE_W = 1600;            // v15: a 1600 px column, centred on the frame (was 1280)
+  // v15: one type size for the chat, 60 px on a 1.4 line (was 44), set inside the box and Obi's bubble at
+  // PADX; the question sits PADT below the box top. Labels ("You", "Obi by …") are 30 px with a 48 px avatar
+  // in both modes. LBL_H is a label's line box (line-height normal). A very long custom reply steps the one
+  // shared chat size down (see layout) so Obi's block still fits under the header.
+  var CHAT = 60, PADX = 64, PADT = 52, LBL = 30, LBL_H = Math.round(LBL * ASC) + Math.round(LBL * DESC);
+  function lineH(size) { return Math.floor(size * 1.4 * 64) / 64; }   // 1.4 × size in Chrome's 1/64 px layout units
+  // partner mode: the end-card message at 64 px on an 80 px line
+  var PMSG = 64, PMSG_LH = 80;
   // a logo fitted inside a box (w × h), optionally on a soft light plate so dark logos read on the dark frame
   function fitBox(im, bw, bh) { var k = Math.min(bw / im.width, bh / im.height); return {w: im.width * k, h: im.height * k}; }
   // preview-only: a dashed slot showing where a partner's logo will go
@@ -615,6 +618,38 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     return lines;
   }
 
+  // Lays out the question and the reply at one chat size: wrap widths, the input box, the sent bubble and
+  // Obi's bubble. Text is inset PADX in both, so the wrap width is STAGE_W - 2 × PADX (1472).
+  function layChat(ctx, s, Q, words, profile, size) {
+    var LH = lineH(size), TW = STAGE_W - 2 * PADX;
+    s.chat = size; s.LH = LH;
+    ctx.font = font(400, size); ctx.letterSpacing = '0px';
+    s.qLines = wrap(ctx, Q, TW);
+    var qH = Math.round(s.qLines.length * LH);     // scrollHeight, as the master measures it
+    s.bubH = qH + 2 * PADT;                         // the sent bubble: the question with PADT above and below
+    // the input box: two lines of question (more if it wraps further), then the send row (84 + 44 + 12)
+    s.boxH = PADT + Math.max(qH, Math.round(2 * LH)) + 140;
+    s.boxTop = 540 - s.boxH / 2;                    // the input box is centred on the frame
+    // the caret's content box: Chrome's ascent + descent, the half-leading floored
+    s.caretOff = Math.floor((LH - Math.round(size * ASC) - Math.round(size * DESC)) / 2) + Math.round(size * 8 / 60);
+    s.caretH = Math.round(size * 1.1);
+    // reply: inline words wrapped inside Obi's bubble, the same size as the question. Only the profile word
+    // is bold, not the punctuation after it.
+    var space = ctx.measureText(' ').width, x = 0, line = 0; s.words = [];
+    words.forEach(function (w) {
+      var b = profile && w.indexOf(profile) === 0 ? w.replace(/[.,;:!?]+$/, '') : '', rest = w.slice(b.length);
+      ctx.font = font(700, size); var bw = b ? ctx.measureText(b).width : 0;
+      ctx.font = font(400, size); var ww = bw + (rest ? ctx.measureText(rest).width : 0);
+      if (x > 0 && x + ww > TW) { x = 0; line++; }
+      s.words.push({b: b, bw: bw, rest: rest, x: x, line: line});
+      x += ww + space;
+    });
+    s.aLines = line + 1;
+    // the bubble is sized to the laid-out reply as the master measures it: scrollHeight (which also counts
+    // the words' 10 px rise offset before they fade in), 40 px above and 38 below
+    s.obW = STAGE_W; s.obH = Math.round(s.aLines * LH + 10) + 78;
+  }
+
   function layout(ctx, opt, img) {
     var name = (opt.name || '').trim() || 'your host';
     var Q = curly(QUESTION.replace(/\{name\}/g, name));
@@ -622,39 +657,27 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     // partner mode: their logo in the header and on the end card, their message on the end card, a larger Obi label
     s.partner = opt.mode === 'partner'; s.pLogo = s.partner ? (opt.partnerLogo || null) : null; s.pBack = !!opt.logoBacking;
     ctx.save();
-    ctx.font = font(400, CHAT); ctx.letterSpacing = '0px';
-    s.qLines = wrap(ctx, Q, 1120);
-    var qH = Math.round(s.qLines.length * LH);     // scrollHeight, as v12 measures it
-    s.bubH = qH + 80;
-    s.boxH = Math.max(250, Math.ceil(qH + 56));     // the input box grows only if the question needs a 4th line
-    s.boxTop = 540 - s.boxH / 2;                    // v12: the input box is centred on the frame (top 415)
-    // reply: inline words wrapped at 1180 inside Obi's bubble, the same size as the question. Only the
-    // profile word is bold, not the punctuation after it.
     var words = curly((opt.reply || '').replace(/\{name\}/g, name)).split(' ').filter(Boolean);
-    ctx.font = font(400, CHAT); var space = ctx.measureText(' ').width;
-    var x = 0, line = 0; s.words = [];
-    words.forEach(function (w) {
-      var b = opt.profile && w.indexOf(opt.profile) === 0 ? w.replace(/[.,;:!?]+$/, '') : '', rest = w.slice(b.length);
-      ctx.font = font(700, CHAT); var bw = b ? ctx.measureText(b).width : 0;
-      ctx.font = font(400, CHAT); var ww = bw + (rest ? ctx.measureText(rest).width : 0);
-      if (x > 0 && x + ww > 1180) { x = 0; line++; }
-      s.words.push({b: b, bw: bw, rest: rest, x: x, line: line});
-      x += ww + space;
-    });
-    s.aLines = line + 1;
-    // the bubble is sized to the laid-out reply as v12 measures it: scrollHeight, which also counts the
-    // words' 8 px rise offset before they fade in
-    s.obW = 1260; s.obH = Math.round(s.aLines * LH + 8) + 60;
+    // the chat size: 60 px, stepped down 2 px at a time (never below 44) only if Obi's block (label row 68 +
+    // bubble), centred on y 540, would reach above y 160 and crowd the header rule (y 136): 7 lines at 60 px fit
+    for (var size = CHAT; ; size -= 2) {
+      layChat(ctx, s, Q, words, opt.profile, size);
+      if (68 + s.obH <= 760 || size <= 44) break;
+    }
     ctx.font = font(400, 20, MONO); ctx.letterSpacing = '2.4px';
     s.statusW = ctx.measureText('MEETING INITIATING').width;
     ctx.font = font(400, 20, MONO); ctx.letterSpacing = '0px';
     s.ch = ctx.measureText('0').width;
-    ctx.font = font(500, 60); ctx.letterSpacing = '-0.6px';
+    ctx.font = font(500, 68); ctx.letterSpacing = '-0.68px';
     s.obiByW = ctx.measureText('Obi by').width;
     if (s.partner) {
       ctx.font = font(500, PMSG); ctx.letterSpacing = '-0.5px';
-      s.pLines = wrap(ctx, curly((opt.partnerMessage || '').replace(/\{name\}/g, name).replace(/\s+/g, ' ').trim()), 1320)
-        .map(function (ln) { return {text: ln.text, w: ctx.measureText(ln.text).width}; });
+      // "The Predictive Index" never splits across lines (no-break spaces, which wrap() does not break at)
+      var pm = curly((opt.partnerMessage || '').replace(/\{name\}/g, name).replace(/\s+/g, ' ').trim()).replace(/The Predictive Index/g, 'The\u00A0Predictive\u00A0Index');
+      // balanced lines: the narrowest width (down to 60%) that keeps the line count, so no word is left alone
+      var pw = 1320, pn = wrap(ctx, pm, pw).length;
+      while (pw > 800 && wrap(ctx, pm, pw - 20).length === pn) pw -= 20;
+      s.pLines = wrap(ctx, pm, pw).map(function (ln) { return {text: ln.text, w: ctx.measureText(ln.text).width}; });
     }
     ctx.restore();
     // timing: v14's T (about 21 s). The read hold allows about 5 words a second from the first word, so up to
@@ -854,7 +877,7 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     });
     // ellipsis: three glowing dots pop in after "meeting", bounce like Obi typing, then arc down into the
     // input box and become its caret
-    var l2 = TL.lines[1], cx = STAGE_X + 46, cy = s.boxTop + 46 + 25;
+    var l2 = TL.lines[1], cx = STAGE_X + PADX + 4, cy = s.boxTop + PADT + s.caretOff + s.caretH / 2;
     for (var i = 0; i < 3; i++) {
       var hx = l2.left + l2.textW + i * 34 + 9, hy = l2.base - 9;
       var pop = seg(t, T.dot0 + i * T.dotGap, T.dot0 + i * T.dotGap + .45);
@@ -963,13 +986,13 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     var vis = 1 - ei(seg(t, T.out0, T.out1));
     var n = 0; if (first) while (n < s.Q.length && s.KT[n] <= t) n++;
     var m = eio(seg(t, T.morph0, T.morph1));
-    var bh = s.boxH + (s.bubH - s.boxH) * m, btop = s.boxTop, bw = 1280;
+    var bh = s.boxH + (s.bubH - s.boxH) * m, btop = s.boxTop, bw = STAGE_W;
     // once Obi starts typing, the conversation scrolls up: the question leaves, Obi's bubble lands centred
     // on the frame. It all happens before the first word, so nothing moves while the reply is read.
-    var obiTop = btop + s.bubH + 44, scr = eio(seg(t, T.scroll0, T.scroll1));
-    var drift = (540 - (58 + s.obH) / 2 - obiTop) * scr, qv = 1 - eo(seg(t, T.scroll0, T.scroll1 - .15));
-    var bx = STAGE_X, by = btop + drift;
-    var br = 14 + 14 * m, BR4 = [br, br, 14 - 6 * m, br];
+    var obiTop = btop + s.bubH + 56, scr = eio(seg(t, T.scroll0, T.scroll1));
+    var drift = (540 - (68 + s.obH) / 2 - obiTop) * scr, qv = 1 - eo(seg(t, T.scroll0, T.scroll1 - .15));
+    var bx = STAGE_X, by = btop + drift, CH = s.chat, LH = s.LH;
+    var br = 16 + 18 * m, BR4 = [br, br, 16 - 6 * m, br];
     // gradient drift: angle sways and the blue/purple blend slides, twice per loop (shared by box and bubble)
     var gp = t / LOOP * Math.PI * 4, gs = Math.sin(gp), gc = Math.cos(gp * .5 + .6);
     var G = {ang: (90 + 16 * gs) * Math.PI / 180, p0: (10 * gc) / 100, p1: (100 + 10 * gc) / 100, gx: 30 + 6 * gc, gy: -14 * gs};
@@ -978,36 +1001,36 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     if (first && t >= T.wipe0 && ga > 0.001) {
       // the box group on a layer: it fades as one (CSS opacity) and the wipe clips all of it, glow included
       var L = work(R); L.save();
-      if (wp < 1) { L.beginPath(); L.rect(bx - 90, by - 90, 40 + wp * 1330 + 90, bh + 180); L.clip(); }
-      edge(L, bx - 2, by - 2, bw + 4, bh + 4, [16, 16, 16, 16], [14, 14, 14, 14], G, 1 - m);
+      if (wp < 1) { L.beginPath(); L.rect(bx - 90, by - 90, 40 + wp * (bw + 50) + 90, bh + 180); L.clip(); }
+      edge(L, bx - 2, by - 2, bw + 4, bh + 4, [18, 18, 18, 18], [16, 16, 16, 16], G, 1 - m);
       L.fillStyle = m > 0 ? '#1B1B20' : C.soft; L.beginPath(); rrect4(L, bx, by, bw, bh, BR4); L.fill();
       // typed question
-      L.fillStyle = C.ink; L.font = font(400, CHAT);
-      var caretX = 46, caretY = 46, placed = n === 0;
+      L.fillStyle = C.ink; L.font = font(400, CH);
+      var caretX = PADX + 2, caretY = PADT + s.caretOff, placed = n === 0;
       s.qLines.forEach(function (ln, li) {
         var k = Math.max(0, Math.min(ln.text.length, n - ln.start));
-        if (k > 0) say(L, ln.text.slice(0, k), bx + 44, base(by + 40 + li * LH, CHAT, LH));
+        if (k > 0) say(L, ln.text.slice(0, k), bx + PADX, base(by + PADT + li * LH, CH, LH));
         // the caret sits on the first line that holds position n (a trailing space hangs at the line end)
         if (!placed && n >= ln.start && n <= ln.start + ln.text.length) {
           placed = true;
-          caretX = 44 + L.measureText(ln.text.slice(0, k)).width + 2;
-          caretY = 40 + li * LH + Math.floor((LH - Math.round(CHAT * ASC) - Math.round(CHAT * DESC)) / 2) + 6;
+          caretX = PADX + L.measureText(ln.text.slice(0, k)).width + 2;
+          caretY = PADT + li * LH + s.caretOff;
         }
       });
       var typing = t >= T.typeStart && t <= T.typeEnd, blink = Math.floor(t / (LOOP / 52)) % 2 === 0 ? 1 : 0;
       var caretA = (t < T.caretIn || t >= T.morph0) ? 0 : (typing ? 1 : (t < T.caretIn + .5 ? eo(seg(t, T.caretIn, T.caretIn + .2)) : blink));
-      if (caretA > 0.001) { L.globalAlpha = caretA; L.fillStyle = C.blue; L.fillRect(bx + caretX, by + caretY, 3, 50); L.globalAlpha = 1; }
+      if (caretA > 0.001) { L.globalAlpha = caretA; L.fillStyle = C.blue; L.fillRect(bx + caretX, by + caretY, 4, s.caretH); L.globalAlpha = 1; }
       // send: pops in as the box lands; press down, release with a white flash
       var sp = seg(t, T.wipe1 - .2, T.wipe1 + .25);
       var pss = seg(t, T.press - .14, T.press), prr = seg(t, T.press, T.press + .28);
       var sScale = (.5 + .5 * eob(sp)) * (1 - .16 * eo(pss) + .16 * eo(prr)), fl = pss >= 1 ? (1 - prr) * .55 : 0;
       var sA = eo(sp) * (1 - eo(seg(t, T.morph0, T.morph0 + .25)));
       if (sA > 0.001) {
-        var scx = bx + bw - 26 - 34, scy = by + bh - 26 - 34;
+        var scx = bx + bw - 44 - 42, scy = by + bh - 44 - 42;
         L.save(); L.globalAlpha = sA; L.translate(scx, scy); L.scale(sScale, sScale);
-        L.fillStyle = C.purple; L.beginPath(); rrect(L, -34, -34, 68, 68, 10); L.fill();
-        L.save(); L.translate(-15, -15); L.scale(30 / 24, 30 / 24); L.fillStyle = '#fff'; L.fill(SEND); L.restore();
-        if (fl > 0) { L.globalAlpha = sA * fl; L.fillStyle = '#fff'; L.beginPath(); rrect(L, -34, -34, 68, 68, 10); L.fill(); }
+        L.fillStyle = C.purple; L.beginPath(); rrect(L, -42, -42, 84, 84, 12); L.fill();
+        L.save(); L.translate(-19, -19); L.scale(38 / 24, 38 / 24); L.fillStyle = '#fff'; L.fill(SEND); L.restore();
+        if (fl > 0) { L.globalAlpha = sA * fl; L.fillStyle = '#fff'; L.beginPath(); rrect(L, -42, -42, 84, 84, 12); L.fill(); }
         L.restore();
       }
       L.restore();
@@ -1015,13 +1038,13 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
       // "You" label above the sent bubble
       if (m * ga > 0.001) {
         ctx.globalAlpha = m * ga; ctx.fillStyle = C.muted; ctx.font = font(400, LBL);
-        say(ctx, 'You', STAGE_X + 44, base(btop - 44 + drift, LBL, LBL_H));
+        say(ctx, 'You', STAGE_X + PADX, base(btop - 54 + drift, LBL, LBL_H));
         ctx.globalAlpha = 1;
       }
     }
     // the line of light that leads the box's edge as it draws open
     if (t > T.wipe0 && wp < 1) {
-      var ea = Math.sin(wp * Math.PI) * .95, ex = STAGE_X + 40 + wp * 1240;
+      var ea = Math.sin(wp * Math.PI) * .95, ex = STAGE_X + 40 + wp * (STAGE_W - 40);
       if (ea > 0.001) {
         ctx.save(); ctx.globalAlpha = ea;
         var a2 = ctx.getTransform().a, far = 10000;
@@ -1043,34 +1066,29 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
       var useL2 = oa < .999, O = ctx;
       if (useL2) O = work(R);
       var oy = obiTop + drift, lt = oy + (1 - eo(o)) * 10;
-      if (s.partner) {
-        if (img.circle) O.drawImage(img.circle, STAGE_X, lt - 4, 48, 48);
-        O.fillStyle = '#B9B8C0'; O.font = font(400, PLBL);
-        say(O, 'Obi by The Predictive Index', STAGE_X + 62, base(lt + 20 - PLBL_H / 2, PLBL, PLBL_H));
-      } else {
-        if (img.circle) O.drawImage(img.circle, STAGE_X, lt, 40, 40);
-        O.fillStyle = C.muted; O.font = font(400, LBL);
-        say(O, 'Obi by The Predictive Index', STAGE_X + 54, base(lt + (40 - LBL_H) / 2, LBL, LBL_H));
-      }
+      // the Obi label: a 48 px avatar and a 30 px name (a touch lighter in partner mode)
+      if (img.circle) O.drawImage(img.circle, STAGE_X, lt, 48, 48);
+      O.fillStyle = s.partner ? '#B9B8C0' : C.muted; O.font = font(400, LBL);
+      say(O, 'Obi by The Predictive Index', STAGE_X + 62, base(lt + (48 - LBL_H) / 2, LBL, LBL_H));
       var g2 = eio(seg(t, T.grow0, T.grow1)), sc2 = .55 + .45 * eob(o);
-      var ow = 140 + (s.obW - 140) * g2, oh = 84 + (s.obH - 84) * g2;
-      O.save(); O.translate(STAGE_X, oy + 58); O.scale(sc2, sc2);
-      edge(O, -2, -2, ow + 4, oh + 4, [10, 34, 34, 34], [8, 32, 32, 32], G, 1);
-      O.fillStyle = '#100D19'; O.beginPath(); rrect4(O, 0, 0, ow, oh, [8, 32, 32, 32]); O.fill();
+      var ow = 180 + (s.obW - 180) * g2, oh = 108 + (s.obH - 108) * g2;
+      O.save(); O.translate(STAGE_X, oy + 68); O.scale(sc2, sc2);
+      edge(O, -2, -2, ow + 4, oh + 4, [12, 42, 42, 42], [10, 40, 40, 40], G, 1);
+      O.fillStyle = '#100D19'; O.beginPath(); rrect4(O, 0, 0, ow, oh, [10, 40, 40, 40]); O.fill();
       var dv = 1 - eo(seg(t, T.grow0 - .05, T.grow0 + .15));
       if (dv > 0.001) for (var di = 0; di < 3; di++) {
         var ph = ((t - T.obi) * 1.25 - di * .17) % 1; ph = ph < 0 ? ph + 1 : ph; var bb = ph < .5 ? Math.sin(ph * 2 * Math.PI) : 0;
         O.globalAlpha = dv * (.5 + .5 * bb); O.fillStyle = '#CFC4FF';
-        O.beginPath(); O.arc(38 + di * 25 + 6.5, 36 + 6.5 - 9 * bb, 6.5, 0, Math.PI * 2); O.fill();
+        O.beginPath(); O.arc(52 + di * 30 + 8, 46 + 8 - 11 * bb, 8, 0, Math.PI * 2); O.fill();
       }
       O.globalAlpha = 1; O.fillStyle = C.ink;
       s.words.forEach(function (w, i) {
         var t0 = T.words0 + i * T.wordGap, k = eo(seg(t, t0, t0 + .5));
         if (k <= 0.001) return;
-        var y = base(28 + w.line * LH, CHAT, LH) + (1 - k) * 8;
+        var y = base(40 + w.line * LH, CH, LH) + (1 - k) * 10;
         O.globalAlpha = k;
-        if (w.b) { O.font = font(700, CHAT); say(O, w.b, 40 + w.x, y); }
-        if (w.rest) { O.font = font(400, CHAT); say(O, w.rest, 40 + w.x + w.bw, y); }
+        if (w.b) { O.font = font(700, CH); say(O, w.b, PADX + w.x, y); }
+        if (w.rest) { O.font = font(400, CH); say(O, w.rest, PADX + w.x + w.bw, y); }
       });
       O.restore();
       if (useL2) { ctx.globalAlpha = oa; ctx.drawImage(R.layer, 0, 0, W, H); }
@@ -1098,11 +1116,12 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
         if (lb && lb.slot) slot(M, 960 - lb.w / 2, ptop + mH + gap, lb.w, lb.h, 'Your logo here');
         else if (lb && !s.logoHold) drawLogo(M, s.pLogo, 960 - lb.w / 2, ptop + mH + gap, lb.w, lb.h, s.pBack);
       } else {
-        var mw = 660, mh = 660 * img.mark.height / img.mark.width, top = 540 - (60 + 30 + mh) / 2;
-        M.fillStyle = C.ink; M.font = font(500, 60); M.letterSpacing = '-0.6px';
-        say(M, 'Obi by', 960 - s.obiByW / 2, base(top, 60, 60));
+        // v15: scaled up with the chat, 68 px over a 760 px logo (was 60 over 660)
+        var mw = 760, mh = 760 * img.mark.height / img.mark.width, top = 540 - (68 + 34 + mh) / 2;
+        M.fillStyle = C.ink; M.font = font(500, 68); M.letterSpacing = '-0.68px';
+        say(M, 'Obi by', 960 - s.obiByW / 2, base(top, 68, 68));
         M.letterSpacing = '0px';
-        M.drawImage(img.mark, 960 - mw / 2, top + 90, mw, mh);
+        M.drawImage(img.mark, 960 - mw / 2, top + 102, mw, mh);
       }
       ctx.save(); ctx.globalAlpha = ma; if (mb > .05) ctx.filter = 'blur(' + (mb * R.k).toFixed(2) + 'px)';
       ctx.drawImage(R.layer, 0, 0, W, H); ctx.restore();

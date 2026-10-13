@@ -197,3 +197,18 @@ Build a tool (like the chat animator) where someone enters their own name, Refer
 - Partner logo, made obvious (2026-10-13): in partner mode the logo is the first field in Step 1, a tall accent drop area ("Add your logo", upload icon) that collapses to a thumbnail row once a logo is in. Until then, the preview shows dashed "Your logo" slots in the header and on the end card (`scene.hint`). Exports draw a copy of the scene with `hint: false`, so slots never reach the MP4.
 - The "branded" moment (2026-10-13), page only: adding a logo holds the preview on the end card, and the logo lifts out of the drop area and glides into the video, landing where it sits on the end card. The video logo stays hidden until it lands (`scene.logoHold`). Then a thin white line traces the preview frame once (a conic-gradient border driven by a registered `--wr-a` angle), a soft neutral halo glows, and a "✓ BRANDED" glass badge rises under the content and fades. Neutral white, with no colored gradients (Steve). Screen readers hear "Logo added to your video". Reduced motion: badge only. Playback resumes after about 3.4 s. Exports use `hint: false, logoHold: false`.
 - The "branded" moment, made flat (2026-10-13): no ring, halo, outline or gradient. When the logo lands there is a brief white flash over the video (opacity 0.14 → 0 over 0.55 s), then a solid white "✓ BRANDED" pill pops in under the content, holds, and fades (about 2.4 s). It is a UI interaction only and never part of the video.
+
+## v15 (2026-10-13): larger copy, fuller frame
+
+- Steve: "I want the copy larger. The text box at the beginning of the chat and the Obi reply can both be taller, with more room. There's too much dark space."
+- **Type:** one chat size, 60 px on an 84 px line (was 44). Labels ("You", "Obi by The Predictive Index") are 30 px with a 48 px avatar in both modes (the partner sizes became the standard).
+- **Column:** 1600 px (stage left 160; was 1280 at left 320), with text inset 64 px in the box and the bubble, so the wrap width is 1472. The default reply wraps to 4 lines and the question to 2.
+- **Input box:** 360 px tall (was 250), still centred on y 540. The question sits 52 px below the top. The send button is 84 px (was 68), inset 44 px. The caret is 4 × 66, and the title's dots fly to its new rest point.
+- **Obi's bubble:** 1600 wide, 40 px above the text and 38 below. It pops from 180 × 108, with 16 px typing dots. Corners are 40 px with a 10 px tail. The sent bubble keeps 52 px above and below the question.
+- **End card:** "Obi by" is 68 px over a 760 px PI logo (was 60 over 660).
+- **Partner end card:** 64 px on an 80 px line (was 56). "The Predictive Index" never splits across lines, and lines are balanced (the narrowest width that keeps the line count), so no word sits alone.
+- **Fit:** timings are unchanged, so `fitWords` stays 32 (`RATE` 5) and `MAX_WORDS` stays 37. The longest default reply (Scholar) with a long name takes 5 lines; a 34-word custom reply takes 6. If a very long custom reply would push Obi's block above y 160, the builder steps the one shared chat size down 2 px at a time (never below 44 px). Up to 7 lines fit at 60 px.
+- **Gauntlet:** three rounds. An independent reviewer found nothing significant after round 1. Fixes along the way: the end-card scale, the partner line breaks, the bubble's bottom padding and the send inset. "Move the chat 40 px below centre" was left for Steve, because it would break the centred rule.
+- **Checks:**
+  - `studio/check-motion.js` passes on the builder in both modes and on the master: all counters 0; seam step 0.028 (builder) and 0.025 (master).
+  - Builder vs master: mean difference 0.3–0.7/255, antialiasing only.

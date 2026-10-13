@@ -37,7 +37,7 @@ Usual flow: **edit** (wr-video, wr-ui or wr-copy) → **check** (wr-qa) → **sh
 ## Steve's rules (from his feedback; don't regress these)
 
 - Everything centered. One message on screen at a time. Nothing moves while text is being read.
-- One 44 px text size for the question and the reply. Typing is steady per character, never eased.
+- One 60 px text size for the question and the reply (v15; 44 px before), in a 1600 px column. Typing is steady per character, never eased.
 - Near-black background with haze and drifting lights over a faint dot grid: never dead flat, never a gray wash.
 - Obi's reply is a friendly speech bubble that carries the input box's blue → purple edge and glow. Those Obi gradients belong to Obi's box and bubble only.
 - Builder UI: flat, calm, no decorative gradients (the step numbers are flat gray), no stacked cards. Delight is welcome but flat and not overdone.
