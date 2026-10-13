@@ -198,6 +198,15 @@ Build a tool (like the chat animator) where someone enters their own name, Refer
 - The "branded" moment (2026-10-13), page only: adding a logo holds the preview on the end card, and the logo lifts out of the drop area and glides into the video, landing where it sits on the end card. The video logo stays hidden until it lands (`scene.logoHold`). Then a thin white line traces the preview frame once (a conic-gradient border driven by a registered `--wr-a` angle), a soft neutral halo glows, and a "✓ BRANDED" glass badge rises under the content and fades. Neutral white, with no colored gradients (Steve). Screen readers hear "Logo added to your video". Reduced motion: badge only. Playback resumes after about 3.4 s. Exports use `hint: false, logoHold: false`.
 - The "branded" moment, made flat (2026-10-13): no ring, halo, outline or gradient. When the logo lands there is a brief white flash over the video (opacity 0.14 → 0 over 0.55 s), then a solid white "✓ BRANDED" pill pops in under the content, holds, and fades (about 2.4 s). It is a UI interaction only and never part of the video.
 
+## Builder, light redesign (2026-10-13)
+
+- Feedback: the dark page caused cognitive overload and the video took too much space. The page is now light, on PI's product Design System: a white page, purple-tinted neutrals, Roboto, a 4 px grid, 48 px fields with 6 px corners, primary purple for the one main action. The video preview stays dark, because that's the product. The shared kit (`shared/asset-builder/`) changed with it, and `scripts/sync_kit.py --check` keeps the copy inlined in `builder.html` identical.
+- Three steps on the left: 1 Customize your video, 2 Download your video, 3 Add it to Zoom. The video is on the right under "Preview · Updates as you type". Name and profile sit side by side, and Obi's reply folds into a disclosure that names its state (Suggested, Edited, Approved, Too long) and opens itself when the reply is over 37 words. Name, profile, Download and the video transport are above the fold at 1280×800 and 1440×900 in both modes.
+- The PI team / Partner switch looks like the Design System's Tabs and keeps radio semantics and arrow keys. Partner mode shifts the accent to the Design System's blue (blue-700), with its own subtitle that mentions the logo. Logo upload stays first, and the flat BRANDED moment is unchanged.
+- Errors show next to the field (a red count, edge and line) and again under Download, saying why it waits. Input edges are neutral-400 (3.4:1) rather than the lighter border token, for WCAG 1.4.11.
+- Phones: a viewport meta was missing, so phones laid the page out at 980 px. Narrow screens now get one column: Customize, Preview, Download, Zoom.
+- Built through the wr-ui gauntlet (now in `.claude/agents/wr-ui.md`): two rounds, with the independent review passing in round 2. `studio/check-motion.js` passes in both modes, and the renderer is unchanged.
+
 ## v15 (2026-10-13): larger copy, fuller frame
 
 - Steve: "I want the copy larger. The text box at the beginning of the chat and the Obi reply can both be taller, with more room. There's too much dark space."
