@@ -195,6 +195,7 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
 .wr-side .bab-btn { width: 100%; }
 /* partner mode: partner-only fields appear, internal-only ones step aside */
 body.bab:not([data-mode="partner"]) .wr-partner, body.bab[data-mode="partner"] .wr-internal { display: none; }
+.wr-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .wr-msgcount { text-align: right; font-variant-numeric: tabular-nums; }
 .wr-msgcount.over { color: #FF8A8A; }
 .bab-text[readonly] { color: var(--bab-ink-soft); background: var(--bab-surface); cursor: default; }
@@ -209,6 +210,41 @@ body.bab:not([data-mode="partner"]) .wr-partner, body.bab[data-mode="partner"] .
 .wr-logodrop.has-logo .wr-logo-empty { display: none; }
 .wr-logodrop.has-logo .bab-thumb, .wr-logodrop.has-logo .wr-logo-has { display: grid; }
 .wr-logo-has { font-size: 14px; color: var(--bab-ink-soft); }
+/* the "branded" moment: a light ring runs once around the preview, a BRANDED badge rises over the video */
+@property --wr-a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+.wr-framewrap { position: relative; }
+.wr-celebrate { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
+.wr-ring { position: absolute; inset: -3px; border-radius: 15px; padding: 3px; opacity: 0;
+  background: conic-gradient(from var(--wr-a), rgba(255,255,255,0) 0deg, rgba(255,255,255,0) 250deg, rgba(255,255,255,.95) 345deg, rgba(255,255,255,0) 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+.wr-halo { position: absolute; inset: 0; border-radius: 12px; opacity: 0;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.35), 0 0 36px 2px rgba(255,255,255,.12); }
+.wr-celebrate.go .wr-ring { animation: wr-spin 1.5s cubic-bezier(.45,.05,.25,1) forwards, wr-ring-fade 1.9s ease forwards; }
+.wr-celebrate.go .wr-halo { animation: wr-halo 2.6s ease forwards; }
+@keyframes wr-spin { from { --wr-a: 0deg; } to { --wr-a: 720deg; } }
+@keyframes wr-ring-fade { 0% { opacity: 0; } 12% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes wr-halo { 0% { opacity: 0; } 35% { opacity: 1; } 100% { opacity: 0; } }
+.wr-badge { position: absolute; left: 50%; top: 80%; transform: translate(-50%, 10px) scale(.92); opacity: 0; filter: blur(6px);
+  display: inline-flex; align-items: center; gap: 12px; padding: 12px 22px 12px 14px; border-radius: 999px;
+  background: rgba(8,10,16,.72); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.28), 0 12px 36px -10px rgba(0,0,0,.8);
+  font: 600 15px/1 var(--bab-sans); letter-spacing: .32em; color: #fff; white-space: nowrap; }
+.wr-badge i { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: #fff; }
+.wr-badge i svg { width: 14px; height: 14px; fill: none; stroke: #0b0b0d; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 24; stroke-dashoffset: 24; }
+.wr-celebrate.go .wr-badge { animation: wr-badge 2.8s cubic-bezier(.2,.7,.2,1) .45s forwards; }
+.wr-celebrate.go .wr-badge i svg { animation: wr-tick .45s ease .85s forwards; }
+@keyframes wr-badge { 0% { opacity: 0; transform: translate(-50%, 10px) scale(.92); filter: blur(6px); }
+  16% { opacity: 1; transform: translate(-50%, 0) scale(1); filter: blur(0); }
+  78% { opacity: 1; transform: translate(-50%, 0) scale(1); filter: blur(0); }
+  100% { opacity: 0; transform: translate(-50%, -8px) scale(.98); filter: blur(4px); } }
+@keyframes wr-tick { to { stroke-dashoffset: 0; } }
+.wr-flylogo { position: fixed; z-index: 50; pointer-events: none; object-fit: contain; filter: drop-shadow(0 6px 18px rgba(0,0,0,.6)); }
+.wr-logodrop.has-logo .bab-thumb img.wr-pop { animation: wr-pop .5s cubic-bezier(.2,.9,.3,1.4); }
+@keyframes wr-pop { from { transform: scale(.6); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .wr-celebrate.go .wr-ring, .wr-celebrate.go .wr-halo { animation: none; }
+  .wr-celebrate.go .wr-badge { animation: wr-badge 2.4s linear forwards; }
+}
 .wr-logo-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .wr-title { margin: 0; text-align: center; font-size: clamp(12.5px, 1.1vw, 14px); line-height: 1.4; color: #c9c6cf; }
 .wr-topic { margin: 1px 0 0; text-align: center; font-size: 12px; color: #7d7a83; }
@@ -248,6 +284,7 @@ body.bab:not([data-mode="partner"]) .wr-partner, body.bab[data-mode="partner"] .
 
   <main class="wr-main">
     <section class="wr-preview" aria-label="Preview">
+      <div class="wr-framewrap">
       <div class="bab-frame" aria-label="How guests see it in the waiting room">
         <div class="bab-frame-bar" aria-hidden="true"><i></i><i></i><i></i><span>Waiting room</span></div>
         <div class="bab-frame-body">
@@ -257,6 +294,9 @@ body.bab:not([data-mode="partner"]) .wr-partner, body.bab[data-mode="partner"] .
           </div>
           <canvas id="view" width="1920" height="1080" aria-label="Preview of the waiting room video"></canvas>
         </div>
+      </div>
+        <div class="wr-celebrate" id="celebrate" aria-hidden="true"><span class="wr-halo"></span><span class="wr-ring"></span>
+          <span class="wr-badge"><i><svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></i>BRANDED</span></div>
       </div>
       <div class="bab-transport">
         <button id="play" class="bab-play" type="button" aria-label="Pause"><svg id="playIcon" viewBox="0 0 12 12"></svg></button>
@@ -326,6 +366,7 @@ body.bab:not([data-mode="partner"]) .wr-partner, body.bab[data-mode="partner"] .
           <div class="bab-row"><span id="progText">Starting…</span><button id="cancel" class="bab-link" type="button">Cancel</button></div>
         </div>
         <p id="status" class="wr-status" role="status" aria-live="polite"></p>
+        <p id="srNote" class="wr-sr" aria-live="polite"></p>
         <div id="ready" class="wr-ready" hidden></div>
         <!-- Zoom's PI sign-in hands straight to Google, which shows a bare 403 to anyone not signed into a PI
              Google account, so the link goes through Zoom's own sign-in page (Google, with an account chooser). -->
@@ -910,7 +951,7 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     var SWEEP = LOOP / 10, PULSE = LOOP / 16;
     var first = t < T.out1;
     var hl = 1 - eo(seg(t, T.out0, T.out1)) * (1 - eo(seg(t, T.end0 + .2, T.end1)));
-    if (s.pLogo) { var hb = fitBox(s.pLogo, 340, 74); ctx.globalAlpha = hl; drawLogo(ctx, s.pLogo, 64, 83 - hb.h / 2, hb.w, hb.h, s.pBack); }
+    if (s.pLogo && !s.logoHold) { var hb = fitBox(s.pLogo, 340, 74); ctx.globalAlpha = hl; drawLogo(ctx, s.pLogo, 64, 83 - hb.h / 2, hb.w, hb.h, s.pBack); }
     else if (s.partner && s.hint) { ctx.globalAlpha = hl; slot(ctx, 64, 50, 260, 66, 'Your logo'); }
     else if (img.logo) { ctx.globalAlpha = hl; ctx.drawImage(img.logo, 64, 56, 54 * img.logo.width / img.logo.height, 54); }
     ctx.globalAlpha = 1; ctx.fillStyle = C.rule; ctx.fillRect(64, 136, 1792, 1);
@@ -1067,7 +1108,7 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
         s.pLines.forEach(function (ln, li) { say(M, ln.text, 960 - ln.w / 2, base(ptop + li * PMSG_LH, PMSG, PMSG_LH)); });
         M.letterSpacing = '0px';
         if (lb && lb.slot) slot(M, 960 - lb.w / 2, ptop + mH + gap, lb.w, lb.h, 'Your logo here');
-        else if (lb) drawLogo(M, s.pLogo, 960 - lb.w / 2, ptop + mH + gap, lb.w, lb.h, s.pBack);
+        else if (lb && !s.logoHold) drawLogo(M, s.pLogo, 960 - lb.w / 2, ptop + mH + gap, lb.w, lb.h, s.pBack);
       } else {
         var mw = 660, mh = 660 * img.mark.height / img.mark.width, top = 540 - (60 + 30 + mh) / 2;
         M.fillStyle = C.ink; M.font = font(500, 60); M.letterSpacing = '-0.6px';
@@ -1258,10 +1299,44 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
         c.width = Math.max(1, Math.round((im.width || 800) * k)); c.height = Math.max(1, Math.round((im.height || 400) * k));
         c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
         state.plogo = c.toDataURL('image/png'); remember();
-        loadImg(state.plogo).then(function(sm){ images.plogo = sm; showLogo(); rebuild(); jump(scene.T.mk1 + .2); });
+        var from = $('logoDrop').getBoundingClientRect();
+        loadImg(state.plogo).then(function(sm){ images.plogo = sm; showLogo(); rebuild(); celebrate(sm, from); });
       });
     };
     fr.readAsDataURL(file);
+  }
+  // the "branded" moment: the logo lifts out of the drop area and glides into the video (landing where it
+  // sits on the end card), then a light ring runs around the preview and a BRANDED badge rises. Page only.
+  var celebrateTimer = 0;
+  function celebrate(im, from){
+    $('srNote').textContent = 'Logo added to your video.';
+    // hold the preview on the end card while the logo lands, then carry on playing
+    var wasPlaying = playing || !!celebrateTimer;
+    clearTimeout(celebrateTimer); setPlaying(false); jump(scene.T.mk1 + .4);
+    celebrateTimer = setTimeout(function(){ celebrateTimer = 0; if (wasPlaying) setPlaying(true); }, 3400);
+    var thumb = $('logoThumb'); thumb.classList.remove('wr-pop'); void thumb.offsetWidth; thumb.classList.add('wr-pop');
+    var cel = $('celebrate'), v = view.getBoundingClientRect();
+    function ring(){ cel.classList.remove('go'); void cel.offsetWidth; cel.classList.add('go'); }
+    if (reduced || !from || !im) { ring(); return; }
+    scene.logoHold = true; dirty = true;
+    // where the logo lands: the end-card logo box (680×220 under the message), in preview pixels
+    var k = v.width / 1920, fit = Math.min(680 / im.width, 220 / im.height), lw = im.width * fit * k, lh = im.height * fit * k;
+    var mH = (scene.pLines ? scene.pLines.length : 2) * 70, ih = im.height * fit, ptop = 540 - (mH + 56 + ih) / 2;
+    var ty = v.top + (ptop + mH + 56 + ih / 2) * k;
+    var fly = document.createElement('img'); fly.src = im.src; fly.className = 'wr-flylogo';
+    var sw = Math.min(from.width * .6, 160), sh = sw * im.height / im.width;
+    fly.style.left = (from.left + from.width / 2 - sw / 2) + 'px'; fly.style.top = (from.top + from.height / 2 - sh / 2) + 'px';
+    fly.style.width = sw + 'px'; fly.style.height = sh + 'px';
+    document.body.appendChild(fly);
+    var dx = (v.left + v.width / 2) - (from.left + from.width / 2), dy = ty - (from.top + from.height / 2), sc = lw / sw;
+    var a = fly.animate([
+      {transform: 'translate(0,0) scale(1)', opacity: 0},
+      {transform: 'translate(0,-18px) scale(1.08)', opacity: 1, offset: .18},
+      {transform: 'translate(' + dx * .55 + 'px,' + (dy * .55 - 60) + 'px) scale(' + (1 + (sc - 1) * .6) + ')', opacity: 1, offset: .62},
+      {transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' + sc + ')', opacity: 0}
+    ], {duration: 1050, easing: 'cubic-bezier(.45,.05,.3,1)', fill: 'forwards'});
+    setTimeout(function(){ scene.logoHold = false; dirty = true; ring(); }, 860);   // it lands: the logo is in the video
+    a.onfinish = function(){ fly.remove(); };
   }
   $('logoFile').addEventListener('change', function(){ useLogoFile(this.files && this.files[0]); this.value = ''; });
   var drop = $('logoDrop');
@@ -1342,7 +1417,7 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     if (!pick) { setStatus('This browser has no H.264 encoder. Open the page in Chrome or Edge.'); return; }
     var job = lock(true), enc = null; clearReady(); setStatus('');
     $('progress').hidden = false; $('barFill').style.width = '0';
-    var name = fileName(), sc = Object.assign({}, scene, {hint: false}), total = Math.round(sc.LOOP * FPS);
+    var name = fileName(), sc = Object.assign({}, scene, {hint: false, logoHold: false}), total = Math.round(sc.LOOP * FPS);
     try {
       var c = document.createElement('canvas'); c.width = WR.W; c.height = WR.H; var ctx = c.getContext('2d', {alpha:false});
       var blob = null;
