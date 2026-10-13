@@ -19,6 +19,16 @@
   --bab-ease: cubic-bezier(.2, .7, .2, 1);
   color-scheme: dark;
 }
+/* modes: a tool can set data-mode on <body>. "partner" re-points the accent from purple to the PI blue
+   family; the colours are registered so the change animates instead of snapping. */
+@property --bab-purple { syntax: '<color>'; inherits: true; initial-value: #5000a8; }
+@property --bab-purple-hi { syntax: '<color>'; inherits: true; initial-value: #6a1ed0; }
+@property --bab-accent-soft { syntax: '<color>'; inherits: true; initial-value: rgba(80,0,168,.18); }
+:root { --bab-accent-soft: rgba(80,0,168,.18); }
+body.bab { transition: --bab-purple .45s var(--bab-ease), --bab-purple-hi .45s var(--bab-ease), --bab-accent-soft .45s var(--bab-ease); }
+body.bab[data-mode="partner"] { --bab-purple: #1b6f9e; --bab-purple-hi: #2387bd; --bab-accent-soft: rgba(51,168,211,.16);
+  --bab-edge: linear-gradient(90deg, #5cc3e6, #1b6f9e);
+  --bab-glow: 0 0 0 1px rgba(51,168,211,.6), -10px 0 28px -10px rgba(92,195,230,.55), 10px 0 28px -10px rgba(27,111,158,.85); }
 .bab, .bab * { box-sizing: border-box; }
 body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 400 15px/1.55 var(--bab-sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 .bab [hidden] { display: none !important; }
@@ -29,13 +39,13 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
 /* ---- brand bar: PI mark + "Brand Asset Builder" | tool name ---- */
 .bab-bar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 14px; height: 52px; padding: 0 clamp(16px, 3vw, 32px);
   background: rgba(5,5,6,.82); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border-bottom: 1px solid var(--bab-line); }
-.bab-bar img { height: 24px; width: 24px; display: block; }
+.bab-bar img { height: 28px; width: 28px; display: block; }
 .bab-bar > a, .bab-bar > span:first-child { display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none; }
 .bab-bar .bab-sep { width: 1px; height: 18px; background: var(--bab-line-hi); }
-.bab-bar .bab-name { font-size: 13px; font-weight: 500; letter-spacing: .02em; color: var(--bab-ink); white-space: nowrap; }
+.bab-bar .bab-name { font-size: 15px; font-weight: 500; letter-spacing: .02em; color: var(--bab-ink); white-space: nowrap; }
 .bab-bar .bab-note { margin-left: 14px; font-size: 12px; color: var(--bab-ink-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 @media (max-width: 900px) { .bab-bar .bab-note { display: none; } }
-.bab-bar .bab-badge { flex: none;  margin-left: auto; padding: 3px 9px; border: 1px solid rgba(150,120,255,.45); border-radius: 999px; font-size: 10.5px; font-weight: 500; letter-spacing: .12em; color: #CFC4FF; background: rgba(80,0,168,.18); }
+.bab-bar .bab-badge { flex: none;  margin-left: auto; padding: 3px 9px; border: 1px solid var(--bab-purple-hi); border-radius: 999px; font-size: 10.5px; font-weight: 500; letter-spacing: .12em; color: #e6e1ff; background: var(--bab-accent-soft); }
 .bab-bar .bab-tool { font-size: 13px; color: var(--bab-ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* ---- page ---- */
@@ -122,6 +132,23 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
 .bab-steps li::before { content: counter(bab-step) "."; position: absolute; left: 0; top: 0; font-weight: 500; color: var(--bab-ink-faint); font-variant-numeric: tabular-nums; }
 .bab-steps b { font-weight: 500; color: var(--bab-ink); }
 
+/* ---- segmented switch (radio group): <div class="bab-seg" role="radiogroup"><button role="radio" aria-checked> ---- */
+.bab-seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; padding: 4px; background: var(--bab-surface); border: 1px solid var(--bab-line); border-radius: 12px; }
+.bab-seg button { padding: 9px 12px; border-radius: 8px; font: 500 14px/1 var(--bab-sans); color: var(--bab-ink-soft); transition: background-color .3s var(--bab-ease), color .3s var(--bab-ease); }
+.bab-seg button:hover { color: var(--bab-ink); }
+.bab-seg button[aria-checked="true"] { background: var(--bab-purple); color: #fff; }
+
+/* ---- file drop zone: a label wrapping a hidden file input, with an optional preview ---- */
+.bab-drop { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px dashed var(--bab-line-hi); border-radius: 10px; background: var(--bab-bg); cursor: pointer;
+  color: var(--bab-ink-soft); font-size: 14px; transition: border-color .2s var(--bab-ease), box-shadow .2s var(--bab-ease); }
+.bab-drop:hover, .bab-drop.bab-over { border-color: var(--bab-ink-faint); }
+.bab-drop:focus-within { border-style: solid; border-color: transparent; box-shadow: var(--bab-glow); }
+.bab-drop input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.bab-drop .bab-thumb { flex: none; width: 88px; height: 44px; border-radius: 6px; background: #000; display: grid; place-items: center; overflow: hidden; }
+.bab-drop .bab-thumb img { max-width: 80px; max-height: 36px; object-fit: contain; }
+.bab-check { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--bab-ink-soft); cursor: pointer; }
+.bab-check input { accent-color: var(--bab-purple); }
+
 /* ---- preview frame: a quiet app window around a live 16:9 canvas, with a transport row ---- */
 .bab-frame { background: var(--bab-surface); border: 1px solid var(--bab-line); border-radius: 12px; overflow: hidden; }
 .bab-frame-bar { position: relative; display: flex; align-items: center; height: 28px; padding: 0 12px; background: #0f0f12; border-bottom: 1px solid var(--bab-line); font-size: 12px; color: #6f6c74; }
@@ -158,7 +185,7 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
    video on the right where the eye lands, sticky while the steps scroll. Open sections, not stacked cards. */
 .bab-page { /* one width for the whole page, centred: wide enough for the steps plus a video that fits above the fold */
   max-width: min(1560px, max(844px, calc((100vh - 348px) * 16 / 9 + 72px + 428px + 64px))); }
-.wr-intro { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; }
+.wr-intro { display: grid; gap: 6px; }
 .wr-h1 { margin: 0; font: 600 clamp(22px, 2.2vw, 28px)/1.2 var(--bab-sans); letter-spacing: -.015em; color: #fff; }
 .wr-intro .bab-sub { margin: 0; font-size: 15px; max-width: none; }
 .wr-main { display: grid; grid-template-columns: 380px minmax(0, 1fr); grid-template-areas: "side preview"; gap: clamp(28px, 3vw, 48px);
@@ -166,6 +193,13 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
 .wr-preview { grid-area: preview; position: sticky; top: 76px; }
 .wr-side { grid-area: side; display: grid; gap: 24px; }
 .wr-side .bab-btn { width: 100%; }
+/* partner mode: partner-only fields appear, internal-only ones step aside */
+body.bab:not([data-mode="partner"]) .wr-partner, body.bab[data-mode="partner"] .wr-internal { display: none; }
+.wr-msgcount { text-align: right; font-variant-numeric: tabular-nums; }
+.wr-msgcount.over { color: #FF8A8A; }
+.bab-text[readonly] { color: var(--bab-ink-soft); background: var(--bab-surface); cursor: default; }
+.bab-text[readonly]:focus { box-shadow: none; border-color: var(--bab-line-hi); }
+.wr-logo-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .wr-title { margin: 0; text-align: center; font-size: clamp(12.5px, 1.1vw, 14px); line-height: 1.4; color: #c9c6cf; }
 .wr-topic { margin: 1px 0 0; text-align: center; font-size: 12px; color: #7d7a83; }
 /* a minimal window: gray title bar, slim padding, and a soft glow so the dark video lifts off the page */
@@ -224,6 +258,10 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
     </section>
 
     <aside class="wr-side" aria-label="Make your video">
+      <div class="bab-seg" role="radiogroup" aria-label="Who is this video for?">
+        <button type="button" role="radio" data-mode="internal" aria-checked="true">PI team</button>
+        <button type="button" role="radio" data-mode="partner" aria-checked="false">Partner</button>
+      </div>
       <section class="bab-step" aria-labelledby="step1">
         <div class="bab-step-head"><span class="bab-step-num" aria-hidden="true">1</span><h2 class="bab-step-title" id="step1">Customize your video</h2></div>
         <div class="bab-field">
@@ -235,11 +273,29 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
           <button id="profileBtn" class="bab-control bab-pick" type="button" aria-labelledby="profileLbl profileName"><img id="profileIcon" alt=""><span id="profileName">Persuader</span><svg class="bab-chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg></button>
           <div id="profilePop" class="bab-pop"></div>
         </div>
+        <div class="bab-field wr-partner">
+          <span class="bab-label" id="logoLbl">Your logo</span>
+          <label class="bab-drop" id="logoDrop">
+            <input id="logoFile" type="file" accept="image/png,image/svg+xml,image/jpeg,image/webp" aria-labelledby="logoLbl">
+            <span class="bab-thumb"><img id="logoThumb" alt="" hidden></span>
+            <span id="logoText">Drop a PNG or SVG, or click to choose. It stays in your browser.</span>
+          </label>
+          <div class="wr-logo-row">
+            <label class="bab-check"><input id="logoBack" type="checkbox"> Light backing (for dark logos)</label>
+            <button id="logoRemove" class="bab-link" type="button" hidden>Remove</button>
+          </div>
+        </div>
+        <div class="bab-field wr-partner">
+          <label class="bab-label" for="pmsg">End-card message</label>
+          <textarea id="pmsg" class="bab-text" rows="2" maxlength="140" spellcheck="true" aria-describedby="pmsgCount"></textarea>
+          <p class="bab-hint wr-msgcount" id="pmsgCount"></p>
+        </div>
         <div class="bab-field wr-reply">
           <div class="wr-replyhead"><label class="bab-label" for="reply">Obi’s reply</label><button id="replyReset" class="bab-link" type="button" hidden>Use the suggested reply</button></div>
           <textarea id="reply" class="bab-text" rows="5" maxlength="280" spellcheck="true" aria-describedby="replyHint replyNote"></textarea>
-          <p class="bab-hint wr-count" id="replyHint"></p>
-          <p class="bab-fineprint" id="replyNote">Do not input text that disregards PI science. Always use Obi output for text shown here. You are responsible for what is put here.</p>
+          <p class="bab-hint wr-count wr-internal" id="replyHint"></p>
+          <p class="bab-hint wr-partner">Partner videos use Obi’s approved reply for each profile.</p>
+          <p class="bab-fineprint wr-internal" id="replyNote">Do not input text that disregards PI science. Always use Obi output for text shown here. You are responsible for what is put here.</p>
         </div>
       </section>
 
@@ -266,7 +322,8 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
           </ol>
           <a class="bab-btn" href="https://zoom.us/profile/setting?tab=meeting" target="_blank" rel="noopener noreferrer">Open Zoom settings
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5"/><path d="M19 5l-8 8"/><path d="M18 14v4a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h4"/></svg></a>
-          <p class="bab-fineprint">Sign in with Google using your PI account. Seeing a Google “403” page? Switch this browser to your PI account and try again.</p>
+          <p class="bab-fineprint wr-internal">Sign in with Google using your PI account. Seeing a Google “403” page? Switch this browser to your PI account and try again.</p>
+          <p class="bab-fineprint wr-partner">Sign in to your own Zoom account to upload it.</p>
         </div>
       </section>
     </aside>
@@ -445,6 +502,14 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
   // v9: one type size for the chat. Question and reply are both 44 px on a 1.4 line; labels are 24 px.
   // LH is 1.4 × 44 in Chrome's 1/64 px layout units; LBL_H is a 24 px label's line box (line-height normal).
   var CHAT = 44, LH = Math.floor(CHAT * 1.4 * 64) / 64, LBL = 24, LBL_H = Math.round(LBL * ASC) + Math.round(LBL * DESC);
+  // partner mode: a 30 px Obi label with a 48 px avatar, and the end-card message at 56 px on a 70 px line
+  var PLBL = 30, PLBL_H = Math.round(PLBL * ASC) + Math.round(PLBL * DESC), PMSG = 56, PMSG_LH = 70;
+  // a logo fitted inside a box (w × h), optionally on a soft light plate so dark logos read on the dark frame
+  function fitBox(im, bw, bh) { var k = Math.min(bw / im.width, bh / im.height); return {w: im.width * k, h: im.height * k}; }
+  function drawLogo(c, im, x, y, w, h, backing) {
+    if (backing) { var pd = Math.round(h * .18); c.save(); c.fillStyle = 'rgba(244,243,247,.96)'; c.beginPath(); rrect(c, x - pd, y - pd, w + 2 * pd, h + 2 * pd, Math.min(14, pd + 4)); c.fill(); c.restore(); }
+    c.drawImage(im, x, y, w, h);
+  }
 
   function cl(x) { return Math.max(0, Math.min(1, x)); }
   function eo(x) { x = cl(x); return 1 - Math.pow(1 - x, 3); }
@@ -502,6 +567,8 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     var name = (opt.name || '').trim() || 'your host';
     var Q = curly(QUESTION.replace(/\{name\}/g, name));
     var s = {Q: Q, img: img};
+    // partner mode: their logo in the header and on the end card, their message on the end card, a larger Obi label
+    s.partner = opt.mode === 'partner'; s.pLogo = s.partner ? (opt.partnerLogo || null) : null; s.pBack = !!opt.logoBacking;
     ctx.save();
     ctx.font = font(400, CHAT); ctx.letterSpacing = '0px';
     s.qLines = wrap(ctx, Q, 1120);
@@ -532,6 +599,11 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     s.ch = ctx.measureText('0').width;
     ctx.font = font(500, 60); ctx.letterSpacing = '-0.6px';
     s.obiByW = ctx.measureText('Obi by').width;
+    if (s.partner) {
+      ctx.font = font(500, PMSG); ctx.letterSpacing = '-0.5px';
+      s.pLines = wrap(ctx, curly((opt.partnerMessage || '').replace(/\{name\}/g, name).replace(/\s+/g, ' ').trim()), 1320)
+        .map(function (ln) { return {text: ln.text, w: ctx.measureText(ln.text).width}; });
+    }
     ctx.restore();
     // timing: v14's T (about 21 s). The read hold allows about 5 words a second from the first word, so up to
     // s.fitWords (32) words fit the 21.2 s loop; the Persuader line is 30. A longer reply grows the
@@ -815,7 +887,8 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     var SWEEP = LOOP / 10, PULSE = LOOP / 16;
     var first = t < T.out1;
     var hl = 1 - eo(seg(t, T.out0, T.out1)) * (1 - eo(seg(t, T.end0 + .2, T.end1)));
-    if (img.logo) { ctx.globalAlpha = hl; ctx.drawImage(img.logo, 64, 56, 54 * img.logo.width / img.logo.height, 54); }
+    if (s.pLogo) { var hb = fitBox(s.pLogo, 340, 74); ctx.globalAlpha = hl; drawLogo(ctx, s.pLogo, 64, 83 - hb.h / 2, hb.w, hb.h, s.pBack); }
+    else if (img.logo) { ctx.globalAlpha = hl; ctx.drawImage(img.logo, 64, 56, 54 * img.logo.width / img.logo.height, 54); }
     ctx.globalAlpha = 1; ctx.fillStyle = C.rule; ctx.fillRect(64, 136, 1792, 1);
     var sw = (t % SWEEP) / SWEEP, fx = 64 + (-260 + (1792 + 260) * eio(sw));
     var g = ctx.createLinearGradient(fx, 0, fx + 260, 0);
@@ -917,9 +990,15 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
       var useL2 = oa < .999, O = ctx;
       if (useL2) O = work(R);
       var oy = obiTop + drift, lt = oy + (1 - eo(o)) * 10;
-      if (img.circle) O.drawImage(img.circle, STAGE_X, lt, 40, 40);
-      O.fillStyle = C.muted; O.font = font(400, LBL);
-      say(O, 'Obi by The Predictive Index', STAGE_X + 54, base(lt + (40 - LBL_H) / 2, LBL, LBL_H));
+      if (s.partner) {
+        if (img.circle) O.drawImage(img.circle, STAGE_X, lt - 4, 48, 48);
+        O.fillStyle = '#B9B8C0'; O.font = font(400, PLBL);
+        say(O, 'Obi by The Predictive Index', STAGE_X + 62, base(lt + 20 - PLBL_H / 2, PLBL, PLBL_H));
+      } else {
+        if (img.circle) O.drawImage(img.circle, STAGE_X, lt, 40, 40);
+        O.fillStyle = C.muted; O.font = font(400, LBL);
+        say(O, 'Obi by The Predictive Index', STAGE_X + 54, base(lt + (40 - LBL_H) / 2, LBL, LBL_H));
+      }
       var g2 = eio(seg(t, T.grow0, T.grow1)), sc2 = .55 + .45 * eob(o);
       var ow = 140 + (s.obW - 140) * g2, oh = 84 + (s.obH - 84) * g2;
       O.save(); O.translate(STAGE_X, oy + 58); O.scale(sc2, sc2);
@@ -948,19 +1027,29 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     // ---- title intro and the ellipsis dots (only while they can be on screen)
     if (t < T.fly1 + .5) drawTitle(ctx, R, s, t);
 
-    // ---- end card: "Obi by" above the big PI logo, centred as a pair; it settles in as the chat clears,
+    // ---- end card: "Obi by" above the big PI logo (partner mode: their message over their logo), centred; it settles in as the chat clears,
     // holds, then shrinks and blurs back into the bloom the title rises from (t = LOOP is t = 0)
     var mi = eo(seg(t, T.mk0, T.mk1)), me = eio(seg(t, T.end0, T.end1)), ma = mi * (1 - me);
-    if (img.mark && ma > 0.001) {
-      var mw = 660, mh = 660 * img.mark.height / img.mark.width, top = 540 - (60 + 30 + mh) / 2;
+    if ((s.partner || img.mark) && ma > 0.001) {
       var msc = (.94 + .06 * mi) * (1 - .08 * me), mb = 12 * me;
-      // drawn on a layer so the blur and fade apply to the pair as one, like the CSS filter on #mark
+      // drawn on a layer so the blur and fade apply to the card as one, like the CSS filter on #mark
       var M = work(R);
       M.translate(960, 540); M.scale(msc, msc); M.translate(-960, -540);
-      M.fillStyle = C.ink; M.font = font(500, 60); M.letterSpacing = '-0.6px';
-      say(M, 'Obi by', 960 - s.obiByW / 2, base(top, 60, 60));
-      M.letterSpacing = '0px';
-      M.drawImage(img.mark, 960 - mw / 2, top + 90, mw, mh);
+      if (s.partner) {
+        // partner card: their message, then their logo, centred as a block (message alone if no logo)
+        var lb = s.pLogo ? fitBox(s.pLogo, 680, 220) : null, mH = s.pLines.length * PMSG_LH, gap = lb ? 56 : 0;
+        var ptop = 540 - (mH + gap + (lb ? lb.h : 0)) / 2;
+        M.fillStyle = C.ink; M.font = font(500, PMSG); M.letterSpacing = '-0.5px';
+        s.pLines.forEach(function (ln, li) { say(M, ln.text, 960 - ln.w / 2, base(ptop + li * PMSG_LH, PMSG, PMSG_LH)); });
+        M.letterSpacing = '0px';
+        if (lb) drawLogo(M, s.pLogo, 960 - lb.w / 2, ptop + mH + gap, lb.w, lb.h, s.pBack);
+      } else {
+        var mw = 660, mh = 660 * img.mark.height / img.mark.width, top = 540 - (60 + 30 + mh) / 2;
+        M.fillStyle = C.ink; M.font = font(500, 60); M.letterSpacing = '-0.6px';
+        say(M, 'Obi by', 960 - s.obiByW / 2, base(top, 60, 60));
+        M.letterSpacing = '0px';
+        M.drawImage(img.mark, 960 - mw / 2, top + 90, mw, mh);
+      }
       ctx.save(); ctx.globalAlpha = ma; if (mb > .05) ctx.filter = 'blur(' + (mb * R.k).toFixed(2) + 'px)';
       ctx.drawImage(R.layer, 0, 0, W, H); ctx.restore();
     }
@@ -982,18 +1071,26 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
   // ---------- assets ----------
   function loadImg(src){ return new Promise(function(res){ var i=new Image(); i.onload=function(){res(i);}; i.onerror=function(){res(null);}; i.src=src; }); }
   var images = {};
-  var imgReady = Promise.all([loadImg(ASSETS.logo), loadImg(ASSETS.circle), loadImg(ASSETS.mark)]).then(function(a){ images = {logo:a[0], circle:a[1], mark:a[2]}; });
-  var fontsReady = Promise.all(['400 44px Roboto','700 44px Roboto','500 60px Roboto','400 20px "Roboto Mono"','500 124px "WR Title"','italic 300 124px "WR Title"'].map(function(f){ return document.fonts.load(f).catch(function(){}); }))
+  var imgReady = Promise.all([loadImg(ASSETS.logo), loadImg(ASSETS.circle), loadImg(ASSETS.mark)]).then(function(a){ images = {logo:a[0], circle:a[1], mark:a[2], plogo: images.plogo || null}; });
+  var fontsReady = Promise.all(['400 44px Roboto','700 44px Roboto','500 60px Roboto','500 56px Roboto','400 30px Roboto','400 20px "Roboto Mono"','500 124px "WR Title"','italic 300 124px "WR Title"'].map(function(f){ return document.fonts.load(f).catch(function(){}); }))
     .then(function(){ return document.fonts.ready; });
 
   // ---------- state ----------
   var state = {name: 'Steve', profile: 'Persuader', replies: {}};
   try { var saved = JSON.parse(localStorage.getItem('wrb14') || 'null'); if (saved && saved.profile) state = saved; } catch(e){}
   if (!state.replies) state.replies = {};
+  // partner mode: on with ?for=partner (or #partner), off with ?for=internal; otherwise the remembered mode
+  var DEFAULT_PMSG = "What would you ask Obi by The Predictive Index? We're here to help you through it.", MAX_PMSG = 90;
+  var linkMode = /[?&]for=partner\b/.test(location.search) || /^#partner$/.test(location.hash) ? 'partner' : /[?&]for=internal\b/.test(location.search) ? 'internal' : null;
+  state.mode = linkMode || state.mode || 'internal';
+  if (state.pmsg == null) state.pmsg = DEFAULT_PMSG;
   nameEl.value = state.name;
   function profile(){ return PROFILES.filter(function(p){ return p.name === state.profile; })[0] || PROFILES[0]; }
   function cleanName(){ return nameEl.value.replace(/\s+/g,' ').trim(); }
-  function remember(){ try { localStorage.setItem('wrb14', JSON.stringify(state)); } catch(e){} }
+  function remember(){
+    try { localStorage.setItem('wrb14', JSON.stringify(state)); }
+    catch(e){ try { var lite = Object.assign({}, state); delete lite.plogo; localStorage.setItem('wrb14', JSON.stringify(lite)); } catch(e2){} }
+  }
   // Obi's reply: the suggested one for the profile, unless someone has edited it (edits are kept per profile).
   // Replies are stored as templates with {name}, so changing the name later updates an edited reply too;
   // the box shows them with the name filled in.
@@ -1001,7 +1098,9 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
   function esc(x){ return x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
   function fillName(tpl){ return tpl.replace(/\{name\}/g, cleanName() || 'your host'); }
   function toTemplate(text){ var n = cleanName(); return n ? text.replace(new RegExp('\\b' + esc(n) + '\\b', 'g'), '{name}') : text; }
-  function replyText(){ var p = profile(), r = (state.replies[p.name] || '').replace(/\s+/g,' ').trim(); return r || p.reply; }
+  function isPartner(){ return state.mode === 'partner'; }
+  // partner videos always carry the approved reply for the profile
+  function replyText(){ var p = profile(), r = isPartner() ? '' : (state.replies[p.name] || '').replace(/\s+/g,' ').trim(); return r || p.reply; }
 
   // brand bar, the name field and the profile picker (Brand Asset Builder kit)
   BAB.bar($('bar'), {logo: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMjEuODMgMzIxLjgzIj48dGl0bGU+UmVkIEJ1dHRvbjwvdGl0bGU+PGcgaWQ9IkxheWVyXzIiIGRhdGEtbmFtZT0iTGF5ZXIgMiI+PGcgaWQ9IkxheWVyXzEtMiIgZGF0YS1uYW1lPSJMYXllciAxIj48ZyBpZD0iRnVsbF9Mb2dvIiBkYXRhLW5hbWU9IkZ1bGwgTG9nbyI+PGNpcmNsZSBjeD0iMTYwLjkxIiBjeT0iMTYwLjkxIiByPSIxNjAuOTEiIHN0eWxlPSJmaWxsOiNlYjI3MzgiLz48cGF0aCBkPSJNMTk4LjEyLDk0LjQ1bDE3LDMuMjF2NDIuMjVhMjMuMjYsMjMuMjYsMCwwLDEsMjQuNjYtLjM4Vjk3Ljc4YTk4LjQxLDk4LjQxLDAsMCwwLDE3LTMuNzFsMi0uNy0xLjYxLTEzLjUySDE5OS40MWwtLjc1LDEuMzVBMTUuMjMsMTUuMjMsMCwwLDAsMTk3LDg3Ljc5YzAsMywuMTQsNC40NC41NCw1LjM3WiIgc3R5bGU9ImZpbGw6I2ZmZiIvPjxjaXJjbGUgY3g9IjIyNy43NiIgY3k9IjE1OS42NCIgcj0iMTUuNTYiIHN0eWxlPSJmaWxsOiNmZmYiLz48cGF0aCBkPSJNMjU5LjE2LDIyNy40N2wtMTkuMzgtMy41NFYxNzkuNzVhMjMuMjcsMjMuMjcsMCwwLDEtMjQuNjYtLjM3VjIyMy44Yy01Ljg3LjctMTIuNTIsMS41MS0xNy43MiwzLjMxbC0yLC42OCwxLjQyLDE0LjJoNjFsLjc1LTEuMzZhMTkuNjYsMTkuNjYsMCwwLDAsMS42My03LjQ1LDExLjg3LDExLjg3LDAsMCwwLS41NC00LjM5WiIgc3R5bGU9ImZpbGw6I2ZmZiIvPjxwYXRoIGQ9Ik0xNzIuNDUsOTAuNjZjLTguOTEtNy4zOC0yMi4wNi0xMC44Mi00MS40LTEwLjgySDY0LjQybC0uNTYsMS44OGEyOS40LDI5LjQsMCwwLDAtMS40MSwxMC41N2wuMTMsMiwxLjk0LjQyYzUuMTUsMS4xMiwxMC4wOCwxLjg2LDE1LjM3LDIuNTZ2MTI3Yy0xLjI1LjE0LTIuNTMuMjctMy44Ni40LTQsLjQxLTguMTcuODItMTIuMTMsMS42M2wtMi4yNS40Nkw2Mi42LDI0Mmg2N2wuMzgtMi4xOWEzMy4zOSwzMy4zOSwwLDAsMCwwLTEwLjg2bC0uMzEtMS44MS0xLjgxLS4zM2MtMy43My0uNjktMTAuNDItMS4zMy0xNi4zMy0xLjg5LTIuNS0uMjQtNC45LS40Ny02Ljg2LS42OFYxODUuNTRhMTU2LjUyLDE1Ni41MiwwLDAsMCwyNC4yMywyLjE2YzQxLjE5LDAsNTgtMTYuNjEsNTgtNTcuMzVDMTg2Ljg4LDExMS42OSwxODIuMTYsOTguNywxNzIuNDUsOTAuNjZabS0xOC4yMiw2OS4yN2MtNS4zNCw3LjIxLTE0LjU5LDEwLjU4LTI5LjEzLDEwLjU3aDBjLTEuOTMsMC00LS4wNi02LjA5LS4xOGwtMTQuNjMtLjgzVjk4Ljc0bDExLjQ5LS4xOGMxLjMxLDAsMi41OCwwLDMuODEsMCwzNy4xMSwwLDQxLjE3LDkuODIsNDEuMTcsMzAuNjZDMTYwLjg2LDE0NC40NiwxNTguODgsMTUzLjY1LDE1NC4yNCwxNTkuOTNaIiBzdHlsZT0iZmlsbDojZmZmIi8+PHBhdGggZD0iTTI3MC44NCwyMjkuNjdhNi40Miw2LjQyLDAsMSwwLDYuNTQsNi4zOEE2LjQ2LDYuNDYsMCwwLDAsMjcwLjg0LDIyOS42N1ptMCwxMS40OGE1LjEsNS4xLDAsMSwxLDQuODctNS4wNkE0Ljg5LDQuODksMCwwLDEsMjcwLjg4LDI0MS4xNVoiIHN0eWxlPSJmaWxsOiNmZmYiLz48cGF0aCBkPSJNMjcyLjMyLDIzNi4yNHYtLjA4YTEuNjQsMS42NCwwLDAsMCwxLjMyLTEuNDgsMS43NywxLjc3LDAsMCwwLS42Mi0xLjQsNCw0LDAsMCwwLTIuMjItLjQ3LDEyLjk0LDEyLjk0LDAsMCwwLTIuNDUuMTl2Ni4zOGgxLjQ4di0yLjU3aC43Yy44MiwwLDEuMjEuMzEsMS4zMiwxYTUuNDYsNS40NiwwLDAsMCwuNTEsMS41NkgyNzRhNC44Niw0Ljg2LDAsMCwxLS40Ny0xLjZBMS44OSwxLjg5LDAsMCwwLDI3Mi4zMiwyMzYuMjRabS0xLjc1LS40N2gtLjd2LTEuODNhMy41NywzLjU3LDAsMCwxLC44Mi0uMDhjLjkzLDAsMS4zNi4zOSwxLjM2LDFTMjcxLjM5LDIzNS43OCwyNzAuNTcsMjM1Ljc4WiIgc3R5bGU9ImZpbGw6I2ZmZiIvPjwvZz48L2c+PC9nPjwvc3ZnPg==', tool: 'Zoom Waiting Room', badge: 'BETA',
@@ -1020,18 +1119,24 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
   showProfile(false);
 
   // ---------- preview ----------
-  var MAX_WORDS = 37;
+  var MAX_WORDS = 37, blocked = false;
   var scene = null, t0 = performance.now(), offset = 0, playing = !reduced, pausedAt = 0;
   function rebuild(){
     var p = profile();
     var reply = replyText(), edited = reply !== p.reply, shown = fillName(reply), n = shown.split(' ').length;
-    scene = WR.layout(vctx, {name: cleanName(), profile: p.name, reply: reply}, images);
-    if (document.activeElement !== replyEl) replyEl.value = fillName(state.replies[p.name] || p.reply);
-    $('replyReset').hidden = !edited;
-    // a quiet word count against the limit; over it, the count turns red and the download waits
-    var h = $('replyHint'), over = n > MAX_WORDS;
+    var partner = isPartner(), pm = (state.pmsg || '').replace(/\s+/g, ' ').trim();
+    scene = WR.layout(vctx, {name: cleanName(), profile: p.name, reply: reply, mode: state.mode,
+                             partnerLogo: images.plogo || null, partnerMessage: pm, logoBacking: !!state.pback}, images);
+    replyEl.readOnly = partner;
+    if (document.activeElement !== replyEl || partner) replyEl.value = fillName(partner ? p.reply : (state.replies[p.name] || p.reply));
+    $('replyReset').hidden = !edited || partner;
+    // quiet counts against the limits; over one, it turns red and the download waits
+    var h = $('replyHint'), over = !partner && n > MAX_WORDS;
     h.textContent = n + ' / ' + MAX_WORDS + ' words'; h.classList.toggle('over', over);
-    $('mp4').disabled = over || !!busy;
+    var pc = $('pmsgCount'), pOver = partner && pm.length > MAX_PMSG;
+    pc.textContent = pm.length + ' / ' + MAX_PMSG + ' characters'; pc.classList.toggle('over', pOver);
+    blocked = over || pOver;
+    $('mp4').disabled = blocked || !!busy;
     $('wrTopic').textContent = (cleanName() || 'Your host') + '’s meeting';
     $('scrub').setAttribute('aria-valuemax', scene.LOOP.toFixed(1));
     dirty = true;
@@ -1086,6 +1191,59 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
 
   // typing the name replays the question, already typed, so the change shows right away
   nameEl.addEventListener('input', function(){ state.name = nameEl.value; remember(); rebuild(); jump(scene.T.typeEnd); });
+
+  // ---------- partner mode ----------
+  var segBtns = [].slice.call(document.querySelectorAll('.bab-seg [role="radio"]'));
+  function applyMode(){
+    var partner = isPartner();
+    document.body.dataset.mode = state.mode;
+    segBtns.forEach(function(b){ var on = b.dataset.mode === state.mode; b.setAttribute('aria-checked', String(on)); b.tabIndex = on ? 0 : -1; });
+    var tool = document.querySelector('#bar .bab-tool'); if (tool) tool.textContent = partner ? 'Zoom Waiting Room · Partners' : 'Zoom Waiting Room';
+  }
+  function setMode(m){
+    if (m === state.mode) return;
+    state.mode = m; remember(); applyMode(); rebuild();
+    jump(m === 'partner' ? scene.T.mk1 + .2 : scene.T.words0 + 3.2);   // show what changed: the end card, or the reply
+  }
+  segBtns.forEach(function(b, i){
+    b.addEventListener('click', function(){ setMode(b.dataset.mode); });
+    b.addEventListener('keydown', function(e){
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      e.preventDefault(); var nb = segBtns[(i + (e.key === 'ArrowRight' ? 1 : segBtns.length - 1)) % segBtns.length]; nb.focus(); setMode(nb.dataset.mode);
+    });
+  });
+  var pmsgEl = $('pmsg'); pmsgEl.value = state.pmsg;
+  pmsgEl.addEventListener('input', function(){ state.pmsg = pmsgEl.value; remember(); rebuild(); jump(scene.T.mk1 + .2); });
+  $('logoBack').checked = !!state.pback;
+  $('logoBack').addEventListener('change', function(){ state.pback = this.checked; remember(); rebuild(); jump(scene.T.mk1 + .2); });
+  // the logo never leaves the browser: it's read locally, scaled to 800 px on its long side, and remembered
+  function showLogo(){
+    var has = !!images.plogo; $('logoThumb').hidden = !has; $('logoRemove').hidden = !has;
+    if (has) $('logoThumb').src = state.plogo;
+    $('logoText').textContent = has ? 'Replace logo: drop a file or click.' : 'Drop a PNG or SVG, or click to choose. It stays in your browser.';
+  }
+  function useLogoFile(file){
+    if (!file || !/^image\//.test(file.type)) return;
+    var fr = new FileReader();
+    fr.onload = function(){
+      loadImg(fr.result).then(function(im){
+        if (!im) return;
+        var k = Math.min(1, 800 / Math.max(im.width || 800, im.height || 800)), c = document.createElement('canvas');
+        c.width = Math.max(1, Math.round((im.width || 800) * k)); c.height = Math.max(1, Math.round((im.height || 400) * k));
+        c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+        state.plogo = c.toDataURL('image/png'); remember();
+        loadImg(state.plogo).then(function(sm){ images.plogo = sm; showLogo(); rebuild(); jump(scene.T.mk1 + .2); });
+      });
+    };
+    fr.readAsDataURL(file);
+  }
+  $('logoFile').addEventListener('change', function(){ useLogoFile(this.files && this.files[0]); this.value = ''; });
+  var drop = $('logoDrop');
+  ['dragenter','dragover'].forEach(function(ev){ drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.add('bab-over'); }); });
+  ['dragleave','drop'].forEach(function(ev){ drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.remove('bab-over'); }); });
+  drop.addEventListener('drop', function(e){ useLogoFile(e.dataTransfer && e.dataTransfer.files[0]); });
+  $('logoRemove').addEventListener('click', function(){ delete state.plogo; images.plogo = null; remember(); showLogo(); rebuild(); jump(scene.T.mk1 + .2); });
+  applyMode();
 
   // ---------- export ----------
   var busy = null;
@@ -1148,7 +1306,7 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     }
     return null;
   }
-  function lock(on){ busy = on ? {cancelled:false} : null; $('mp4').disabled = !!on || $('replyHint').classList.contains('over'); nameEl.disabled = !!on; replyEl.disabled = !!on; picker.disable(on); return busy; }
+  function lock(on){ busy = on ? {cancelled:false} : null; $('mp4').disabled = !!on || blocked; nameEl.disabled = !!on; replyEl.disabled = !!on; pmsgEl.disabled = !!on; $('logoFile').disabled = !!on; segBtns.forEach(function(b){ b.disabled = !!on; }); picker.disable(on); return busy; }
   $('cancel').addEventListener('click', function(){ if (busy) busy.cancelled = true; });
 
   $('mp4').addEventListener('click', async function(){
@@ -1213,7 +1371,8 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
   function uninvite(){ nameSlot.classList.remove('bab-active'); }
   nameEl.addEventListener('blur', uninvite);
   document.addEventListener('pointerdown', function(ev){ if (ev.target !== nameEl) uninvite(); }, true);
-  Promise.all([imgReady, fontsReady]).then(function(){ fitName(); sizeView(); rebuild(); frame(); requestAnimationFrame(loop); });
+  var plogoReady = state.plogo ? loadImg(state.plogo).then(function(im){ images.plogo = im; }) : Promise.resolve();
+  Promise.all([imgReady, fontsReady]).then(function(){ return plogoReady; }).then(function(){ showLogo(); fitName(); sizeView(); rebuild(); frame(); requestAnimationFrame(loop); });
   // a font that finishes loading late changes text widths: lay out again
   document.fonts.addEventListener && document.fonts.addEventListener('loadingdone', function(){ if (scene) rebuild(); });
   window.__wr = {jump: jump, setPlaying: setPlaying, state: state, get scene(){ return scene; }};

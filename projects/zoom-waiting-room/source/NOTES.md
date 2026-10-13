@@ -181,3 +181,16 @@ Build a tool (like the chat animator) where someone enters their own name, Refer
 - Builder layout: the live video sits front and center on the left. The right column is two numbered steps: 1 Customize your video (first name, Reference Profile picker, Obi's reply) and 2 Download and install (Download video, then "Easy to upload:" with three numbered steps and an Open Zoom settings link). The step, field and list styles (`.bab-step`, `.bab-field`, `.bab-control`, `.bab-steps`, `.bab-subtitle`) live in the shared kit.
 - Both pass `studio/check-motion.js`: no font fallbacks, overlaps or out-of-stage text; determinism, seam wrap and seam step pass.
 - Builder layout, second pass (2026-10-13): the steps are on the left and the live video on the right (sticky). Steps are open sections split by one rule, not cards. Step numbers are flat gray circles (no gradient), and the "Easy to upload" list uses plain muted numerals, so only the two main steps read as steps. On narrow screens the video comes first. The saved-state key went to `wrb14`, so everyone starts once on Steve / Persuader.
+
+## Partner mode (2026-10-13)
+
+- One builder, two modes: a "PI team | Partner" switch at the top of the steps. Link straight to it with `builder.html?for=partner` (or `#partner`); `?for=internal` forces PI team mode, and otherwise the last-used mode is remembered.
+- In partner mode:
+  - The UI accent shifts from purple to the PI blue family, animated.
+  - The bar reads "Zoom Waiting Room · Partners".
+  - Step 1 adds "Your logo" (PNG, SVG or JPG; read in the browser and never uploaded; scaled to 800 px and remembered locally) with an optional light backing for dark logos, and an "End-card message" (default "What would you ask Obi by The Predictive Index? We're here to help you through it.", 90-character limit, red count and a held download over it).
+  - Obi's reply is read-only (the approved reply for the profile).
+  - Step 2's sign-in note says to use your own Zoom account.
+- Video in partner mode: the partner logo top left (fitted to 340×74; the PI logo if there's none), the Obi label at 30 px with a 48 px avatar, and the end card is the partner's message (56 px on a 70 px line, centred) over their logo (fitted to 680×220). The timing and the dissolve back into the bloom are unchanged, so the seam holds.
+- Both modes: "Brand Asset Builder" in the bar is now 15 px with a 28 px mark, and the subhead sits under the H1.
+- Checked: `studio/check-motion.js` passes in both modes (partner run with a placeholder logo via `--eval`). A partner hardware export took 3.5 s and came out at 16.4 MB.

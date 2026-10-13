@@ -13,6 +13,16 @@
   --bab-ease: cubic-bezier(.2, .7, .2, 1);
   color-scheme: dark;
 }
+/* modes: a tool can set data-mode on <body>. "partner" re-points the accent from purple to the PI blue
+   family; the colours are registered so the change animates instead of snapping. */
+@property --bab-purple { syntax: '<color>'; inherits: true; initial-value: #5000a8; }
+@property --bab-purple-hi { syntax: '<color>'; inherits: true; initial-value: #6a1ed0; }
+@property --bab-accent-soft { syntax: '<color>'; inherits: true; initial-value: rgba(80,0,168,.18); }
+:root { --bab-accent-soft: rgba(80,0,168,.18); }
+body.bab { transition: --bab-purple .45s var(--bab-ease), --bab-purple-hi .45s var(--bab-ease), --bab-accent-soft .45s var(--bab-ease); }
+body.bab[data-mode="partner"] { --bab-purple: #1b6f9e; --bab-purple-hi: #2387bd; --bab-accent-soft: rgba(51,168,211,.16);
+  --bab-edge: linear-gradient(90deg, #5cc3e6, #1b6f9e);
+  --bab-glow: 0 0 0 1px rgba(51,168,211,.6), -10px 0 28px -10px rgba(92,195,230,.55), 10px 0 28px -10px rgba(27,111,158,.85); }
 .bab, .bab * { box-sizing: border-box; }
 body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 400 15px/1.55 var(--bab-sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 .bab [hidden] { display: none !important; }
@@ -23,13 +33,13 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
 /* ---- brand bar: PI mark + "Brand Asset Builder" | tool name ---- */
 .bab-bar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 14px; height: 52px; padding: 0 clamp(16px, 3vw, 32px);
   background: rgba(5,5,6,.82); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border-bottom: 1px solid var(--bab-line); }
-.bab-bar img { height: 24px; width: 24px; display: block; }
+.bab-bar img { height: 28px; width: 28px; display: block; }
 .bab-bar > a, .bab-bar > span:first-child { display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none; }
 .bab-bar .bab-sep { width: 1px; height: 18px; background: var(--bab-line-hi); }
-.bab-bar .bab-name { font-size: 13px; font-weight: 500; letter-spacing: .02em; color: var(--bab-ink); white-space: nowrap; }
+.bab-bar .bab-name { font-size: 15px; font-weight: 500; letter-spacing: .02em; color: var(--bab-ink); white-space: nowrap; }
 .bab-bar .bab-note { margin-left: 14px; font-size: 12px; color: var(--bab-ink-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 @media (max-width: 900px) { .bab-bar .bab-note { display: none; } }
-.bab-bar .bab-badge { flex: none;  margin-left: auto; padding: 3px 9px; border: 1px solid rgba(150,120,255,.45); border-radius: 999px; font-size: 10.5px; font-weight: 500; letter-spacing: .12em; color: #CFC4FF; background: rgba(80,0,168,.18); }
+.bab-bar .bab-badge { flex: none;  margin-left: auto; padding: 3px 9px; border: 1px solid var(--bab-purple-hi); border-radius: 999px; font-size: 10.5px; font-weight: 500; letter-spacing: .12em; color: #e6e1ff; background: var(--bab-accent-soft); }
 .bab-bar .bab-tool { font-size: 13px; color: var(--bab-ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* ---- page ---- */
@@ -115,6 +125,23 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
 .bab-steps li { counter-increment: bab-step; position: relative; padding-left: 22px; font-size: 14px; line-height: 1.45; color: var(--bab-ink-soft); }
 .bab-steps li::before { content: counter(bab-step) "."; position: absolute; left: 0; top: 0; font-weight: 500; color: var(--bab-ink-faint); font-variant-numeric: tabular-nums; }
 .bab-steps b { font-weight: 500; color: var(--bab-ink); }
+
+/* ---- segmented switch (radio group): <div class="bab-seg" role="radiogroup"><button role="radio" aria-checked> ---- */
+.bab-seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; padding: 4px; background: var(--bab-surface); border: 1px solid var(--bab-line); border-radius: 12px; }
+.bab-seg button { padding: 9px 12px; border-radius: 8px; font: 500 14px/1 var(--bab-sans); color: var(--bab-ink-soft); transition: background-color .3s var(--bab-ease), color .3s var(--bab-ease); }
+.bab-seg button:hover { color: var(--bab-ink); }
+.bab-seg button[aria-checked="true"] { background: var(--bab-purple); color: #fff; }
+
+/* ---- file drop zone: a label wrapping a hidden file input, with an optional preview ---- */
+.bab-drop { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px dashed var(--bab-line-hi); border-radius: 10px; background: var(--bab-bg); cursor: pointer;
+  color: var(--bab-ink-soft); font-size: 14px; transition: border-color .2s var(--bab-ease), box-shadow .2s var(--bab-ease); }
+.bab-drop:hover, .bab-drop.bab-over { border-color: var(--bab-ink-faint); }
+.bab-drop:focus-within { border-style: solid; border-color: transparent; box-shadow: var(--bab-glow); }
+.bab-drop input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.bab-drop .bab-thumb { flex: none; width: 88px; height: 44px; border-radius: 6px; background: #000; display: grid; place-items: center; overflow: hidden; }
+.bab-drop .bab-thumb img { max-width: 80px; max-height: 36px; object-fit: contain; }
+.bab-check { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--bab-ink-soft); cursor: pointer; }
+.bab-check input { accent-color: var(--bab-purple); }
 
 /* ---- preview frame: a quiet app window around a live 16:9 canvas, with a transport row ---- */
 .bab-frame { background: var(--bab-surface); border: 1px solid var(--bab-line); border-radius: 12px; overflow: hidden; }
