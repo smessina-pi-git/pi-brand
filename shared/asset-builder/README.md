@@ -7,7 +7,7 @@ The shared look for PI Brand's builder tools and "video editor" style tools. The
 - a big sentence-style form, for example "I'm [ Steve ], a [ Persuader ▾ ]."
 - numbered steps for a builder's side panel, with labeled fields and numbered lists
 - a picker popover
-- a mode switch styled as PI Design System Tabs
+- a pill switch for modes (an accent pill that slides between options)
 - buttons, cards and text fields
 - small, muted fine print
 - a preview frame with a play and scrub row
@@ -43,10 +43,10 @@ The shared look for PI Brand's builder tools and "video editor" style tools. The
 - **Steps.** The builder layout: the preview on the left, steps on the right. Each step is a `<section class="bab-step">` with a `.bab-step-head` (`.bab-step-num` badge plus `<h2 class="bab-step-title">`). Inside a step:
   - Fields are `.bab-field`: a `.bab-label`, then a `.bab-control` (a text input, or a `.bab-control.bab-pick` button for the picker, with its `.bab-pop` inside the same field).
   - Instructions are a `.bab-subtitle` over an `<ol class="bab-steps">`, with numbered dots.
-  - Steps are open sections split by a rule, with flat gray number badges (no gradients). The Zoom waiting room builder puts three steps on the left ("Customize your video", "Download your video", "Add it to Zoom") and the live preview on the right.
+  - Steps are open sections separated by space, not rules: give their container a gap (the Zoom waiting room builder uses 40 px). Number badges are flat gray circles (no gradients). Add `bab-next` to a badge to tint it with the accent (the step to do now), or `bab-done` and an `<svg>` check inside to show it's finished; the check draws itself. The Zoom waiting room builder puts three steps on the left ("Customize your video", "Download your video", "Add it to Zoom") and the live preview on the right.
   - Fields follow the Design System's TextField: a bold 14 px label, a 48 px control with a 6 px radius and an edge that turns accent on focus. The edge is neutral-400 (`--bab-edge`, 3.4:1 on white) rather than the Design System's `border-primary` neutral-100 (1.5:1), so fields meet WCAG 1.4.11; dividers keep `border-primary`. `.bab-labelrow` puts a hint or count at the right end of the label row. `.bab-invalid` gives a control the error edge.
 - **Modes.** Set `data-mode` on `<body>`. `partner` re-points the accent tokens (`--bab-accent`, `-hi`, `-lo`, `-soft`, `-line`: primary button, focus, tabs, BETA chip) from PI Design System primary-800 purple to PI Design System blue-700, and the colours ease because they're registered with `@property`. Pair it with a `.bab-seg` switch.
-- **Mode switch.** `<div class="bab-seg" role="radiogroup">` with `<button role="radio" aria-checked>` children. It looks like PI Design System Tabs (rules above and below, a 4 px accent bar and semibold label on the chosen one) but keeps radio semantics and arrow keys.
+- **Mode switch.** `<div class="bab-seg" role="radiogroup">` with `<button role="radio" aria-checked>` children: pill tabs on a neutral track, where an accent pill slides to the chosen option (CSS only, through `:has()`). Two options by default; set `--n: 3` on the track for three. Keep the radio semantics and arrow keys in the tool's script.
 - **File drop.** `<label class="bab-drop">` wrapping a hidden file input, with an optional `.bab-thumb` preview. Read files locally; nothing is uploaded. `.bab-check` is a small checkbox row.
 - **Picker.** `BAB.picker(button, popEl, {items: [{value, label, icon}], value, onChange, label})`. Place `popEl` (a `.bab-pop`) inside a `position: relative` container.
   - It's a keyboard-accessible listbox: arrow keys, Home/End, typing a letter, Enter or Space, and Esc.

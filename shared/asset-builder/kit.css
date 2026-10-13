@@ -128,11 +128,18 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
 
 /* ---- steps: a builder's side panel as numbered steps, each with a title, labeled fields and lists ---- */
 .bab-step { display: grid; gap: 16px; }
-.bab-step + .bab-step { border-top: 1px solid var(--bab-line); padding-top: 24px; }
+.bab-step + .bab-step { margin-top: 0; }   /* steps are separated by space alone: give their container a gap */
 .bab-step-head { display: flex; align-items: center; gap: 12px; }
-.bab-step-num { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font: 600 14px/1 var(--bab-sans); color: var(--bab-ink);
-  background: var(--bab-line); font-variant-numeric: tabular-nums; }
-.bab-step-title { margin: 0; font: 600 20px/30px var(--bab-sans); color: var(--bab-ink); }
+/* the number badge: flat gray. .bab-next tints it with the accent (the step to do now); .bab-done turns it
+   into a filled accent circle with a check (put an <svg> check inside). */
+.bab-step-num { flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font: 600 13px/1 var(--bab-sans); color: var(--bab-ink);
+  background: var(--bab-line); font-variant-numeric: tabular-nums; transition: background-color .3s var(--bab-ease), color .3s var(--bab-ease); }
+.bab-step-num.bab-next { background: var(--bab-accent-soft); color: var(--bab-accent); }
+.bab-step-num.bab-done { background: var(--bab-accent); color: #fff; }
+.bab-step-num svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 16; stroke-dashoffset: 0; animation: bab-tick .4s var(--bab-ease) both; }
+@keyframes bab-tick { from { stroke-dashoffset: 16; } }
+.bab-step-title { margin: 0; font: 600 18px/27px var(--bab-sans); color: var(--bab-ink); }
 .bab-field { position: relative; display: grid; gap: 4px; align-content: start; }
 .bab-labelrow { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
 .bab-control { width: 100%; height: 48px; font: 400 16px/24px var(--bab-sans); color: var(--bab-ink); background: var(--bab-bg); border: 1px solid var(--bab-edge); border-radius: 6px;
@@ -151,17 +158,20 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
 .bab-steps li::before { content: counter(bab-step) "."; position: absolute; left: 0; top: 0; font-weight: 600; color: var(--bab-ink-soft); font-variant-numeric: tabular-nums; }
 .bab-steps b { font-weight: 600; color: var(--bab-ink); }
 
-/* ---- mode switch: PI Design System Tabs (left), as a radio group:
-   <div class="bab-seg" role="radiogroup"><button role="radio" aria-checked>. Selection is weight + a 4 px bar. ---- */
-.bab-seg { display: flex; gap: 8px; border-top: 1px solid var(--bab-line-hi); border-bottom: 1px solid var(--bab-line-hi); }
-.bab-seg button { position: relative; padding: 12px 24px; font: 400 16px/24px var(--bab-sans); color: var(--bab-ink); transition: color .2s var(--bab-ease); }
-.bab-seg button::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 0; background: var(--bab-accent-line); transition: height .15s var(--bab-ease), background-color .2s; }
-.bab-seg button:hover { color: var(--bab-accent); }
-.bab-seg button:hover::after { height: 2px; }
-.bab-seg button[aria-checked="true"] { font-weight: 600; color: var(--bab-ink); }
-.bab-seg button[aria-checked="true"]::after { height: 4px; background: var(--bab-accent); }
-.bab-seg button:focus-visible { outline-offset: -2px; }
-.bab-seg button:disabled { color: rgba(36,19,62,.4); cursor: not-allowed; }
+/* ---- mode switch: pill tabs, as a radio group:
+   <div class="bab-seg" role="radiogroup"><button role="radio" aria-checked>…</div>
+   A neutral track with an accent pill that slides to the chosen option (2 or 3 options; set --n: 3 for three). ---- */
+.bab-seg { --n: 2; position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; padding: 4px; border-radius: 9999px; background: var(--bab-surface); isolation: isolate; }
+.bab-seg::before { content: ''; position: absolute; z-index: -1; top: 4px; bottom: 4px; left: 4px; width: calc((100% - 8px) / var(--n)); border-radius: 9999px;
+  background: var(--bab-accent); transition: transform .34s cubic-bezier(.3, .9, .3, 1), background-color .4s var(--bab-ease); }
+.bab-seg:has(> [aria-checked="true"]:nth-child(2))::before { transform: translateX(100%); }
+.bab-seg:has(> [aria-checked="true"]:nth-child(3))::before { transform: translateX(200%); }
+.bab-seg button { min-height: 40px; padding: 8px 16px; border-radius: 9999px; font: 600 16px/24px var(--bab-sans); color: var(--bab-ink-soft); transition: color 0s linear .06s; }   /* the label colour flips as the pill crosses the middle */
+.bab-seg button:hover { color: var(--bab-ink); }
+.bab-seg button[aria-checked="true"] { color: #fff; }
+.bab-seg button:focus-visible { outline-offset: 2px; }
+.bab-seg button:disabled { cursor: not-allowed; }
+.bab-seg:has(button:disabled) { opacity: .6; }
 
 /* ---- file drop zone: a label wrapping a hidden file input, with an optional preview ---- */
 .bab-drop { position: relative; display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px dashed var(--bab-edge); border-radius: 6px; background: var(--bab-bg); cursor: pointer;
@@ -200,5 +210,5 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
 .bab-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 14px; color: var(--bab-ink-soft); font-variant-numeric: tabular-nums; }
 
 @media (prefers-reduced-motion: reduce) {
-  .bab *, .bab *::after, body.bab { transition: none !important; animation: none !important; }
+  .bab *, .bab *::before, .bab *::after, body.bab { transition: none !important; animation: none !important; }
 }
