@@ -6,12 +6,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&family=Roboto+Mono:wght@400&family=Roboto+Serif:opsz,wght@8..144,500&display=swap">
 <style>/* Brand Asset Builder kit: the shared look for PI Brand's builder and "video editor" style tools.
-   Light, flat and on PI's product Design System (Tapestry): white page, purple-tinted neutrals, Roboto,
+   Light, flat and on PI's product Design System: white page, purple-tinted neutrals, Roboto,
    primary-800 #5000A8 for the one primary action, a 4 px grid. The preview a tool makes (a video, an
    image) stays whatever it is; only the page around it is light. Everything is prefixed bab- so a tool's
    own CSS can't collide with it. See README.md. */
 :root {
-  /* Tapestry tokens (names in comments). Use these, not raw hex, in tool CSS. */
+  /* PI Design System tokens (names in comments). Use these, not raw hex, in tool CSS. */
   --bab-bg: #FFFFFF;            /* surface-page-bg */
   --bab-surface: #F2F1F3;       /* surface-desktop / neutral-50 */
   --bab-raise: #FFFFFF;         /* popovers */
@@ -31,7 +31,7 @@
   color-scheme: light;
 }
 /* accent: primary-800 / -700 hover / -900 pressed / -25 tint / -200 hover bar. A tool can set data-mode on
-   <body>; "partner" re-points the accent to Tapestry's blue ramp (blue-700 / -800 / -900 / -50 / -200).
+   <body>; "partner" re-points the accent to the Design System's blue ramp (blue-700 / -800 / -900 / -50 / -200).
    The colours are registered so the change eases instead of snapping. */
 @property --bab-accent { syntax: '<color>'; inherits: true; initial-value: #5000A8; }
 @property --bab-accent-hi { syntax: '<color>'; inherits: true; initial-value: #7333B9; }
@@ -60,7 +60,7 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
 .bab-bar .bab-note { margin-left: 12px; font-size: 13px; color: var(--bab-ink-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 @media (max-width: 1100px) { .bab-bar .bab-note { display: none; } }
 @media (max-width: 520px) { .bab-bar .bab-name { display: none; } }
-/* a Tapestry purple chip (xsmall): primary-50 fill, primary-200 border */
+/* a PI Design System purple chip (xsmall): primary-50 fill, primary-200 border */
 .bab-bar .bab-badge { flex: none; margin-left: auto; padding: 1px 8px; border: 1px solid var(--bab-accent-line); border-radius: 6px; background: var(--bab-accent-soft);
   font-size: 12px; font-weight: 600; letter-spacing: .06em; color: var(--bab-accent); }
 
@@ -101,7 +101,7 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
 .bab-opt[aria-selected="true"] { font-weight: 600; background: var(--bab-accent-soft); color: var(--bab-accent); }
 @media (max-width: 560px) { .bab-pop { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
-/* ---- buttons (Tapestry Button, md 40 px / lg 48 px, radius-3) ---- */
+/* ---- buttons (PI Design System Button, md 40 px / lg 48 px, radius-3) ---- */
 .bab-btn { display: inline-flex; justify-content: center; align-items: center; gap: 8px; min-height: 40px; padding: 8px 16px; border-radius: 6px; font: 600 16px/24px var(--bab-sans);
   text-decoration: none; color: var(--bab-accent); border: 1px solid var(--bab-accent); background: var(--bab-bg); cursor: pointer;
   transition: background-color .15s, border-color .15s, color .15s, box-shadow .15s; }
@@ -158,7 +158,7 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
 .bab-steps li::before { content: counter(bab-step) "."; position: absolute; left: 0; top: 0; font-weight: 600; color: var(--bab-ink-soft); font-variant-numeric: tabular-nums; }
 .bab-steps b { font-weight: 600; color: var(--bab-ink); }
 
-/* ---- mode switch: Tapestry Tabs (left), as a radio group:
+/* ---- mode switch: PI Design System Tabs (left), as a radio group:
    <div class="bab-seg" role="radiogroup"><button role="radio" aria-checked>. Selection is weight + a 4 px bar. ---- */
 .bab-seg { display: flex; gap: 8px; border-top: 1px solid var(--bab-line-hi); border-bottom: 1px solid var(--bab-line-hi); }
 .bab-seg button { position: relative; padding: 12px 24px; font: 400 16px/24px var(--bab-sans); color: var(--bab-ink); transition: color .2s var(--bab-ease); }
