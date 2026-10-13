@@ -1,5 +1,5 @@
 // Brand Asset Builder kit: small helpers that go with kit.css. No dependencies. See README.md.
-//   BAB.bar(el, {logo, tool, home, note, badge})     fill a <header class="bab-bar"> with the PI logo, "Brand Asset Builder", tool name
+//   BAB.bar(el, {logo, tool, home, note, badge})   fill a <header class="bab-bar"> with the PI logo, "Brand Asset Builder", tool name
 //   BAB.autosize(input)                 an inline .bab-input grows and shrinks with its text
 //   BAB.picker(button, pop, opts)       a .bab-pick button that opens a .bab-pop listbox of {value, label, icon}
 (function (root) {
