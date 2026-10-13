@@ -43,6 +43,7 @@ Builder and "video editor" style tools share one look: the Brand Asset Builder k
 - Never commit secrets or customer data.
 
 ## Zoom waiting room
-- `projects/zoom-waiting-room/builder.html` is the live builder and its own source (single file, kit inlined). Edit it here and push.
-- `projects/zoom-waiting-room/source/` is the master video animation (v14), with render steps in its README and the design history in NOTES.md.
-- Public repo: never commit rendered frames, old video cuts, internal links, or anyone's personal data.
+- Start with `projects/zoom-waiting-room/README.md`: what it is, the current state, Steve's rules, and which file does what.
+- Work goes through named agents in `.claude/agents/`: **wr-video** (the animation), **wr-ui** (the builder page and the shared kit), **wr-copy** (Obi replies and page text), **wr-qa** (checks only, never edits), and **wr-release** (scan, push, Pages, artifact sync, notes). Edit, then check, then ship.
+- The video exists twice: `source/waiting.html` (the master) and the canvas renderer inside `builder.html` (what users export). Change both together.
+- Public repo: never commit rendered frames, old video cuts, real partner logos, internal links, or anyone's personal data.
