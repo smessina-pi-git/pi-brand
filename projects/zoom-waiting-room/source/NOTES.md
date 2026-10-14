@@ -222,3 +222,11 @@ Build a tool (like the chat animator) where someone enters their own name, Refer
   - `studio/check-motion.js` passes on the builder in both modes and on the master: all counters 0; seam step 0.028 (builder) and 0.025 (master).
   - Builder vs master: mean difference 0.3–0.7/255, antialiasing only.
 - **Shipped** (2026-10-13, Steve approved): merged to main on top of the builder light redesign (only these notes conflicted), with the featured MP4 replaced by the v15 cut. The motion check passed again on the merged builder in both modes, and the claude.ai copy of the builder was republished from the same commit.
+
+## Builder, smooth pass (2026-10-14)
+
+- Feedback on the light builder: "still too busy", "extra horizontal lines on the left side", "clearly tabs like pills between PI Team and Partner", "make it smooth, delightful".
+- No horizontal rules in the steps column: space separates the three steps. The footer note ("About the replies") moved inside Obi's reply and steps aside while the reply is over the limit. "Live preview" sits in the frame bar instead of a header row, and Open Zoom settings is a link.
+- PI team / Partner is a pill switch (kit `.bab-seg`): an accent pill slides to the chosen option (CSS `:has()`), labels flip colour as it crosses the middle, and arrows, Home and End move it.
+- Motion is flat and only answers what the person did: partner fields open and close (grid rows 0fr↔1fr; a closed field takes no space), Obi's reply unfolds (`::details-content`), the remembered mode loads without animating. Download fills inside the button with a percentage and Cancel, then says "Saved" with a drawn check; step 2's badge ticks and step 3 is tinted as next until the video changes. A direct download gets one status line with "Download again" instead of a second video player. Under reduced motion nothing moves, but the checks and BRANDED still show.
+- Built through the wr-ui gauntlet: two rounds, the independent review passed in round 2. `studio/check-motion.js` passes in both modes; the renderer is unchanged. A headless export came out at 16.2 MB.
