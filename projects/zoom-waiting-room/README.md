@@ -20,8 +20,9 @@ Each piece has a named agent in `.claude/agents/`. Ask for the agent by name ("u
 
 Usual flow: **edit** (wr-video, wr-ui or wr-copy) → **check** (wr-qa) → **ship** (wr-release).
 
-## Current state (v14, 2026-10-13)
+## Current state (video v15, builder light + smooth pass, 2026-10-14)
 
+- **Video v15:** larger chat copy, a taller input box and Obi bubble, and a fuller frame (details in `source/NOTES.md`).
 - **Loop:** 21.2 s at 1920×1080, 30 fps. Every frame is a pure function of time, and the first frame equals the last.
 - **Sequence:**
   - glowing title "Behavioral intelligence / *for this meeting…*"
@@ -32,7 +33,12 @@ Usual flow: **edit** (wr-video, wr-ui or wr-copy) → **check** (wr-qa) → **sh
   - the end card dissolves back into the bloom the title rises from
 - **Timings** live in `T` (the same values in both files). The ambient periods are fractions of LOOP, so the seam always closes.
 - **Export:** in-browser H.264. It targets about 17 MB, never more than 19 MB, because Zoom is safest under 20 MB. A hardware export takes about 3.5 s.
-- **Builder:** steps on the left (1 Customize your video, 2 Download and install), the live video on the right. "PI team | Partner" switch. Partner mode gets a logo upload, an end-card message (90 characters), a locked Obi reply, a blue accent, and the flat "BRANDED" moment.
+- **Builder:** a light UI on PI's Design System (the `pi-design-system` skill), with the live video kept dark. Clear numbered steps on the left and the video on the right.
+  - PI team / Partner is a sliding pill switch.
+  - Fields reveal smoothly.
+  - Download fills with a percentage, then shows "Saved ✓", and the steps check off as you go.
+  - Partner mode gets a logo upload (the first field), an end-card message (90 characters), a locked Obi reply, and the flat "BRANDED" moment.
+- **Seeing an old version?** GitHub Pages lets browsers cache for 10 minutes, so hard-refresh (Cmd+Shift+R).
 
 ## Steve's rules (from his feedback; don't regress these)
 
@@ -40,7 +46,7 @@ Usual flow: **edit** (wr-video, wr-ui or wr-copy) → **check** (wr-qa) → **sh
 - One 60 px text size for the question and the reply (v15; 44 px before), in a 1600 px column. Typing is steady per character, never eased.
 - Near-black background with haze and drifting lights over a faint dot grid: never dead flat, never a gray wash.
 - Obi's reply is a friendly speech bubble that carries the input box's blue → purple edge and glow. Those Obi gradients belong to Obi's box and bubble only.
-- Builder UI: flat, calm, no decorative gradients (the step numbers are flat gray), no stacked cards. Delight is welcome but flat and not overdone.
+- Builder UI: light and minimal on PI's Design System; flat, calm, no decorative gradients (the step numbers are flat gray), no stacked cards. Delight is welcome but flat and not overdone.
 - Copy is gender-neutral (tokens `{name}`, `{profile}`). Obi's words come from Obi output or approved copy. Say "Obi" or "Obi by The Predictive Index".
 - Fonts must really load: Roboto, Roboto Serif and Roboto Mono, embedded or installed. A silent fallback is a bug.
 - **This repo is public.** Never commit real partner logos, old video cuts, rendered frames, internal links or anyone's personal data.
