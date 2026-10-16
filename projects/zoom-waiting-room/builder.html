@@ -1597,7 +1597,7 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
       }
       $('progText').textContent = 'Saving…';
       window.__lastExport = {name: name, size: blob.size, frames: total, codec: pick.codec, bitrate: bitrate, attempts: attempt + 1, encoder: pick.enc.hardwareAcceleration || 'default'};
-      if (await save(name, blob)) savedMoment();
+      if (await save(name, blob)) { savedMoment(); logDownload(); }
     } catch (e) {
       setStatus(e && e.cancel ? 'Export cancelled.' : 'The MP4 couldn’t be made (' + ((e && e.message) || 'encoder error') + '). Try again in Chrome or Edge.');
     } finally {
@@ -1618,6 +1618,22 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     savedSig = videoSig(); markSteps(true);
     var dl = $('dl'); clearTimeout(savedTimer); dl.classList.remove('is-saved'); void dl.offsetWidth; dl.classList.add('is-saved');
     savedTimer = setTimeout(function(){ dl.classList.remove('is-saved'); }, 2600);
+  }
+
+  // ---------- download count: one anonymous row per saved video in a Google Sheet (see README) ----------
+  // Sends mode, profile and a random id for this browser. Never the name, logo or message.
+  var LOG_URL = 'https://script.google.com/macros/s/AKfycbxUQQDmbLENF3xsdvDbyQtedyUsz7s5_TewbaE4LK1J0RRcJK63b3_E7Cy6wQGqlmT3/exec';   // the Apps Script web app URL; empty = off
+  function logDownload(){
+    if (!LOG_URL) return;
+    try {
+      var id = localStorage.getItem('wrbId');
+      if (!id) { id = Math.random().toString(36).slice(2, 12); localStorage.setItem('wrbId', id); }
+    } catch(e){ id = ''; }
+    var body = JSON.stringify({mode: state.mode, profile: state.profile, browser: id, host: location.hostname, v: 'v15'});
+    try {
+      if (!(navigator.sendBeacon && navigator.sendBeacon(LOG_URL, body)))
+        fetch(LOG_URL, {method: 'POST', mode: 'no-cors', body: body}).catch(function(){});
+    } catch(e){}
   }
 
   // ---------- start ----------

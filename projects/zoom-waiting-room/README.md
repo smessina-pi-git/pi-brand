@@ -51,6 +51,14 @@ Usual flow: **edit** (wr-video, wr-ui or wr-copy) → **check** (wr-qa) → **sh
 - Fonts must really load: Roboto, Roboto Serif and Roboto Mono, embedded or installed. A silent fallback is a bug.
 - **This repo is public.** Never commit real partner logos, old video cuts, rendered frames, internal links or anyone's personal data.
 
+## Download tracking
+
+Each saved video adds one row to a Google Sheet: time, mode (`partner` or `internal`), profile, a random id for the browser, host and version. The name, logo and message are never sent. **Partners using the tool = distinct `browser` values where `mode` is `partner`.** One partner on two browsers counts twice.
+
+Live since 2026-10-16: the Google Sheet "Waiting room downloads" in Steve's Drive. `Sheet1` holds the counts (partners all-time and last 30 days, partner and PI team downloads); `Downloads` holds the rows. It's written by the Apps Script project "Waiting room download log" (source: `tracking/Code.gs`), deployed as a web app (runs as Steve, access: Anyone). Its `/exec` URL is `LOG_URL` in `builder.html`; empty means tracking is off.
+
+To change the script: edit it in Apps Script, then Deploy → Manage deployments → edit → New version. That keeps the same URL. The URL is public in this repo, so anyone could add junk rows; the script drops rows without a valid mode.
+
 ## Checks
 
 - **Motion check** (on Steve's Mac, from the `Tools & Automation` folder above this repo): `node studio/check-motion.js pi-brand/projects/zoom-waiting-room/builder.html`. It must exit 0; then look at the contact sheet. For partner mode, pass `--eval` to click the Partner switch and inject a placeholder logo (see `source/NOTES.md`). In a cloud session the studio isn't available: use Playwright screenshots and compare the first and last frames instead.
