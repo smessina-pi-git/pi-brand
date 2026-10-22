@@ -190,7 +190,7 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
 .bab-frame-bar i { width: 8px; height: 8px; border-radius: 50%; background: var(--bab-line-hi); margin-right: 6px; }
 .bab-frame-bar span { position: absolute; left: 0; right: 0; text-align: center; pointer-events: none; }
 .bab-frame-body { padding: 12px; display: grid; gap: 12px; }
-.bab-frame canvas, .bab-frame video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; background: #000; border-radius: 4px; }
+.bab-frame canvas, .bab-frame video { display: block; width: 100%; height: auto; aspect-ratio: var(--bab-aspect, 16 / 9); background: #000; border-radius: 4px; }
 .bab-transport { display: flex; align-items: center; gap: 12px; padding: 12px 0 0; }
 .bab-play { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--bab-edge); background: var(--bab-bg); display: grid; place-items: center; flex: none; color: var(--bab-ink);
   transition: border-color .15s, background-color .15s; }

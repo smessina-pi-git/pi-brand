@@ -8,7 +8,7 @@ const { chromium } = require('playwright-core'); const fs = require('fs'); const
   const [,, file, out, mode] = process.argv;
   const opts = process.env.CHROME_PATH ? {executablePath: process.env.CHROME_PATH} : (process.platform === 'darwin' ? {channel: 'chrome'} : {});
   const b = await chromium.launch(opts);
-  const p = await b.newPage({viewport: {width: 1920, height: 1080}});
+  const p = await b.newPage({viewport: {width: 2160, height: 1080}});
   p.on('pageerror', e => console.log('ERR', e.message));
   await p.goto('file://' + path.resolve(file)); await p.evaluate(() => document.fonts.ready); await p.waitForTimeout(500);
   const LOOP = await p.evaluate(() => LOOP);

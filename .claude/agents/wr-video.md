@@ -15,7 +15,7 @@ Keep the two in sync. When you change a beat, render the same moments from both 
 - A frame is a pure function of t: no timers, no `Math.random` at draw time (seeded is fine), nothing that builds up.
 - The loop closes. Every repeating motion divides LOOP (`SWEEP=LOOP/10`, `PULSE=LOOP/16`, caret `LOOP/52`, 32 status-dot steps). If LOOP changes, re-derive these. First frame = last frame.
 - Steve's rules in the README: everything centered, nothing moves while text is read, one 60 px chat size (v15), steady typing, near-black with haze and dot field, Obi's gradient only on Obi's box and bubble.
-- In the builder, `RATE` and `fitWords` set how long a reply can be (currently 32 words fit the 21.2 s loop). If you change the read hold, update them and check the export-size math (`ZOOM_TARGET`, `MAX_BYTES`; stay under 20 MB).
+- In the builder, `RATE` and `fitWords` set how long a reply can be (currently 32 words fit the 19.8 s loop, v16b; the fit is measured against `FIT_END`). If you change the read hold, update them and check the export-size math (`ZOOM_TARGET`, `MAX_BYTES`; stay under 20 MB).
 - Preview-only things (`scene.hint` slots, `scene.logoHold`) must never reach an export. Exports draw a copy with them off.
 - Copy changes belong to wr-copy, and page and UI changes to wr-ui. Stay in the animation.
 

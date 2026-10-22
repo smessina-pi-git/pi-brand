@@ -197,7 +197,7 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
 .bab-frame-bar i { width: 8px; height: 8px; border-radius: 50%; background: var(--bab-line-hi); margin-right: 6px; }
 .bab-frame-bar span { position: absolute; left: 0; right: 0; text-align: center; pointer-events: none; }
 .bab-frame-body { padding: 12px; display: grid; gap: 12px; }
-.bab-frame canvas, .bab-frame video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; background: #000; border-radius: 4px; }
+.bab-frame canvas, .bab-frame video { display: block; width: 100%; height: auto; aspect-ratio: var(--bab-aspect, 16 / 9); background: #000; border-radius: 4px; }
 .bab-transport { display: flex; align-items: center; gap: 12px; padding: 12px 0 0; }
 .bab-play { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--bab-edge); background: var(--bab-bg); display: grid; place-items: center; flex: none; color: var(--bab-ink);
   transition: border-color .15s, background-color .15s; }
@@ -238,7 +238,20 @@ body.bab { margin: 0; background: var(--bab-bg); color: var(--bab-ink); font: 40
 .wr-main { display: grid; grid-template-columns: 420px minmax(0, 1fr); gap: 32px 64px; margin-top: clamp(24px, 3.6vh, 40px); align-items: start; }
 .wr-side { grid-column: 1; grid-row: 1; display: grid; gap: 40px; min-width: 0; }
 .wr-preview { grid-column: 2; grid-row: 1; position: sticky; top: 80px; min-width: 0; }
-.wr-who { margin-bottom: -8px; }
+.wr-who { margin-bottom: 0; }   /* the bigger pills get the full step gap below them */
+/* "I’m a PIoneer" / "I’m a Partner": two separate pills (Design System Button lg: 48 px, 18/27 SemiBold, 24 px sides).
+   Chosen = filled accent pill, white label. Not chosen = white pill, neutral-400 edge, secondary label; hover
+   tints it like a Secondary button. Same radio semantics and arrow keys as the kit's .bab-seg; no sliding track. */
+.bab-seg.wr-pills { gap: 8px; padding: 0; background: none; }
+.bab-seg.wr-pills::before { content: none; }
+.bab-seg.wr-pills button { min-height: 48px; padding: 9px 24px; border: 1px solid var(--bab-edge); background: #fff;
+  font: 600 18px/27px var(--bab-sans); color: var(--bab-ink-soft); white-space: nowrap;
+  transition: background-color .2s var(--bab-ease), border-color .2s var(--bab-ease), color .2s var(--bab-ease); }
+.bab-seg.wr-pills button:hover { border-color: var(--bab-accent); background: var(--bab-accent-soft); color: var(--bab-accent); }
+.bab-seg.wr-pills button[aria-checked="true"] { border-color: var(--bab-accent); background: var(--bab-accent); color: #fff; }
+.bab-seg.wr-pills button[aria-checked="true"]:hover { border-color: var(--bab-accent-hi); background: var(--bab-accent-hi); }
+.bab-seg.wr-pills button:active { border-color: var(--bab-accent-lo); background: var(--bab-accent-lo); color: #fff; }
+@media (max-width: 400px) { .bab-seg.wr-pills button { padding: 9px 12px; font-size: 16px; } }
 .wr-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 /* no motion while the page sets itself up (the remembered mode is applied without animating in) */
 body.wr-preload, body.wr-preload *, body.wr-preload *::before, body.wr-preload *::after { transition: none !important; }
@@ -394,9 +407,9 @@ body.bab:not([data-mode="partner"]) .wr-p { grid-template-rows: 0fr; opacity: 0;
   <main class="wr-main">
     <div class="wr-side">
       <div class="wr-who">
-        <div class="bab-seg" role="radiogroup" aria-label="Who is this video for?">
-          <button type="button" role="radio" data-mode="internal" aria-checked="true">PI team</button>
-          <button type="button" role="radio" data-mode="partner" aria-checked="false">Partner</button>
+        <div class="bab-seg wr-pills" role="radiogroup" aria-label="Who is this video for?">
+          <button type="button" role="radio" data-mode="internal" aria-checked="true">I’m a PIoneer</button>
+          <button type="button" role="radio" data-mode="partner" aria-checked="false">I’m a Partner</button>
         </div>
       </div>
 
@@ -484,7 +497,7 @@ body.bab:not([data-mode="partner"]) .wr-p { grid-template-rows: 0fr; opacity: 0;
               <p class="wr-title">Please wait, the meeting host will let you in soon.</p>
               <p class="wr-topic" id="wrTopic">Steve’s meeting</p>
             </div>
-            <canvas id="view" width="1920" height="1080" aria-label="Preview of the waiting room video"></canvas>
+            <canvas id="view" width="2160" height="1080" style="--bab-aspect: 2 / 1" aria-label="Preview of the waiting room video"></canvas>
           </div>
         </div>
         <div class="wr-celebrate" id="celebrate" aria-hidden="true"><span class="wr-flash"></span>
@@ -647,14 +660,16 @@ var PROFILES = [
 ];
 if (typeof module !== 'undefined') module.exports = PROFILES;
 </script>
-<script>// Waiting room v13, drawn on a 1920×1080 canvas. A port of v13-source/waiting.html: same tokens, same T
+<script>// Waiting room v16, drawn on a 2160×1080 (2:1) canvas. A port of v13-source/waiting.html: same tokens, same T
 // timings and easing; the title intro over the bloom, the ellipsis that becomes the caret, the box that draws
 // itself open, the haze, the drifting-light dot field and Obi's speech bubble. Every frame is a pure function of t, so the live preview and the
 // MP4 export draw identical frames. Usage:
 //   var scene = WaitingRoom.layout(ctx, {name, profile, reply}, images);   // reply may hold {name}
 //   WaitingRoom.draw(ctx, scene, t);
 (function (root) {
-  var W = 1920, H = 1080;
+  // v16: a 2:1 frame (was 1920 × 1080) so Zoom's waiting room fills edge to edge. The height and every type
+  // size hold; full-frame pieces (background, header) span the new width and everything else centres on CX.
+  var W = 2160, H = 1080, CX = W / 2;
   var C = {surface: '#000000', soft: '#0E0E10', bubble: '#161618', ink: '#FFFFFF', muted: '#9A9AA0',
            rule: '#26262A', red: '#EF3340', blue: '#33A8D3', purple: '#5000A8'};
   var QUESTION = "I'm about to meet with {name}. Help me prepare for the meeting before I leave this waiting room.";
@@ -662,7 +677,7 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
   var ASC = 0.927734375, DESC = 0.244140625, MONO_ASC = 1.047852, MONO_LH = 1.318848;
   var SANS = 'Roboto, "Helvetica Neue", Arial, sans-serif', MONO = '"Roboto Mono", Menlo, monospace';
   var SEND = new (root.Path2D || function () {})('M2.5 11.2L21 3.3a.6.6 0 01.8.8L13.9 22.6a.6.6 0 01-1.1-.1l-2.6-7.3-7.6-2.9a.6.6 0 01-.1-1.1zm9.3 3.3l1.8 5.1 5.3-13.5-7.1 8.4zm-1-1l7.1-8.4-13.3 5.7 6.2 2.7z');
-  var STAGE_X = 160, STAGE_W = 1600;            // v15: a 1600 px column, centred on the frame (was 1280)
+  var STAGE_W = 1600, STAGE_X = (W - STAGE_W) / 2;   // v15: a 1600 px column, centred on the frame (x 280 at 2:1)
   // v15: one type size for the chat, 60 px on a 1.4 line (was 44), set inside the box and Obi's bubble at
   // PADX; the question sits PADT below the box top. Labels ("You", "Obi by …") are 30 px with a 48 px avatar
   // in both modes. LBL_H is a label's line box (line-height normal). A very long custom reply steps the one
@@ -800,15 +815,21 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     }
     ctx.restore();
     // timing: v14's T (about 21 s). The read hold allows about 5 words a second from the first word, so up to
-    // s.fitWords (32) words fit the 21.2 s loop; the Persuader line is 30. A longer reply grows the
+    // s.fitWords (32) words fit the 19.8 s loop (v16b); the Persuader line is 30. A longer reply grows the
     // hold in 0.8 s steps (24 frames). Every ambient period (sweep, pulse, status dots, lights, haze breath,
     // caret blink) is a fraction of LOOP, so a longer loop still closes on the seam.
     var T = {ttl0: .2, ttlStag1: .035, ttl2: .75, ttlStag2: .04, dot0: 1.9, dotGap: .14, sweep0: 2.1, sweep1: 3.0, bounce0: 2.4,
              tOut0: 3.2, fly0: 3.3, fly1: 4.0, wipe0: 4.12, wipe1: 4.9, caretIn: 4.2,
-             typeStart: 5.0, typeEnd: 9.2, press: 9.45, morph0: 9.65, morph1: 10.2, obi: 10.35, scroll0: 10.95, scroll1: 11.7, grow0: 11.1, grow1: 11.7,
-             words0: 11.75, wordGap: .075, out0: 17.9, out1: 18.4, mk0: 18.35, mk1: 19.1, end0: 20.1, end1: 20.9};
-    var RATE = 5, LOOP = 21.2, need = T.words0 + words.length / RATE - (T.out0 + .3);
-    s.fitWords = Math.floor((T.out0 + .3 - T.words0) * RATE);
+             typeStart: 5.0, typeEnd: 8.3, press: 8.55, morph0: 8.75, morph1: 9.3, obi: 9.45, scroll0: 10.05, scroll1: 10.8, grow0: 10.2, grow1: 10.8,
+             words0: 10.85, wordGap: .0589, out0: 16.5, out1: 17.0, mk0: 16.95, mk1: 17.7, end0: 18.7, end1: 19.5};
+    // v16: the question types 27% faster (3.3 s, was 4.2); every beat after typeEnd keeps its length and moves
+    // 0.9 s earlier. v16b: Obi's words also come in 27% faster (0.0589 s a word, was 0.075), which brings a
+    // 32-word reply in 0.5 s sooner (31 gaps × 0.0161); out0 and every later beat move 0.5 s earlier, so the
+    // hold after the last word is unchanged. The loop is 19.8 s (594 frames).
+    // Fit: FIT_END is v16's reading window end (out0 + .3, plus the 0.5 s the quicker reveal saves), so the
+    // same replies fit as before: fitWords stays 32, and a longer reply extends the loop exactly as in v16.
+    var RATE = 5, LOOP = 19.8, FIT_END = T.out0 + .8, need = T.words0 + words.length / RATE - FIT_END;
+    s.fitWords = Math.floor((FIT_END - T.words0) * RATE);
     if (need > 0) {
       var ext = Math.ceil(need / .8 - 1e-9) * .8;
       LOOP = Math.round((LOOP + ext) * 30) / 30;
@@ -823,7 +844,7 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     return s;
   }
 
-  // Scale: draw() renders at the target canvas's own resolution (k = canvas width / 1920). Exports draw at
+  // Scale: draw() renders at the target canvas's own resolution (k = canvas width / W). Exports draw at
   // k = 1; the live preview draws at the size it is shown, which is several times cheaper. Work layers are
   // kept per resolution.
   function makeLayer(k) {
@@ -843,7 +864,7 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
   function getGlow() {
     if (glowC) return glowC;
     glowC = makeLayer(1);
-    var RX = 820, RY = 520, cx = 960, cy = 540, g = glowC.getContext('2d'), im = g.createImageData(W, H), D = im.data;
+    var RX = 922, RY = 520, cx = CX, cy = 540, g = glowC.getContext('2d'), im = g.createImageData(W, H), D = im.data;
     var P = [80, 0, 168], B = [51, 168, 211], K = .40, seed = 0x9e3779b9;
     function rnd() { seed = (seed + 0x6D2B79F5) | 0; var z = Math.imul(seed ^ (seed >>> 15), 1 | seed); z = (z + Math.imul(z ^ (z >>> 7), 61 | z)) ^ z; return ((z ^ (z >>> 14)) >>> 0) / 4294967296; }
     for (var y = 0; y < H; y++) for (var x = 0; x < W; x++) {
@@ -859,9 +880,10 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
 
   // Ambient field (v8): three soft lights drift on closed orbits (one or two turns per loop). They tint the
   // black very faintly and light up a fine 36 px dot grid as they pass, so the background is never dead flat.
-  var LIGHTS = [{c: '80,0,168', a: .85, r: 860, ax: 560, ay: 250, k: 1, ph: 0},
-                {c: '51,168,211', a: .55, r: 720, ax: 620, ay: 300, k: 1, ph: Math.PI},
-                {c: '190,170,255', a: .35, r: 520, ax: 420, ay: 220, k: 2, ph: 1.9}];
+  // v16: orbits (and the haze's RX above) widened with the frame (× 1.125) so the 2:1 edges still get light
+  var LIGHTS = [{c: '80,0,168', a: .85, r: 860, ax: 630, ay: 250, k: 1, ph: 0},
+                {c: '51,168,211', a: .55, r: 720, ax: 698, ay: 300, k: 1, ph: Math.PI},
+                {c: '190,170,255', a: .35, r: 520, ax: 473, ay: 220, k: 2, ph: 1.9}];
   function getAmb(R) {
     if (R.amb) return R.amb;
     var A = R.amb = {light: makeLayer(R.k), lit: makeLayer(R.k), dots: makeLayer(R.k)};
@@ -874,7 +896,7 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     var A = getAmb(R), lc = A.light.getContext('2d'), tc = A.lit.getContext('2d'), w = t / LOOP * Math.PI * 2;
     lc.globalCompositeOperation = 'source-over'; lc.clearRect(0, 0, W, H); lc.globalCompositeOperation = 'lighter';
     LIGHTS.forEach(function (L) {
-      var x = 960 + L.ax * Math.cos(w * L.k + L.ph), y = 540 + L.ay * Math.sin(w * L.k + L.ph), g = lc.createRadialGradient(x, y, 0, x, y, L.r);
+      var x = CX + L.ax * Math.cos(w * L.k + L.ph), y = 540 + L.ay * Math.sin(w * L.k + L.ph), g = lc.createRadialGradient(x, y, 0, x, y, L.r);
       for (var i = 0; i <= 8; i++) { var d = i / 8, f = Math.pow(1 - d * d * (3 - 2 * d), 1.6); g.addColorStop(d, 'rgba(' + L.c + ',' + (L.a * f).toFixed(4) + ')'); }
       lc.fillStyle = g; lc.fillRect(0, 0, W, H);
     });
@@ -922,7 +944,7 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     });
     // the two lines are centred as a column on the frame (each line box is 124 × 1.12)
     lines.forEach(function (ln, li) {
-      ln.left = 960 - ln.boxW / 2; ln.top = 540 - TLH + li * TLH;
+      ln.left = CX - ln.boxW / 2; ln.top = 540 - TLH + li * TLH;
       ln.base = ln.top + Math.floor((TLH - ln.asc - ln.desc) / 2) + ln.asc;
     });
     ctx.restore();
@@ -1026,7 +1048,7 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
   function getBloom(R) {
     if (R.bloom) return R.bloom;
     var c = makeLayer(R.k), g = c.getContext('2d');
-    g.setTransform(R.k * 850, 0, 0, R.k * 450, R.k * 960, R.k * 540);
+    g.setTransform(R.k * 850, 0, 0, R.k * 450, R.k * CX, R.k * 540);
     var gr = g.createRadialGradient(0, 0, 0, 0, 0, 1);
     for (var i = 0; i <= 16; i++) {
       var d = i / 16, f = Math.pow(1 - d * d * (3 - 2 * d), 2.2);
@@ -1034,6 +1056,26 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     }
     g.fillStyle = gr; g.fillRect(-1, -1, 2, 2);
     return (R.bloom = c);
+  }
+  // v16 text glow: a very faint, static lilac light (the palette's third ambient light, 190,170,255) behind
+  // the chat column so the frame reads less dark. Ellipse 1150 × 560 at the frame centre, peak alpha .075,
+  // (1 - smoothstep)^1.6 falloff, seeded ±1 LSB alpha dither against banding. Static, so it is loop-safe;
+  // same pixels as #tglow in the master.
+  var tglowC = null;
+  function getTextGlow() {
+    if (tglowC) return tglowC;
+    tglowC = makeLayer(1);
+    var RX = 1150, RY = 560, cy = 540, A = .075, COL = [190, 170, 255], seed = 0x2545f491;
+    var g = tglowC.getContext('2d'), im = g.createImageData(W, H), D = im.data;
+    function rnd() { seed = (seed + 0x6D2B79F5) | 0; var z = Math.imul(seed ^ (seed >>> 15), 1 | seed); z = (z + Math.imul(z ^ (z >>> 7), 61 | z)) ^ z; return ((z ^ (z >>> 14)) >>> 0) / 4294967296; }
+    for (var y = 0; y < H; y++) for (var x = 0; x < W; x++) {
+      var i = (y * W + x) * 4, dx = (x + .5 - CX) / RX, dy = (y + .5 - cy) / RY, d = Math.sqrt(dx * dx + dy * dy);
+      if (d >= 1) continue;
+      var f = Math.pow(1 - d * d * (3 - 2 * d), 1.6) * A * 255 + (rnd() + rnd() - 1);
+      D[i] = COL[0]; D[i + 1] = COL[1]; D[i + 2] = COL[2]; D[i + 3] = Math.max(0, Math.min(255, Math.round(f)));
+    }
+    g.putImageData(im, 0, 0);
+    return tglowC;
   }
 
   function eob(x) { x = cl(x); var c1 = 1.3, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); }
@@ -1076,6 +1118,7 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     // bloom: .3 at the seam, full under the title, gone for the chat, back for the end card
     var bl = cl(.3 + .7 * eio(seg(t, .1, 2.4)) - 1 * eio(seg(t, T.tOut0, T.wipe1)) + .55 * eio(seg(t, T.mk0, T.mk1)) - .25 * eio(seg(t, T.end0, T.end1)));
     if (bl > .001) { ctx.globalAlpha = bl; ctx.drawImage(getBloom(R), 0, 0, W, H); ctx.globalAlpha = 1; }
+    ctx.drawImage(getTextGlow(), 0, 0, W, H);   // v16: the faint static glow behind the text
 
     // ---- header: rule with a red sweep (10 per loop), status dot pulse (16 per loop), 32 dot steps per loop
     var SWEEP = LOOP / 10, PULSE = LOOP / 16;
@@ -1084,12 +1127,12 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     if (s.pLogo && !s.logoHold) { var hb = fitBox(s.pLogo, 340, 74); ctx.globalAlpha = hl; drawLogo(ctx, s.pLogo, 64, 83 - hb.h / 2, hb.w, hb.h, s.pBack); }
     else if (s.partner && s.hint) { ctx.globalAlpha = hl; slot(ctx, 64, 50, 260, 66, 'Your logo'); }
     else if (img.logo) { ctx.globalAlpha = hl; ctx.drawImage(img.logo, 64, 56, 54 * img.logo.width / img.logo.height, 54); }
-    ctx.globalAlpha = 1; ctx.fillStyle = C.rule; ctx.fillRect(64, 136, 1792, 1);
-    var sw = (t % SWEEP) / SWEEP, fx = 64 + (-260 + (1792 + 260) * eio(sw));
+    ctx.globalAlpha = 1; ctx.fillStyle = C.rule; ctx.fillRect(64, 136, W - 128, 1);
+    var sw = (t % SWEEP) / SWEEP, fx = 64 + (-260 + (W - 128 + 260) * eio(sw));
     var g = ctx.createLinearGradient(fx, 0, fx + 260, 0);
     g.addColorStop(0, 'rgba(239,51,64,0)'); g.addColorStop(.5, C.red); g.addColorStop(1, 'rgba(239,51,64,0)');
     ctx.globalAlpha = Math.sin(sw * Math.PI) * 0.9 + 0.1; ctx.fillStyle = g; ctx.fillRect(fx, 135, 260, 3);
-    var stW = 10 + 16 + s.statusW + 3 * 1.2 * s.ch, sx = 1856 - stW, rowH = 20 * MONO_LH, cy = 70 + rowH / 2;
+    var stW = 10 + 16 + s.statusW + 3 * 1.2 * s.ch, sx = W - 64 - stW, rowH = 20 * MONO_LH, cy = 70 + rowH / 2;
     ctx.globalAlpha = 1; ctx.fillStyle = C.red; ctx.beginPath(); ctx.arc(sx + 5, cy, 5, 0, Math.PI * 2); ctx.fill();
     var pu = (t % PULSE) / PULSE, ps = 1 + pu * 2.2;
     ctx.globalAlpha = (1 - pu) * .8; ctx.strokeStyle = C.red; ctx.lineWidth = 1.5 * ps;
@@ -1224,23 +1267,23 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
       var msc = (.94 + .06 * mi) * (1 - .08 * me), mb = 12 * me;
       // drawn on a layer so the blur and fade apply to the card as one, like the CSS filter on #mark
       var M = work(R);
-      M.translate(960, 540); M.scale(msc, msc); M.translate(-960, -540);
+      M.translate(CX, 540); M.scale(msc, msc); M.translate(-CX, -540);
       if (s.partner) {
         // partner card: their message, then their logo, centred as a block (message alone if no logo)
         var lb = s.pLogo ? fitBox(s.pLogo, 680, 220) : (s.hint ? {w: 460, h: 150, slot: true} : null), mH = s.pLines.length * PMSG_LH, gap = lb ? 56 : 0;
         var ptop = 540 - (mH + gap + (lb ? lb.h : 0)) / 2;
         M.fillStyle = C.ink; M.font = font(500, PMSG); M.letterSpacing = '-0.5px';
-        s.pLines.forEach(function (ln, li) { say(M, ln.text, 960 - ln.w / 2, base(ptop + li * PMSG_LH, PMSG, PMSG_LH)); });
+        s.pLines.forEach(function (ln, li) { say(M, ln.text, CX - ln.w / 2, base(ptop + li * PMSG_LH, PMSG, PMSG_LH)); });
         M.letterSpacing = '0px';
-        if (lb && lb.slot) slot(M, 960 - lb.w / 2, ptop + mH + gap, lb.w, lb.h, 'Your logo here');
-        else if (lb && !s.logoHold) drawLogo(M, s.pLogo, 960 - lb.w / 2, ptop + mH + gap, lb.w, lb.h, s.pBack);
+        if (lb && lb.slot) slot(M, CX - lb.w / 2, ptop + mH + gap, lb.w, lb.h, 'Your logo here');
+        else if (lb && !s.logoHold) drawLogo(M, s.pLogo, CX - lb.w / 2, ptop + mH + gap, lb.w, lb.h, s.pBack);
       } else {
         // v15: scaled up with the chat, 68 px over a 760 px logo (was 60 over 660)
         var mw = 760, mh = 760 * img.mark.height / img.mark.width, top = 540 - (68 + 34 + mh) / 2;
         M.fillStyle = C.ink; M.font = font(500, 68); M.letterSpacing = '-0.68px';
-        say(M, 'Obi by', 960 - s.obiByW / 2, base(top, 68, 68));
+        say(M, 'Obi by', CX - s.obiByW / 2, base(top, 68, 68));
         M.letterSpacing = '0px';
-        M.drawImage(img.mark, 960 - mw / 2, top + 102, mw, mh);
+        M.drawImage(img.mark, CX - mw / 2, top + 102, mw, mh);
       }
       ctx.save(); ctx.globalAlpha = ma; if (mb > .05) ctx.filter = 'blur(' + (mb * R.k).toFixed(2) + 'px)';
       ctx.drawImage(R.layer, 0, 0, W, H); ctx.restore();
@@ -1361,10 +1404,10 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
   // never waits on a render, and several changes in one frame cost one draw.
   var dirty = false;
   function loop(){ if (!busy && (playing || dirty)) { dirty = false; frame(); } requestAnimationFrame(loop); }
-  // the preview draws at the size it is shown (the export always draws full 1920 × 1080 frames)
+  // the preview draws at the size it is shown (the export always draws full WR.W × WR.H frames, 2160 × 1080)
   function sizeView(){
-    var w = Math.max(640, Math.min(1920, Math.round(view.clientWidth * (window.devicePixelRatio || 1))));
-    if (view.width !== w) { view.width = w; view.height = Math.round(w * 9 / 16); dirty = true; }
+    var w = Math.max(640, Math.min(WR.W, Math.round(view.clientWidth * (window.devicePixelRatio || 1))));
+    if (view.width !== w) { view.width = w; view.height = Math.round(w * WR.H / WR.W); dirty = true; }
   }
   if (window.ResizeObserver) new ResizeObserver(sizeView).observe(view); else window.addEventListener('resize', sizeView);
   function setPlaying(on){
@@ -1461,8 +1504,8 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     if (reduced || !from || !im) { ring(); return; }
     scene.logoHold = true; dirty = true;
     // where the logo lands: the end-card logo box (680×220 under the message), in preview pixels
-    var k = v.width / 1920, fit = Math.min(680 / im.width, 220 / im.height), lw = im.width * fit * k, lh = im.height * fit * k;
-    var mH = (scene.pLines ? scene.pLines.length : 2) * 70, ih = im.height * fit, ptop = 540 - (mH + 56 + ih) / 2;
+    var k = v.width / WR.W, fit = Math.min(680 / im.width, 220 / im.height), lw = im.width * fit * k, lh = im.height * fit * k;
+    var mH = (scene.pLines ? scene.pLines.length : 2) * 80, ih = im.height * fit, ptop = 540 - (mH + 56 + ih) / 2;
     var ty = v.top + (ptop + mH + 56 + ih / 2) * k;
     var fly = document.createElement('img'); fly.src = im.src; fly.className = 'wr-flylogo';
     var sw = Math.min(from.width * .6, 160), sh = sw * im.height / im.width;
@@ -1507,7 +1550,7 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
       var again = document.createElement('a'); again.className = 'bab-link'; again.href = readyUrl; again.download = name; again.textContent = 'Download again';
       $('status').appendChild(document.createTextNode(' · ')); $('status').appendChild(again); return;
     }
-    var v = document.createElement('video'); v.src = readyUrl; v.controls = true; v.muted = true; v.loop = true; v.playsInline = true;
+    var v = document.createElement('video'); v.src = readyUrl; v.controls = true; v.muted = true; v.loop = true; v.playsInline = true; v.style.setProperty('--bab-aspect', '2 / 1');
     var row = document.createElement('div'); row.className = 'bab-row';
     var nm = document.createElement('span'); nm.textContent = name + ' · ' + mb(blob.size);
     row.appendChild(nm);
@@ -1539,7 +1582,7 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
   // encoder (OpenH264, used when there is no hardware one) flattens the grid on every keyframe whatever the
   // bitrate, so it gets a single keyframe at the start rather than a blink every 2 s.
   // Zoom's waiting room upload is safest under 20 MB. The bitrate is capped to fit about 17 MB over the loop
-  // (about 6.4 Mbps at 21.2 s); one keyframe per loop on the hardware encoder leaves that budget for the dot grid.
+  // (about 6.9 Mbps at 19.8 s); one keyframe per loop on the hardware encoder leaves that budget for the dot grid.
   // If a file still lands over MAX_BYTES it is re-encoded at a lower bitrate.
   var ZOOM_TARGET = 17e6, MAX_BYTES = 19e6;
   var ENCODERS = [{hardwareAcceleration: 'prefer-hardware', bitrate: 8e6, gop: FPS * 30},
@@ -1547,7 +1590,8 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
   function capBitrate(e, loop, scale){ return Math.round(Math.min(e.bitrate, ZOOM_TARGET * 8 / loop) * (scale || 1)); }
   function encConfig(codec, e, bitrate){ return {codec: codec, width: WR.W, height: WR.H, framerate: FPS, bitrate: bitrate || e.bitrate, avc: {format: 'avc'}, hardwareAcceleration: e.hardwareAcceleration || 'no-preference'}; }
   async function pickCodec(){
-    var opts = [['avc1.640028','avc'],['avc1.4d0028','avc'],['avc1.42002a','avc']];
+    // v16: 2160 × 1080 is 9180 macroblocks, over level 4.x's 8192/8704 limit, so level 5.0 (…32) comes first
+    var opts = [['avc1.640032','avc'],['avc1.4d0032','avc'],['avc1.420032','avc'],['avc1.640028','avc'],['avc1.4d0028','avc'],['avc1.42002a','avc']];
     for (var k=0;k<ENCODERS.length;k++) for (var i=0;i<opts.length;i++){
       try { var s = await VideoEncoder.isConfigSupported(encConfig(opts[i][0], ENCODERS[k])); if (s.supported) return {codec:opts[i][0], mux:opts[i][1], enc:ENCODERS[k]}; } catch(e){}
     }
