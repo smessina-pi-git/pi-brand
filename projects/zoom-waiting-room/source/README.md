@@ -1,10 +1,10 @@
 # Zoom waiting room video: source
 
-The master animation for the Zoom waiting room video (v14, a 21.2 s loop). The builder (`../builder.html`) is a canvas port of this page and is what people use to make their own video. Use this folder to change the animation itself and render reference MP4s. `NOTES.md` has the design history and every timing decision.
+The master animation for the Zoom waiting room video (v16b, a 19.8 s loop at 2160×1080). The builder (`../builder.html`) is a canvas port of this page and is what people use to make their own video. Use this folder to change the animation itself and render reference MP4s. `NOTES.md` has the design history and every timing decision.
 
 | File | What it is |
 |---|---|
-| `waiting.html` | The whole animation as one 1920×1080 page. `seek(t)` sets every element as a pure function of time, so frames are deterministic. Timings live in the `T` object; copy lives in `QUESTION` and `REPLY` (tokens `{name}` and `{profile}`). |
+| `waiting.html` | The whole animation as one 2160×1080 (2:1) page. `seek(t)` sets every element as a pure function of time, so frames are deterministic. Timings live in the `T` object; copy lives in `QUESTION` and `REPLY` (tokens `{name}` and `{profile}`). |
 | `build.py` | Fills the name and profile and inlines the logos from the repo's `assets/` folder, writing `waiting_built.html`. |
 | `cap.js` | Renders frames with Playwright. `preview` mode renders a few key frames to check first. |
 
@@ -20,6 +20,6 @@ node cap.js waiting_built.html frames
 ffmpeg -framerate 30 -i frames/f%04d.png -c:v libx264 -pix_fmt yuv420p -crf 16 -tune grain -movflags +faststart out.mp4
 ```
 
-On Linux, copy the fonts into `~/.fonts` and run `fc-cache -f`. On a Mac, Chrome is used automatically; elsewhere set `CHROME_PATH` or let Playwright use its own Chromium. Check that the first and last frames match (the loop is seamless), and keep the file under Zoom's 30 MB limit; about 5 MB is typical.
+On Linux, copy the fonts into `~/.fonts` and run `fc-cache -f`. On a Mac, Chrome is used automatically; elsewhere set `CHROME_PATH` or let Playwright use its own Chromium. Check that the first and last frames match (the loop is seamless), and keep the file under Zoom's 30 MB limit; about 5 MB is typical. The featured `../Obi waiting room - Steve.mp4` is a builder export (Steve, Persuader), currently v16b.
 
 Don't commit rendered frames, `waiting_built.html`, or old cuts of the video. This repo is public.
