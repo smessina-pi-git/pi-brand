@@ -20,10 +20,10 @@ Each piece has a named agent in `.claude/agents/`. Ask for the agent by name ("u
 
 Usual flow: **edit** (wr-video, wr-ui or wr-copy) → **check** (wr-qa) → **ship** (wr-release).
 
-## Current state (video v16, builder light + smooth pass, 2026-10-22)
+## Current state (video v16c, builder light + smooth pass, 2026-10-22)
 
-- **Video v16:** a 2:1 frame (2160×1080) so it fills Zoom's waiting room with no empty sides, a very faint static glow behind the text, and quicker typing and reply (details in `source/NOTES.md`). v15 brought the larger chat copy, taller input box and Obi bubble.
-- **Loop:** 19.8 s at 2160×1080, 30 fps. Every frame is a pure function of time, and the first frame equals the last.
+- **Video v16c:** a 2320×1080 frame (2.148:1, the shape of Zoom's waiting-room video area) so it fills Zoom with no grey sides, a header moved down below Zoom's title bar and made a touch bigger, a very faint static glow behind the text, and quicker typing and reply (details in `source/NOTES.md`). v15 brought the larger chat copy, taller input box and Obi bubble.
+- **Loop:** 19.8 s at 2320×1080, 30 fps. Every frame is a pure function of time, and the first frame equals the last.
 - **Sequence:**
   - glowing title "Behavioral intelligence / *for this meeting…*"
   - the ellipsis dots fly into the input box and become the caret
@@ -32,7 +32,7 @@ Usual flow: **edit** (wr-video, wr-ui or wr-copy) → **check** (wr-qa) → **sh
   - end card: "Obi by [PI logo]", or in partner mode, the partner's message over their logo
   - the end card dissolves back into the bloom the title rises from
 - **Timings** live in `T` (the same values in both files). The ambient periods are fractions of LOOP, so the seam always closes.
-- **Export:** in-browser H.264 at level 5.0 (2160×1080 is over level 4's frame-size limit). It targets about 17 MB, never more than 19 MB, because Zoom is safest under 20 MB. A hardware export takes about 3.5 s.
+- **Export:** in-browser H.264 at level 5.0 (2320×1080 is over level 4's frame-size limit). It targets about 17 MB, never more than 19 MB, because Zoom is safest under 20 MB. A hardware export takes about 3.5 s.
 - **Builder:** a light UI on PI's Design System (the `pi-design-system` skill), with the live video kept dark. Clear numbered steps on the left and the video on the right.
   - The audience switch is two pills, “I’m a PIoneer” and “I’m a Partner”: the chosen one is filled, the other outlined.
   - Fields reveal smoothly.
@@ -42,11 +42,14 @@ Usual flow: **edit** (wr-video, wr-ui or wr-copy) → **check** (wr-qa) → **sh
 
 ## Steve's rules (from his feedback; don't regress these)
 
+- **Zoom's overlays (v16c):** Zoom draws its title bar over the top ~12% of the video (about 126 px at 1080) and its play controls over the bottom ~14% (about 153 px). Keep the header below y 140 and nothing important below y 920.
+
 - Everything centered. One message on screen at a time. Nothing moves while text is being read.
 - One 60 px text size for the question and the reply (v15; 44 px before), in a 1600 px column. Typing is steady per character, never eased.
 - Near-black background with haze and drifting lights over a faint dot grid: never dead flat, never a gray wash.
 - Obi's reply is a friendly speech bubble that carries the input box's blue → purple edge and glow. Those Obi gradients belong to Obi's box and bubble only.
 - Builder UI: light and minimal on PI's Design System; flat, calm, no decorative gradients (the step numbers are flat gray), no stacked cards. Delight is welcome but flat and not overdone.
+- Obi's reply (v16c): at most 32 words (`{name}` counts as one) and at most 5 lines at the full 60 px size. The builder stops further typing or pasting at either limit, so the type never shrinks and the loop never stretches.
 - Copy is gender-neutral (tokens `{name}`, `{profile}`). Obi's words come from Obi output or approved copy. Say "Obi" or "Obi by The Predictive Index".
 - Fonts must really load: Roboto, Roboto Serif and Roboto Mono, embedded or installed. A silent fallback is a bug.
 - **This repo is public.** Never commit real partner logos, old video cuts, rendered frames, internal links or anyone's personal data.
@@ -61,7 +64,7 @@ To change the script: edit it in Apps Script, then Deploy → Manage deployments
 
 ## Checks
 
-- **Motion check** (on Steve's Mac, from the `Tools & Automation` folder above this repo): `node studio/check-motion.js pi-brand/projects/zoom-waiting-room/builder.html`. It must exit 0; then look at the contact sheet. Since v16 the checker's builder shim still assumes 1920×1080, so pass an `--eval` that sets `window.__motion` from `WaitingRoom.W`/`H` (see `source/NOTES.md`, v16), and run the built master with `--size 2160x1080`. For partner mode, pass `--eval` to click the Partner switch and inject a placeholder logo (see `source/NOTES.md`). In a cloud session the studio isn't available: use Playwright screenshots and compare the first and last frames instead.
+- **Motion check** (on Steve's Mac, from the `Tools & Automation` folder above this repo): `node studio/check-motion.js pi-brand/projects/zoom-waiting-room/builder.html`. It must exit 0; then look at the contact sheet. Since v16 the checker's builder shim still assumes 1920×1080, so pass an `--eval` that sets `window.__motion` from `WaitingRoom.W`/`H` (see `source/NOTES.md`, v16), and run the built master with `--size 2320x1080`. For partner mode, pass `--eval` to click the Partner switch and inject a placeholder logo (see `source/NOTES.md`). In a cloud session the studio isn't available: use Playwright screenshots and compare the first and last frames instead.
 - **Layout:** screenshots at 1280×800, 1440×900, 1920×1080 and 390×844. Equal left and right margins, the video's transport above the fold, no horizontal scroll.
 - **Export:** one real Download in Chrome. Under 20 MB, and the first decoded frame equals the last.
 

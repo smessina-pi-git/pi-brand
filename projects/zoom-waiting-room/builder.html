@@ -497,7 +497,7 @@ body.bab:not([data-mode="partner"]) .wr-p { grid-template-rows: 0fr; opacity: 0;
               <p class="wr-title">Please wait, the meeting host will let you in soon.</p>
               <p class="wr-topic" id="wrTopic">Steve’s meeting</p>
             </div>
-            <canvas id="view" width="2160" height="1080" style="--bab-aspect: 2 / 1" aria-label="Preview of the waiting room video"></canvas>
+            <canvas id="view" width="2320" height="1080" style="--bab-aspect: 2320 / 1080" aria-label="Preview of the waiting room video"></canvas>
           </div>
         </div>
         <div class="wr-celebrate" id="celebrate" aria-hidden="true"><span class="wr-flash"></span>
@@ -505,7 +505,7 @@ body.bab:not([data-mode="partner"]) .wr-p { grid-template-rows: 0fr; opacity: 0;
       </div>
       <div class="bab-transport">
         <button id="play" class="bab-play" type="button" aria-label="Pause"><svg id="playIcon" viewBox="0 0 12 12"></svg></button>
-        <div id="scrub" class="bab-scrub" role="slider" tabindex="0" aria-label="Position in the loop" aria-valuemin="0" aria-valuemax="21.2" aria-valuenow="0">
+        <div id="scrub" class="bab-scrub" role="slider" tabindex="0" aria-label="Position in the loop" aria-valuemin="0" aria-valuemax="19.8" aria-valuenow="0">
           <div class="bab-track"></div><div id="done" class="bab-done"></div><div id="head" class="bab-head"></div>
         </div>
         <span id="time" class="bab-time">0.0 / 21.2 s</span>
@@ -660,7 +660,7 @@ var PROFILES = [
 ];
 if (typeof module !== 'undefined') module.exports = PROFILES;
 </script>
-<script>// Waiting room v16, drawn on a 2160×1080 (2:1) canvas. A port of v13-source/waiting.html: same tokens, same T
+<script>// Waiting room v16c, drawn on a 2320×1080 (2.148:1) canvas. A port of v13-source/waiting.html: same tokens, same T
 // timings and easing; the title intro over the bloom, the ellipsis that becomes the caret, the box that draws
 // itself open, the haze, the drifting-light dot field and Obi's speech bubble. Every frame is a pure function of t, so the live preview and the
 // MP4 export draw identical frames. Usage:
@@ -669,7 +669,15 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
 (function (root) {
   // v16: a 2:1 frame (was 1920 × 1080) so Zoom's waiting room fills edge to edge. The height and every type
   // size hold; full-frame pieces (background, header) span the new width and everything else centres on CX.
-  var W = 2160, H = 1080, CX = W / 2;
+  // v16c: 2320 × 1080 (2.148:1), the shape of Zoom's waiting-room video area (about 1208 × 563), so no grey sides
+  var W = 2320, H = 1080, CX = W / 2;
+  // v16c header, below Zoom's title bar (which covers the top ~126 px): logo 66 px tall at top 146 (was 54 at 56),
+  // status 25 px Roboto Mono with a 12.5 px dot, centred on y 179 (was 20 px on y 83), rule at y 228 (was 136).
+  // clear: Obi's block never reaches above it (24 px under the rule).
+  var HDR = {logoTop: 146, logoH: 66, cy: 179, mono: 25, dot: 12.5, gap: 20, rule: 228, clear: 252};
+  // the partner header logo's box: 400 × 66 (the PI logo's height). With the light backing, the logo is at most
+  // 48 px tall, so logo + plate pad (round(h × .18) a side) is at most 66 and stays inside the same box.
+  var PLOGO = {w: 400, h: 66, bh: 48};
   var C = {surface: '#000000', soft: '#0E0E10', bubble: '#161618', ink: '#FFFFFF', muted: '#9A9AA0',
            rule: '#26262A', red: '#EF3340', blue: '#33A8D3', purple: '#5000A8'};
   var QUESTION = "I'm about to meet with {name}. Help me prepare for the meeting before I leave this waiting room.";
@@ -709,6 +717,13 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
   // whole pixels, the half-leading floored.
   function base(top, size, lh) { var a = Math.round(size * ASC), d = Math.round(size * DESC); return top + Math.floor((lh - a - d) / 2) + a; }
   function curly(s) { return s.replace(/'/g, '’'); }
+  // words in a reply template, with {name} counted as one word whatever the name is
+  function replyWords(tpl) { var c = tpl.replace(/\{name\}/g, 'N').replace(/\s+/g, ' ').trim(); return c ? c.split(' ').length : 0; }
+  // v16c: only characters Roboto draws (house rule: no silent font fallback). Latin, Greek and Cyrillic letters,
+  // combining accents, digits, ASCII and Latin-1 punctuation, general punctuation (– — ’ “ ” …) and currency
+  // signs stay; emoji, joiners, variation selectors and other scripts are removed.
+  var ROBOTO_OK = /[\p{Script=Latin}\p{Script=Greek}\p{Script=Cyrillic}̀-ͯ -@[-`{-~ -¿×÷‐-‧‰-⁞₠-₿\s]/u;
+  function robotoOnly(s) { var out = ''; for (var ch of s) if (ROBOTO_OK.test(ch)) out += ch; return out; }
   function font(w, size, fam) { return w + ' ' + size + 'px ' + (fam || SANS); }
   // Chrome on a Mac draws page text with font smoothing, which thickens strokes; canvas text gets none.
   // A hairline stroke in the fill colour gives canvas text the same weight as the v9 render.
@@ -791,16 +806,18 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     // partner mode: their logo in the header and on the end card, their message on the end card, a larger Obi label
     s.partner = opt.mode === 'partner'; s.pLogo = s.partner ? (opt.partnerLogo || null) : null; s.pBack = !!opt.logoBacking;
     ctx.save();
-    var words = curly((opt.reply || '').replace(/\{name\}/g, name)).split(' ').filter(Boolean);
+    var words = curly(robotoOnly(opt.reply || '').replace(/\{name\}/g, name)).split(' ').filter(Boolean);
     // the chat size: 60 px, stepped down 2 px at a time (never below 44) only if Obi's block (label row 68 +
-    // bubble), centred on y 540, would reach above y 160 and crowd the header rule (y 136): 7 lines at 60 px fit
+    // bubble), centred on y 540, would reach above HDR.clear (24 px under the header rule) and crowd the header.
+    // v16c: the header moved down under Zoom's title bar (rule y 136 → 228), so 5 lines at 60 px fit (was 7):
+    // every default reply, even with a 24-character name, still sets at 60 px; only long custom replies step down.
     for (var size = CHAT; ; size -= 2) {
       layChat(ctx, s, Q, words, opt.profile, size);
-      if (68 + s.obH <= 760 || size <= 44) break;
+      if (68 + s.obH <= 2 * (540 - HDR.clear) || size <= 44) break;
     }
-    ctx.font = font(400, 20, MONO); ctx.letterSpacing = '2.4px';
+    ctx.font = font(400, HDR.mono, MONO); ctx.letterSpacing = (HDR.mono * .12) + 'px';
     s.statusW = ctx.measureText('MEETING INITIATING').width;
-    ctx.font = font(400, 20, MONO); ctx.letterSpacing = '0px';
+    ctx.font = font(400, HDR.mono, MONO); ctx.letterSpacing = '0px';
     s.ch = ctx.measureText('0').width;
     ctx.font = font(500, 68); ctx.letterSpacing = '-0.68px';
     s.obiByW = ctx.measureText('Obi by').width;
@@ -828,7 +845,10 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     // hold after the last word is unchanged. The loop is 19.8 s (594 frames).
     // Fit: FIT_END is v16's reading window end (out0 + .3, plus the 0.5 s the quicker reveal saves), so the
     // same replies fit as before: fitWords stays 32, and a longer reply extends the loop exactly as in v16.
-    var RATE = 5, LOOP = 19.8, FIT_END = T.out0 + .8, need = T.words0 + words.length / RATE - FIT_END;
+    // v16c: the name counts as one word however many it has ("Mary Ann"), so a default reply with a two-word
+    // name doesn't tip over 32 and stretch the loop; the builder's word count uses the same rule (replyWords).
+    var nWords = replyWords(opt.reply || '');
+    var RATE = 5, LOOP = 19.8, FIT_END = T.out0 + .8, need = T.words0 + nWords / RATE - FIT_END;
     s.fitWords = Math.floor((FIT_END - T.words0) * RATE);
     if (need > 0) {
       var ext = Math.ceil(need / .8 - 1e-9) * .8;
@@ -864,7 +884,7 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
   function getGlow() {
     if (glowC) return glowC;
     glowC = makeLayer(1);
-    var RX = 922, RY = 520, cx = CX, cy = 540, g = glowC.getContext('2d'), im = g.createImageData(W, H), D = im.data;
+    var RX = 991, RY = 520, cx = CX, cy = 540, g = glowC.getContext('2d'), im = g.createImageData(W, H), D = im.data;
     var P = [80, 0, 168], B = [51, 168, 211], K = .40, seed = 0x9e3779b9;
     function rnd() { seed = (seed + 0x6D2B79F5) | 0; var z = Math.imul(seed ^ (seed >>> 15), 1 | seed); z = (z + Math.imul(z ^ (z >>> 7), 61 | z)) ^ z; return ((z ^ (z >>> 14)) >>> 0) / 4294967296; }
     for (var y = 0; y < H; y++) for (var x = 0; x < W; x++) {
@@ -880,10 +900,10 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
 
   // Ambient field (v8): three soft lights drift on closed orbits (one or two turns per loop). They tint the
   // black very faintly and light up a fine 36 px dot grid as they pass, so the background is never dead flat.
-  // v16: orbits (and the haze's RX above) widened with the frame (× 1.125) so the 2:1 edges still get light
-  var LIGHTS = [{c: '80,0,168', a: .85, r: 860, ax: 630, ay: 250, k: 1, ph: 0},
-                {c: '51,168,211', a: .55, r: 720, ax: 698, ay: 300, k: 1, ph: Math.PI},
-                {c: '190,170,255', a: .35, r: 520, ax: 473, ay: 220, k: 2, ph: 1.9}];
+  // v16c: orbits (and the haze's RX above) widened with the frame (× 2320/1920) so the wide edges still get light
+  var LIGHTS = [{c: '80,0,168', a: .85, r: 860, ax: 677, ay: 250, k: 1, ph: 0},
+                {c: '51,168,211', a: .55, r: 720, ax: 749, ay: 300, k: 1, ph: Math.PI},
+                {c: '190,170,255', a: .35, r: 520, ax: 508, ay: 220, k: 2, ph: 1.9}];
   function getAmb(R) {
     if (R.amb) return R.amb;
     var A = R.amb = {light: makeLayer(R.k), lit: makeLayer(R.k), dots: makeLayer(R.k)};
@@ -1124,21 +1144,29 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     var SWEEP = LOOP / 10, PULSE = LOOP / 16;
     var first = t < T.out1;
     var hl = 1 - eo(seg(t, T.out0, T.out1)) * (1 - eo(seg(t, T.end0 + .2, T.end1)));
-    if (s.pLogo && !s.logoHold) { var hb = fitBox(s.pLogo, 340, 74); ctx.globalAlpha = hl; drawLogo(ctx, s.pLogo, 64, 83 - hb.h / 2, hb.w, hb.h, s.pBack); }
-    else if (s.partner && s.hint) { ctx.globalAlpha = hl; slot(ctx, 64, 50, 260, 66, 'Your logo'); }
-    else if (img.logo) { ctx.globalAlpha = hl; ctx.drawImage(img.logo, 64, 56, 54 * img.logo.width / img.logo.height, 54); }
-    ctx.globalAlpha = 1; ctx.fillStyle = C.rule; ctx.fillRect(64, 136, W - 128, 1);
+    // v16c: the header sits below Zoom's title bar (it covers the top ~126 px) and is about 1.22× (logo) and
+    // 1.25× (status) larger. The partner logo, with its light backing plate if on, always stays inside the PI
+    // logo's box (PLOGO: 400 × 66 at x 64, y 146–212, centred on the status row), clear of Zoom's bar and 16 px
+    // above the rule; the preview's "Your logo" slot is that same box.
+    if (s.pLogo && !s.logoHold) {
+      var hb = s.pBack ? fitBox(s.pLogo, PLOGO.w - 2 * Math.round(PLOGO.bh * .18), PLOGO.bh) : fitBox(s.pLogo, PLOGO.w, PLOGO.h);
+      var hpd = s.pBack ? Math.round(hb.h * .18) : 0;
+      ctx.globalAlpha = hl; drawLogo(ctx, s.pLogo, 64 + hpd, HDR.cy - hb.h / 2, hb.w, hb.h, s.pBack);
+    }
+    else if (s.partner && s.hint) { ctx.globalAlpha = hl; slot(ctx, 64, HDR.cy - PLOGO.h / 2, PLOGO.w, PLOGO.h, 'Your logo'); }
+    else if (img.logo) { ctx.globalAlpha = hl; ctx.drawImage(img.logo, 64, HDR.logoTop, HDR.logoH * img.logo.width / img.logo.height, HDR.logoH); }
+    ctx.globalAlpha = 1; ctx.fillStyle = C.rule; ctx.fillRect(64, HDR.rule, W - 128, 1);
     var sw = (t % SWEEP) / SWEEP, fx = 64 + (-260 + (W - 128 + 260) * eio(sw));
     var g = ctx.createLinearGradient(fx, 0, fx + 260, 0);
     g.addColorStop(0, 'rgba(239,51,64,0)'); g.addColorStop(.5, C.red); g.addColorStop(1, 'rgba(239,51,64,0)');
-    ctx.globalAlpha = Math.sin(sw * Math.PI) * 0.9 + 0.1; ctx.fillStyle = g; ctx.fillRect(fx, 135, 260, 3);
-    var stW = 10 + 16 + s.statusW + 3 * 1.2 * s.ch, sx = W - 64 - stW, rowH = 20 * MONO_LH, cy = 70 + rowH / 2;
-    ctx.globalAlpha = 1; ctx.fillStyle = C.red; ctx.beginPath(); ctx.arc(sx + 5, cy, 5, 0, Math.PI * 2); ctx.fill();
-    var pu = (t % PULSE) / PULSE, ps = 1 + pu * 2.2;
-    ctx.globalAlpha = (1 - pu) * .8; ctx.strokeStyle = C.red; ctx.lineWidth = 1.5 * ps;
-    ctx.beginPath(); ctx.arc(sx + 5, cy, (5 - .75) * ps, 0, Math.PI * 2); ctx.stroke();
-    ctx.globalAlpha = 1; ctx.fillStyle = C.muted; ctx.font = font(400, 20, MONO); ctx.letterSpacing = '2.4px';
-    var tb = 70 + 20 * MONO_ASC + (rowH - 20 * MONO_LH) / 2, tx = sx + 26;
+    ctx.globalAlpha = Math.sin(sw * Math.PI) * 0.9 + 0.1; ctx.fillStyle = g; ctx.fillRect(fx, HDR.rule - 1, 260, 3);
+    var dr = HDR.dot / 2, stW = HDR.dot + HDR.gap + s.statusW + 3 * 1.2 * s.ch, sx = W - 64 - stW, rowH = HDR.mono * MONO_LH, sTop = HDR.cy - rowH / 2, cy = HDR.cy;
+    ctx.globalAlpha = 1; ctx.fillStyle = C.red; ctx.beginPath(); ctx.arc(sx + dr, cy, dr, 0, Math.PI * 2); ctx.fill();
+    var pu = (t % PULSE) / PULSE, ps = 1 + pu * 2.2, rw = HDR.dot * .15;
+    ctx.globalAlpha = (1 - pu) * .8; ctx.strokeStyle = C.red; ctx.lineWidth = rw * ps;
+    ctx.beginPath(); ctx.arc(sx + dr, cy, (dr - rw / 2) * ps, 0, Math.PI * 2); ctx.stroke();
+    ctx.globalAlpha = 1; ctx.fillStyle = C.muted; ctx.font = font(400, HDR.mono, MONO); ctx.letterSpacing = (HDR.mono * .12) + 'px';
+    var tb = sTop + HDR.mono * MONO_ASC, tx = sx + HDR.dot + HDR.gap;
     say(ctx, 'MEETING INITIATING', tx, tb);
     var d = Math.floor(t / (LOOP / 32)) % 4;
     for (var i = 0; i < 3; i++) if (i < d) say(ctx, '.', tx + s.statusW + i * 1.2 * s.ch, tb);
@@ -1291,7 +1319,7 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     ctx.restore();
   }
 
-  root.WaitingRoom = {layout: layout, draw: draw, W: W, H: H, FPS: 30, QUESTION: QUESTION};
+  root.WaitingRoom = {layout: layout, draw: draw, W: W, H: H, FPS: 30, QUESTION: QUESTION, replyWords: replyWords, robotoOnly: robotoOnly};
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
 <script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.2.2/build/mp4-muxer.js"></script>
@@ -1354,11 +1382,20 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
   showProfile(false);
 
   // ---------- preview ----------
-  var MAX_WORDS = 37, blocked = false;
+  // v16c reply limits (Steve: no long custom replies). 32 words = fitWords, so the loop never extends; and the
+  // reply must set in MAX_LINES lines at the full 60 px chat size, measured with the renderer's own layout
+  // (real canvas text metrics, the current name), so the type never steps down. A character cap can't do this:
+  // long words wrap to 6 lines from about 225 shown characters, while the approved Scholar reply with a
+  // 24-character name is 228 characters and fits in 5.
+  var MAX_WORDS = 32, MAX_LINES = 5, blocked = false, replyStripped = false;
+  function replyFits(tpl){
+    var s = WR.layout(vctx, {name: cleanName(), profile: profile().name, reply: tpl.replace(/\s+/g, ' ').trim()}, images);
+    return {lines: s.aLines, ok: s.chat >= 60 && s.aLines <= MAX_LINES};
+  }
   var scene = null, t0 = performance.now(), offset = 0, playing = !reduced, pausedAt = 0;
   function rebuild(){
     var p = profile();
-    var reply = replyText(), edited = reply !== p.reply, shown = fillName(reply), n = shown.split(' ').length;
+    var reply = replyText(), edited = reply !== p.reply, shown = fillName(reply), n = WR.replyWords(reply);
     var partner = isPartner(), pm = (state.pmsg || '').replace(/\s+/g, ' ').trim();
     scene = WR.layout(vctx, {name: cleanName(), profile: p.name, reply: reply, mode: state.mode,
                              partnerLogo: images.plogo || null, partnerMessage: pm, logoBacking: !!state.pback}, images);
@@ -1367,19 +1404,22 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     if (document.activeElement !== replyEl || partner) replyEl.value = fillName(partner ? p.reply : (state.replies[p.name] || p.reply));
     $('replyReset').hidden = !edited || partner;
     // quiet counts against the limits; over one, it turns red and the download waits
-    var h = $('replyHint'), over = !partner && n > MAX_WORDS;
-    h.textContent = n + ' / ' + MAX_WORDS + ' words'; h.classList.toggle('over', over);
+    // (a longer name can push a saved reply past a limit; then it is over, and the download waits)
+    var tall = !partner && (scene.chat < 60 || scene.aLines > MAX_LINES), over = !partner && (n > MAX_WORDS || tall);
+    var full = !partner && !over && edited && (n === MAX_WORDS || scene.aLines === MAX_LINES);   // only once they've edited
+    var h = $('replyHint');
+    h.textContent = n + ' / ' + MAX_WORDS + ' words' + (tall ? ' · too long to fit' : full ? ' · at the limit' : '') + (replyStripped && !partner ? ' · emoji and unsupported characters removed' : ''); h.classList.toggle('over', over);
     var pc = $('pmsgCount'), pOver = partner && pm.length > MAX_PMSG;
     pc.textContent = pm.length + ' / ' + MAX_PMSG; pc.classList.toggle('over', pOver);
     $('pmsgErr').textContent = pOver ? 'Shorten it to ' + MAX_PMSG + ' characters to download.' : '';
     replyEl.classList.toggle('bab-invalid', over); pmsgEl.classList.toggle('bab-invalid', pOver);
     replyEl.setAttribute('aria-invalid', String(over)); pmsgEl.setAttribute('aria-invalid', String(pOver));
     // the disclosure's summary says what's in it; a reply over the limit opens it so the reason is in view
-    $('replySum').textContent = partner ? 'Approved for ' + p.name : over ? 'Too long: ' + n + ' / ' + MAX_WORDS + ' words' : edited ? 'Edited' : 'Suggested for ' + p.name;
+    $('replySum').textContent = partner ? 'Approved for ' + p.name : over ? (tall ? 'Too long to fit' : 'Too long: ' + n + ' / ' + MAX_WORDS + ' words') : edited ? 'Edited' : 'Suggested for ' + p.name;
     $('replyBox').classList.toggle('over', over);
     if (over) $('replyBox').open = true;
     // say why Download waits, right under it
-    $('why').textContent = over ? 'Shorten Obi’s reply to ' + MAX_WORDS + ' words to download.' : pOver ? 'Shorten the end-card message to ' + MAX_PMSG + ' characters to download.' : '';
+    $('why').textContent = over ? (tall ? 'Shorten Obi’s reply so it fits on screen to download.' : 'Shorten Obi’s reply to ' + MAX_WORDS + ' words to download.') : pOver ? 'Shorten the end-card message to ' + MAX_PMSG + ' characters to download.' : '';
     blocked = over || pOver;
     $('mp4').disabled = blocked || !!busy;
     $('wrTopic').textContent = (cleanName() || 'Your host') + '’s meeting';
@@ -1404,7 +1444,7 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
   // never waits on a render, and several changes in one frame cost one draw.
   var dirty = false;
   function loop(){ if (!busy && (playing || dirty)) { dirty = false; frame(); } requestAnimationFrame(loop); }
-  // the preview draws at the size it is shown (the export always draws full WR.W × WR.H frames, 2160 × 1080)
+  // the preview draws at the size it is shown (the export always draws full WR.W × WR.H frames, 2320 × 1080)
   function sizeView(){
     var w = Math.max(640, Math.min(WR.W, Math.round(view.clientWidth * (window.devicePixelRatio || 1))));
     if (view.width !== w) { view.width = w; view.height = Math.round(w * WR.H / WR.W); dirty = true; }
@@ -1430,8 +1470,63 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
   });
 
   // editing the reply shows the whole answer on screen while you type
+  // v16c reply guard: it judges the text an edit leaves, not the keystroke. The reply can never grow past
+  // 32 words or 5 lines at 60 px, and it can never be left with letters joined onto an existing word that
+  // there's no room to separate (typing "very" before "compelling" at 32/32 used to leave "verycompelling").
+  //  - Every character carries where it came from: the reply as it was when the field got focus, or typed.
+  //  - A "join" is a place inside one word where typed letters meet original letters. A join is fine when the
+  //    word is a correction of an original word: the same word, or one letter changed or removed (so replacing a
+  //    letter and delete-then-retype work at the limit). Any other join counts as a word still to be split.
+  //  - An edit that adds or replaces text is accepted only if the reply fits with every counted join split into
+  //    its own word. So at the limit, the first letter that would glue is refused, and nothing is ever left
+  //    half-joined. Retyping a whole word (select it, type over it) always works.
+  //  - Deleting is always allowed, so a reply pushed over by a longer name can be shortened.
+  // Emoji and other characters Roboto can't draw are removed as they arrive (no silent font fallback).
+  var WORDCH = /[\p{L}\p{N}\p{M}'’-]/u, lastReply = null, prov = null, refWords = null;
+  function wordsOf(s){ return s.toLowerCase().split(/[^\p{L}\p{N}\p{M}'’-]+/u).filter(Boolean); }
+  function near(a, b){   // edit distance ≤ 1, and a is not longer than b
+    if (a === b) return true; if (a.length > b.length || b.length - a.length > 1) return false;
+    var i = 0; while (i < a.length && a[i] === b[i]) i++;
+    return a.length === b.length ? a.slice(i + 1) === b.slice(i + 1) : a.slice(i) === b.slice(i + 1);
+  }
+  function correction(tok){ tok = tok.toLowerCase(); for (var w of refWords) if (near(tok, w)) return true; return false; }
+  // the reply with every counted join split by a space
+  function splitJoins(s, pv){
+    var cuts = [], i = 0;
+    while (i < s.length) {
+      if (!WORDCH.test(s[i])) { i++; continue; }
+      var j = i; while (j < s.length && WORDCH.test(s[j])) j++;
+      var mixed = false; for (var k = i; k < j - 1; k++) if (pv[k] !== pv[k + 1]) mixed = true;
+      if (mixed && !correction(s.slice(i, j))) for (var k2 = i; k2 < j - 1; k2++) if (pv[k2] !== pv[k2 + 1]) cuts.push(k2 + 1);
+      i = j;
+    }
+    for (var c = cuts.length - 1; c >= 0; c--) s = s.slice(0, cuts[c]) + ' ' + s.slice(cuts[c]);
+    return s;
+  }
+  function startEdit(){ lastReply = replyEl.value; prov = Array.from(lastReply, function(){ return 1; });
+    refWords = new Set(wordsOf(lastReply).concat(wordsOf(fillName(profile().reply)))); }
+  function announce(msg){ var n = $('srNote'); n.textContent = ''; if (msg) requestAnimationFrame(function(){ n.textContent = msg; }); }
+  replyEl.addEventListener('focus', startEdit);
   replyEl.addEventListener('input', function(){
-    var p = profile(), v = toTemplate(replyEl.value), c = v.replace(/\s+/g,' ').trim();
+    if (lastReply === null) startEdit();
+    var raw = replyEl.value, R = WR.robotoOnly(raw), stripped = R !== raw, P = lastReply;
+    // what changed: the common start and end are kept, the middle was inserted (and maybe replaced)
+    var a = 0; while (a < P.length && a < R.length && P[a] === R[a]) a++;
+    var e = 0; while (e < P.length - a && e < R.length - a && P[P.length - 1 - e] === R[R.length - 1 - e]) e++;
+    var ins = R.length - e - a, pv = prov.slice(0, a).concat(new Array(ins).fill(0), prov.slice(P.length - e));
+    if (ins > 0) {
+      var tpl = toTemplate(R).replace(/\s+/g, ' ').trim(), tplS = toTemplate(splitJoins(R, pv)).replace(/\s+/g, ' ').trim();
+      var wR = WR.replyWords(tpl), wS = WR.replyWords(tplS), msg = '';
+      if (tpl) {
+        if (wR > MAX_WORDS) msg = 'That would go over the ' + MAX_WORDS + '-word limit.';
+        else if (wS > MAX_WORDS) msg = 'That would join onto a word, and Obi’s reply is at the ' + MAX_WORDS + '-word limit.';
+        else if (!replyFits(tpl).ok || !replyFits(tplS).ok) msg = 'That would go past the ' + MAX_LINES + ' lines Obi’s bubble holds.';
+      }
+      if (msg) { replyEl.value = P; replyEl.setSelectionRange(a, a); announce(msg); return; }
+    }
+    if (stripped) { replyEl.value = R; replyEl.setSelectionRange(a + Math.max(0, ins), a + Math.max(0, ins)); }
+    replyStripped = stripped; lastReply = R; prov = pv; announce('');
+    var p = profile(), v = toTemplate(R), c = v.replace(/\s+/g,' ').trim();
     if (c && c !== p.reply) state.replies[p.name] = v; else delete state.replies[p.name];
     remember(); rebuild(); jump(scene.T.out0 - 1);
   });
@@ -1550,7 +1645,7 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
       var again = document.createElement('a'); again.className = 'bab-link'; again.href = readyUrl; again.download = name; again.textContent = 'Download again';
       $('status').appendChild(document.createTextNode(' · ')); $('status').appendChild(again); return;
     }
-    var v = document.createElement('video'); v.src = readyUrl; v.controls = true; v.muted = true; v.loop = true; v.playsInline = true; v.style.setProperty('--bab-aspect', '2 / 1');
+    var v = document.createElement('video'); v.src = readyUrl; v.controls = true; v.muted = true; v.loop = true; v.playsInline = true; v.style.setProperty('--bab-aspect', WR.W + ' / ' + WR.H);
     var row = document.createElement('div'); row.className = 'bab-row';
     var nm = document.createElement('span'); nm.textContent = name + ' · ' + mb(blob.size);
     row.appendChild(nm);
@@ -1590,7 +1685,7 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
   function capBitrate(e, loop, scale){ return Math.round(Math.min(e.bitrate, ZOOM_TARGET * 8 / loop) * (scale || 1)); }
   function encConfig(codec, e, bitrate){ return {codec: codec, width: WR.W, height: WR.H, framerate: FPS, bitrate: bitrate || e.bitrate, avc: {format: 'avc'}, hardwareAcceleration: e.hardwareAcceleration || 'no-preference'}; }
   async function pickCodec(){
-    // v16: 2160 × 1080 is 9180 macroblocks, over level 4.x's 8192/8704 limit, so level 5.0 (…32) comes first
+    // v16c: 2320 × 1080 is 9860 macroblocks, over level 4.x's 8192/8704 limit, so level 5.0 (…32, up to 22080) comes first
     var opts = [['avc1.640032','avc'],['avc1.4d0032','avc'],['avc1.420032','avc'],['avc1.640028','avc'],['avc1.4d0028','avc'],['avc1.42002a','avc']];
     for (var k=0;k<ENCODERS.length;k++) for (var i=0;i<opts.length;i++){
       try { var s = await VideoEncoder.isConfigSupported(encConfig(opts[i][0], ENCODERS[k])); if (s.supported) return {codec:opts[i][0], mux:opts[i][1], enc:ENCODERS[k]}; } catch(e){}
@@ -1673,7 +1768,7 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
       var id = localStorage.getItem('wrbId');
       if (!id) { id = Math.random().toString(36).slice(2, 12); localStorage.setItem('wrbId', id); }
     } catch(e){ id = ''; }
-    var body = JSON.stringify({mode: state.mode, profile: state.profile, browser: id, host: location.hostname, v: 'v15'});
+    var body = JSON.stringify({mode: state.mode, profile: state.profile, browser: id, host: location.hostname, v: 'v16c'});
     try {
       if (!(navigator.sendBeacon && navigator.sendBeacon(LOG_URL, body)))
         fetch(LOG_URL, {method: 'POST', mode: 'no-cors', body: body}).catch(function(){});

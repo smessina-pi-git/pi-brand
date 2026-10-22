@@ -10,7 +10,7 @@ You own the copy. Where it lives:
 ## Rules
 - Obi's words must come from Obi output or approved copy, accurate to PI's behavioral science. Use the PI MCP (AskObi) or the pi-branding skill to ground a reply; never invent behavioral claims.
 - Pattern: "{name}'s a {Profile}, which means {name} …". Gender-neutral: repeat the name, no pronouns. Only the profile word is bold (the renderer bolds the word that starts with the profile name).
-- Length: replies must fit `fitWords` (32 words at the current loop; MAX_WORDS 37 hard cap). Keep the partner message within MAX_PMSG (90 characters).
+- Length: replies must fit `fitWords` (32 words at the current loop; since v16c `MAX_WORDS` is also 32, counting `{name}` as one word, and a reply must also set in 5 lines at 60 px with a 24-character name, which the builder enforces as people type). Every default reply must pass both with a 24-character name. Keep the partner message within MAX_PMSG (90 characters).
 - Naming: "Obi" or "Obi by The Predictive Index", never OBI or PI Assistant. Check the obi-product-reference skill when describing Obi.
 - Zoom path wording Steve confirmed: Settings › Meeting › Security → Waiting Room → Customize. Partners sign in to their own Zoom; the PI team signs in with Google using their PI account.
 - Show Steve any new or changed Obi replies for approval before they ship. Then hand off to wr-qa and wr-release.

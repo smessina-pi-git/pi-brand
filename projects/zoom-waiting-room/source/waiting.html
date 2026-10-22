@@ -3,20 +3,23 @@
 <style>
 :root{--surface:#000000;--soft:#0E0E10;--bubble:#161618;--ink:#FFFFFF;--muted:#9A9AA0;--rule:#26262A;--red:#EF3340;--blue:#33A8D3;--purple:#5000A8}
 *{box-sizing:border-box;margin:0;padding:0}
-/* v16: a 2:1 frame (2160 × 1080) so Zoom's waiting room fills edge to edge; the content keeps its 1080 px scale, centred */
-html,body{width:2160px;height:1080px;overflow:hidden;background:var(--surface);color:var(--ink);font-family:Roboto,sans-serif}
-.mono{font-family:"Roboto Mono",monospace;font-size:20px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+/* v16c: a 2320 × 1080 frame (2.148:1, Zoom's waiting-room video area is about 1208 × 563) so it fills edge to edge;
+   the content keeps its 1080 px scale, centred on x 1160 */
+html,body{width:2320px;height:1080px;overflow:hidden;background:var(--surface);color:var(--ink);font-family:Roboto,sans-serif}
+.mono{font-family:"Roboto Mono",monospace;font-size:25px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .lbl{font-size:30px;color:var(--muted)}
 /* v15: one 60 px chat size (was 44) in a 1600 px column, so the exchange fills the frame */
 :root{--chat:60px}
-#logo{position:absolute;left:64px;top:56px;height:54px}
-#bar{position:absolute;left:64px;right:64px;top:136px;height:1px;background:var(--rule);overflow:visible}
+/* v16c header: below Zoom's title bar (it covers the top ~126 px), logo and status about 1.22-1.25x (was logo 54 px at top 56,
+   status 20 px centred on y 83, rule at y 136): logo 66 px at top 146, status 25 px centred on y 179, rule at y 228 */
+#logo{position:absolute;left:64px;top:146px;height:66px}
+#bar{position:absolute;left:64px;right:64px;top:228px;height:1px;background:var(--rule);overflow:visible}
 #fill{position:absolute;left:0;top:-1px;height:3px;width:260px;background:linear-gradient(90deg,rgba(239,51,64,0),#EF3340 50%,rgba(239,51,64,0))}
-#status{position:absolute;right:64px;top:70px;display:flex;align-items:center;gap:16px}
-#status .dot{position:relative;width:10px;height:10px;border-radius:50%;background:var(--red)}
-#status .dot::after{content:'';position:absolute;left:50%;top:50%;width:10px;height:10px;border-radius:50%;border:1.5px solid var(--red);transform:translate(-50%,-50%) scale(var(--ps,1));opacity:var(--po,0)}
+#status{position:absolute;right:64px;top:162.5px;display:flex;align-items:center;gap:20px}
+#status .dot{position:relative;width:12.5px;height:12.5px;border-radius:50%;background:var(--red)}
+#status .dot::after{content:'';position:absolute;left:50%;top:50%;width:12.5px;height:12.5px;border-radius:50%;border:1.875px solid var(--red);transform:translate(-50%,-50%) scale(var(--ps,1));opacity:var(--po,0)}
 #status .dots span{display:inline-block;width:1.2ch;text-align:left}
-#stage{position:absolute;left:280px;top:0;width:1600px;height:1080px}
+#stage{position:absolute;left:360px;top:0;width:1600px;height:1080px}
 #box{position:absolute;left:0;top:366px;width:1600px;height:348px;background:var(--soft);border-radius:16px}
 #box::before{content:'';position:absolute;inset:-2px;border-radius:18px;padding:2px;background:linear-gradient(var(--ga,90deg),var(--blue) var(--gs0,0%),var(--purple) var(--gs1,100%));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:var(--bo,1)}
 #box::after{content:'';position:absolute;inset:-2px;border-radius:18px;box-shadow:calc(-1px*var(--gx,30)) calc(-1px*var(--gy,0)) 40px -8px rgba(51,168,211,.45),calc(1px*var(--gx,30)) calc(1px*var(--gy,0)) 40px -8px rgba(80,0,168,.70);opacity:var(--bo,1);pointer-events:none}
@@ -38,9 +41,9 @@ html,body{width:2160px;height:1080px;overflow:hidden;background:var(--surface);c
 #tdots i{width:16px;height:16px;border-radius:50%;background:#CFC4FF}
 #a .w{display:inline-block;opacity:0;transform:translateY(10px)}
 #a b{font-weight:700}
-#glow,#amb,#tglow{position:absolute;left:0;top:0;width:2160px;height:1080px;pointer-events:none}
-#bloom{position:absolute;left:230px;top:90px;width:1700px;height:900px;pointer-events:none}
-#title{position:absolute;left:0;top:0;width:2160px;height:1080px;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+#glow,#amb,#tglow{position:absolute;left:0;top:0;width:2320px;height:1080px;pointer-events:none}
+#bloom{position:absolute;left:310px;top:90px;width:1700px;height:900px;pointer-events:none}
+#title{position:absolute;left:0;top:0;width:2320px;height:1080px;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
 #title .ln{position:relative;white-space:nowrap;font-family:"Roboto Serif",serif;font-size:124px;line-height:1.12;letter-spacing:-.015em}
 #title .l1{font-weight:500}
 #title .l2{font-weight:300;font-style:italic}
@@ -53,15 +56,15 @@ html,body{width:2160px;height:1080px;overflow:hidden;background:var(--surface);c
 #edge{position:absolute;top:366px;width:4px;height:348px;margin-left:-2px;border-radius:2px;pointer-events:none;opacity:0;
   background:linear-gradient(180deg,rgba(255,255,255,0),#fff 30%,#fff 70%,rgba(255,255,255,0));
   box-shadow:0 0 18px 4px rgba(150,110,255,.9),0 0 50px 12px rgba(51,168,211,.45)}
-#mark{position:absolute;left:0;top:0;width:2160px;height:1080px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;opacity:0}
+#mark{position:absolute;left:0;top:0;width:2320px;height:1080px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;opacity:0}
 /* v15: the end card scaled up with the chat (68 px over a 760 px logo; was 60 over 660) */
 #mark span{font-size:68px;font-weight:500;line-height:1;letter-spacing:-.01em;color:var(--ink)}
 #mark img{width:760px;height:auto;display:block}
 </style></head><body>
-<canvas id="amb" width="2160" height="1080"></canvas>
-<canvas id="glow" width="2160" height="1080"></canvas>
+<canvas id="amb" width="2320" height="1080"></canvas>
+<canvas id="glow" width="2320" height="1080"></canvas>
 <div id="bloom"></div>
-<canvas id="tglow" width="2160" height="1080"></canvas>
+<canvas id="tglow" width="2320" height="1080"></canvas>
 <img id="logo" src="data:image/png;base64,__LOGO__" alt="">
 <div id="bar"><div id="fill"></div></div>
 <div id="status"><span class="dot"></span><span class="mono">Meeting initiating<span class="dots"><span>.</span><span>.</span><span>.</span></span></span></div>
@@ -114,7 +117,7 @@ var SW=1600, PADX=64, PADT=52, LH=84;
 q.textContent=Q; var qH=q.scrollHeight; q.textContent='';
 var boxH=PADT+Math.max(qH,2*LH)+140, boxTop=540-boxH/2, bubH=qH+2*PADT;
 // caret at rest (and the point the title's dots fly to): one line's content box, inset like a typed caret
-var CARET0={x:PADX+2,y:PADT+Math.floor((LH-71)/2)+8}, CARET={x:280+CARET0.x+2,y:boxTop+CARET0.y+33};
+var CARET0={x:PADX+2,y:PADT+Math.floor((LH-71)/2)+8}, CARET={x:360+CARET0.x+2,y:boxTop+CARET0.y+33};
 // reply bubble size: measured with every word laid out (they are only transparent); 40 px above, 38 below
 var aEl2=document.getElementById('a'), obW=SW, obH=aEl2.scrollHeight+78;
 function eob(x){x=cl(x);var c1=1.3,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2);}
@@ -192,7 +195,7 @@ function drawTitle(t){
 // triangular dither against banding; exactly 0 outside the ellipse, so frame edges stay true black.
 var glow=$('glow');
 (function(){
-  var W=2160,H=1080,RX=922,RY=520,cx=1080,cy=540,g=glow.getContext('2d'),img=g.createImageData(W,H),D=img.data;
+  var W=2320,H=1080,RX=991,RY=520,cx=1160,cy=540,g=glow.getContext('2d'),img=g.createImageData(W,H),D=img.data;
   var P=[80,0,168],B=[51,168,211],K=.40;
   for(var y=0;y<H;y++)for(var x=0;x<W;x++){
     var i=(y*W+x)*4, dx=(x+.5-cx)/RX, dy=(y+.5-cy)/RY, d=Math.sqrt(dx*dx+dy*dy); D[i+3]=255;
@@ -206,7 +209,7 @@ var glow=$('glow');
 // v16 text glow: a very faint, static lilac light behind the chat column so the frame reads less dark.
 // Static (drawn once), so it is loop-safe. Same pixels as the builder's getTextGlow(): seeded dither.
 (function(){
-  var W=2160,H=1080,RX=1150,RY=560,cx=1080,cy=540,A=.075,COL=[190,170,255],seed=0x2545f491;
+  var W=2320,H=1080,RX=1150,RY=560,cx=1160,cy=540,A=.075,COL=[190,170,255],seed=0x2545f491;
   function rnd(){seed=(seed+0x6D2B79F5)|0;var z=Math.imul(seed^(seed>>>15),1|seed);z=(z+Math.imul(z^(z>>>7),61|z))^z;return((z^(z>>>14))>>>0)/4294967296;}
   var c=$('tglow'),g=c.getContext('2d'),img=g.createImageData(W,H),D=img.data;
   for(var y=0;y<H;y++)for(var x=0;x<W;x++){
@@ -220,27 +223,27 @@ var glow=$('glow');
 // Ambient field: three soft lights drift on closed orbits (one or two turns per loop). They tint the black
 // very faintly and light up a fine dot grid as they pass, so the background is never a dead flat black.
 var amb=$('amb'), ac=amb.getContext('2d');
-function layer(){var c=document.createElement('canvas');c.width=2160;c.height=1080;return c;}
+function layer(){var c=document.createElement('canvas');c.width=2320;c.height=1080;return c;}
 var lightC=layer(), lc=lightC.getContext('2d'), dotsC=layer(), dc=dotsC.getContext('2d'), litC=layer(), tc=litC.getContext('2d');
-(function(){var G=36; dc.fillStyle='#fff'; for(var y=G/2;y<1080;y+=G)for(var x=G/2;x<2160;x+=G){dc.beginPath();dc.arc(x,y,1.4,0,Math.PI*2);dc.fill();}})();
-// v16: orbits widened with the frame (×1.125) so the 2:1 edges still get light
-var LIGHTS=[{c:'80,0,168',a:.85,r:860,ax:630,ay:250,k:1,ph:0},
-            {c:'51,168,211',a:.55,r:720,ax:698,ay:300,k:1,ph:Math.PI},
-            {c:'190,170,255',a:.35,r:520,ax:473,ay:220,k:2,ph:1.9}];
+(function(){var G=36; dc.fillStyle='#fff'; for(var y=G/2;y<1080;y+=G)for(var x=G/2;x<2320;x+=G){dc.beginPath();dc.arc(x,y,1.4,0,Math.PI*2);dc.fill();}})();
+// v16c: orbits widened with the frame (×2320/1920) so the 2:1 edges still get light
+var LIGHTS=[{c:'80,0,168',a:.85,r:860,ax:677,ay:250,k:1,ph:0},
+            {c:'51,168,211',a:.55,r:720,ax:749,ay:300,k:1,ph:Math.PI},
+            {c:'190,170,255',a:.35,r:520,ax:508,ay:220,k:2,ph:1.9}];
 function drawAmbient(t){
   var w=t/LOOP*Math.PI*2;
-  lc.globalCompositeOperation='source-over'; lc.clearRect(0,0,2160,1080); lc.globalCompositeOperation='lighter';
+  lc.globalCompositeOperation='source-over'; lc.clearRect(0,0,2320,1080); lc.globalCompositeOperation='lighter';
   LIGHTS.forEach(function(L){
-    var x=1080+L.ax*Math.cos(w*L.k+L.ph), y=540+L.ay*Math.sin(w*L.k+L.ph), g=lc.createRadialGradient(x,y,0,x,y,L.r);
+    var x=1160+L.ax*Math.cos(w*L.k+L.ph), y=540+L.ay*Math.sin(w*L.k+L.ph), g=lc.createRadialGradient(x,y,0,x,y,L.r);
     for(var i=0;i<=8;i++){var d=i/8, f=Math.pow(1-d*d*(3-2*d),1.6); g.addColorStop(d,'rgba('+L.c+','+(L.a*f).toFixed(4)+')');}
-    lc.fillStyle=g; lc.fillRect(0,0,2160,1080);
+    lc.fillStyle=g; lc.fillRect(0,0,2320,1080);
   });
   // dots: a faint silver grid everywhere, brightened and tinted where the lights pass
-  tc.globalCompositeOperation='source-over'; tc.clearRect(0,0,2160,1080);
-  tc.fillStyle='rgba(150,150,170,1)'; tc.fillRect(0,0,2160,1080);
+  tc.globalCompositeOperation='source-over'; tc.clearRect(0,0,2320,1080);
+  tc.fillStyle='rgba(150,150,170,1)'; tc.fillRect(0,0,2320,1080);
   tc.globalCompositeOperation='lighter'; tc.drawImage(lightC,0,0); tc.drawImage(lightC,0,0);
   tc.globalCompositeOperation='destination-in'; tc.drawImage(dotsC,0,0);
-  ac.clearRect(0,0,2160,1080);
+  ac.clearRect(0,0,2320,1080);
   ac.globalAlpha=.16; ac.drawImage(lightC,0,0);
   ac.globalAlpha=.17; ac.globalCompositeOperation='lighter'; ac.drawImage(litC,0,0);
   ac.globalAlpha=1; ac.globalCompositeOperation='source-over';
@@ -251,7 +254,7 @@ var KT=(function(){var w=[],sum=0;for(var i=0;i<Q.length;i++){sum+=1+(/[,.?!]/.t
 function seek(t){
   t=((t%LOOP)+LOOP)%LOOP;
   drawAmbient(t);
-  var sw=(t%SWEEP)/SWEEP; fill.style.left=(-260+(2032+260)*eio(sw))+'px'; fill.style.opacity=Math.sin(sw*Math.PI)*0.9+0.1;
+  var sw=(t%SWEEP)/SWEEP; fill.style.left=(-260+(2192+260)*eio(sw))+'px'; fill.style.opacity=Math.sin(sw*Math.PI)*0.9+0.1;
   var pu=(t%PULSE)/PULSE; var dot=document.querySelector('#status .dot'); dot.style.setProperty('--ps',1+pu*2.2); dot.style.setProperty('--po',(1-pu)*.8);
   var d=Math.floor(t/(LOOP/32))%4; dots.forEach(function(s,i){s.style.opacity=i<d?1:0;});
   drawTitle(t);
@@ -317,7 +320,7 @@ function seek(t){
   glow.style.opacity=hz*(.93+.07*Math.sin(t/LOOP*Math.PI*4));
 }
 window.seek=seek; seek(0);
-// motion contract (Tools & Automation/CLAUDE.md): v16 frame is 2:1
-window.__motion={loop:LOOP,fps:30,width:2160,height:1080,seek:seek};
+// motion contract (Tools & Automation/CLAUDE.md): v16c frame is 2320 × 1080
+window.__motion={loop:LOOP,fps:30,width:2320,height:1080,seek:seek};
 </script>
 </body></html>

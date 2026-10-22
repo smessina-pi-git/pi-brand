@@ -1,6 +1,6 @@
 # Zoom waiting room video: source
 
-The master animation for the Zoom waiting room video (v16b, a 19.8 s loop at 2160×1080). The builder (`../builder.html`) is a canvas port of this page and is what people use to make their own video. Use this folder to change the animation itself and render reference MP4s. `NOTES.md` has the design history and every timing decision.
+The master animation for the Zoom waiting room video (v16c, a 19.8 s loop at 2320×1080). The builder (`../builder.html`) is a canvas port of this page and is what people use to make their own video. Use this folder to change the animation itself and render reference MP4s. `NOTES.md` has the design history and every timing decision.
 
 | File | What it is |
 |---|---|
@@ -20,6 +20,6 @@ node cap.js waiting_built.html frames
 ffmpeg -framerate 30 -i frames/f%04d.png -c:v libx264 -pix_fmt yuv420p -crf 16 -tune grain -movflags +faststart out.mp4
 ```
 
-On Linux, copy the fonts into `~/.fonts` and run `fc-cache -f`. On a Mac, Chrome is used automatically; elsewhere set `CHROME_PATH` or let Playwright use its own Chromium. Check that the first and last frames match (the loop is seamless), and keep the file under Zoom's 30 MB limit; about 5 MB is typical. The featured `../Obi waiting room - Steve.mp4` is a builder export (Steve, Persuader), currently v16b.
+On Linux, copy the fonts into `~/.fonts` and run `fc-cache -f`. On a Mac, Chrome is used automatically; elsewhere set `CHROME_PATH` or let Playwright use its own Chromium. Check that the first and last frames match (the loop is seamless), and keep the file under Zoom's 30 MB limit; about 5 MB is typical. The featured `../Obi waiting room - Steve.mp4` is a builder export (Steve, Persuader), currently v16c.
 
 Don't commit rendered frames, `waiting_built.html`, or old cuts of the video. This repo is public.

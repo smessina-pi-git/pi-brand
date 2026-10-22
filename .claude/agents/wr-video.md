@@ -15,7 +15,7 @@ Keep the two in sync. When you change a beat, render the same moments from both 
 - A frame is a pure function of t: no timers, no `Math.random` at draw time (seeded is fine), nothing that builds up.
 - The loop closes. Every repeating motion divides LOOP (`SWEEP=LOOP/10`, `PULSE=LOOP/16`, caret `LOOP/52`, 32 status-dot steps). If LOOP changes, re-derive these. First frame = last frame.
 - Steve's rules in the README: everything centered, nothing moves while text is read, one 60 px chat size (v15), steady typing, near-black with haze and dot field, Obi's gradient only on Obi's box and bubble.
-- In the builder, `RATE` and `fitWords` set how long a reply can be (currently 32 words fit the 19.8 s loop, v16b; the fit is measured against `FIT_END`). If you change the read hold, update them and check the export-size math (`ZOOM_TARGET`, `MAX_BYTES`; stay under 20 MB).
+- In the builder, `RATE` and `fitWords` set how long a reply can be (currently 32 words fit the 19.8 s loop, v16b; the fit is measured against `FIT_END`). The chat size steps down when Obi's block would rise above `HDR.clear` (y 252, under the v16c header), so 5 lines fit at 60 px. Zoom covers the top ~126 px and the bottom ~153 px of the frame: keep the header below y 140 and nothing important below y 920. If you change the read hold, update them and check the export-size math (`ZOOM_TARGET`, `MAX_BYTES`; stay under 20 MB).
 - Preview-only things (`scene.hint` slots, `scene.logoHold`) must never reach an export. Exports draw a copy with them off.
 - Copy changes belong to wr-copy, and page and UI changes to wr-ui. Stay in the animation.
 
@@ -33,7 +33,7 @@ Work in rounds, at most 5. Stop when a round finds nothing significant.
    - From the `Tools & Automation` folder, run `node studio/check-motion.js pi-brand/projects/zoom-waiting-room/builder.html` in **both modes**. Partner mode uses `--eval`: click `button[data-mode="partner"]`, put a generated placeholder PNG into `#logoFile` with a DataTransfer, dispatch `change`, then wait about 5 s for the "branded" moment to finish. Never use a real partner logo.
    - Also run the check on the built master. **Every run must exit 0.**
    - Parity: draw the builder (`WaitingRoom.layout`/`draw`) and the master at the same t values. The mean difference should stay under about 1/255, and the layouts must match.
-   - Stress cases: a 24-character name, the longest default reply, and a long custom reply near `MAX_WORDS`.
+   - Stress cases: a 24-character name, the longest default reply, and custom replies at the limits (32 words, and long words up to the 5-line cap), which must set at 60 px without extending the loop.
 3. **Review.** An independent reviewer subagent (wr-qa, or a fresh agent that did not make the change) critiques the frames:
    - legibility at Zoom size (a laptop window about 960 px wide, and a phone about 390 px wide)
    - composition and balance
