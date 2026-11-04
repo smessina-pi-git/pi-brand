@@ -432,7 +432,8 @@ body.bab:not([data-mode="partner"]) .wr-p { grid-template-rows: 0fr; opacity: 0;
         <div class="wr-pair">
           <div class="bab-field">
             <label class="bab-label" for="name">Your first name</label>
-            <input id="name" class="bab-control" type="text" maxlength="24" autocomplete="given-name" spellcheck="false" value="Steve" placeholder="First name">
+            <input id="name" class="bab-control" type="text" maxlength="24" autocomplete="given-name" spellcheck="false" value="Steve" placeholder="First name" aria-describedby="nameHint">
+            <p class="bab-hint" id="nameHint" hidden></p>
           </div>
           <div class="bab-field">
             <span class="bab-label" id="profileLbl">Your Reference Profile</span>
@@ -448,7 +449,7 @@ body.bab:not([data-mode="partner"]) .wr-p { grid-template-rows: 0fr; opacity: 0;
         <details class="wr-reply" id="replyBox">
           <summary><span class="bab-label">Obi’s reply</span><span class="wr-sumtext" id="replySum">Suggested</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg></summary>
           <div class="wr-replybody">
-            <textarea id="reply" class="bab-text" rows="4" maxlength="280" spellcheck="true" aria-label="Obi’s reply" aria-describedby="replyHint replyNote"></textarea>
+            <textarea id="reply" class="bab-text" rows="4" maxlength="600" spellcheck="true" aria-label="Obi’s reply" aria-describedby="replyHint replyNote"></textarea>
             <div class="bab-labelrow wr-internal"><span class="bab-hint wr-count" id="replyHint"></span><button id="replyReset" class="bab-link" type="button" hidden>Use the suggested reply</button></div>
             <p class="bab-hint wr-partner">Partner videos use Obi’s approved reply for each profile.</p>
             <p class="bab-fineprint wr-internal" id="replyNote">Do not input text that disregards PI science. Always use Obi output for text shown here. You are responsible for what is put here.</p>
@@ -717,13 +718,20 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
   // whole pixels, the half-leading floored.
   function base(top, size, lh) { var a = Math.round(size * ASC), d = Math.round(size * DESC); return top + Math.floor((lh - a - d) / 2) + a; }
   function curly(s) { return s.replace(/'/g, '’'); }
-  // words in a reply template, with {name} counted as one word whatever the name is
-  function replyWords(tpl) { var c = tpl.replace(/\{name\}/g, 'N').replace(/\s+/g, ' ').trim(); return c ? c.split(' ').length : 0; }
-  // v16c: only characters Roboto draws (house rule: no silent font fallback). Latin, Greek and Cyrillic letters,
-  // combining accents, digits, ASCII and Latin-1 punctuation, general punctuation (– — ’ “ ” …) and currency
-  // signs stay; emoji, joiners, variation selectors and other scripts are removed.
-  var ROBOTO_OK = /[\p{Script=Latin}\p{Script=Greek}\p{Script=Cyrillic}̀-ͯ -@[-`{-~ -¿×÷‐-‧‰-⁞₠-₿\s]/u;
-  function robotoOnly(s) { var out = ''; for (var ch of s) if (ROBOTO_OK.test(ch)) out += ch; return out; }
+  // words in a reply template, with {name} counted as one word whatever the name is. v16d2: a token with no
+  // letter or digit (a lone "." or "—") isn't a word, so "outcome ." is one word, as the renderer draws it
+  function replyWords(tpl) { return tpl.replace(/\{name\}/g, 'N').split(/\s+/).filter(function (w) { return /[\p{L}\p{N}]/u.test(w); }).length; }
+  // v16d2: after stripping, no space is left before punctuation ("Persuader 🎉," → "Persuader,") and no double spaces
+  function tidy(s) { return s.replace(/[ \t ]+(?=[,.;:!?…)\]}»”])/g, '').replace(/[ \t ]{2,}/g, ' '); }
+  // v16c/v16d2: only characters Roboto draws (house rule: no silent font fallback). ROBOTO_OK is the measured set,
+  // not Unicode ranges: every code point U+0021-U+2BFF, U+FB00-FB4F and U+FF00-FFEF was drawn in Chrome with Roboto
+  // as this page loads it (Google Fonts, weights 400, 500 and 700) and kept only if Roboto drew it at all three
+  // weights (the same pixels whatever fallback follows Roboto in the stack, and different from that fallback alone):
+  // 1,220 characters, plus whitespace. It keeps ™ € — ’ “ ” … Ł é Ж Ω and drops what Roboto here lacks: emoji,
+  // fullwidth Latin, polytonic Greek (ἀ), IPA (ʃ), most Latin Ext-B/Additional, the ﬁ ligature, ‰ and →.
+  // Text is NFC-normalised first, so a decomposed é stays é. Regenerate with coverage.js if the fonts change.
+  var ROBOTO_OK = /[\u0021-\u007E\u00A1-\u00AC\u00AE-\u017F\u018F\u0192\u01A0-\u01A1\u01AF-\u01B0\u01F0\u01FA-\u01FF\u0218-\u021B\u0237\u0259\u02BC\u02C6-\u02C7\u02C9\u02DA\u02DC-\u02DD\u02F3\u0301\u0303\u0309\u0384-\u038A\u038C\u038E-\u03A1\u03A3-\u03CE\u03D1-\u03D2\u03D6\u0400-\u0484\u0486\u0488-\u0513\u052A-\u052D\u1C80-\u1C8A\u1E00-\u1E01\u1E3E-\u1E3F\u1E80-\u1E85\u1E9E\u1EA0-\u1EF9\u1F4D\u2010-\u2011\u2013-\u2014\u2017-\u201A\u201C-\u201E\u2020\u2022-\u2027\u2031-\u2033\u2035-\u203D\u203F-\u2054\u2057\u205A\u205D\u2070-\u2071\u2074-\u208E\u20A3-\u20A4\u20A6-\u20AC\u20B1\u20B9-\u20BA\u20BC-\u20BD\u20C0\u20E2\u2100-\u2101\u2105-\u2106\u2113\u2116-\u2117\u2120-\u2122\u2126-\u2127\u2129\u212E\u2132\u213A-\u213B\u2141-\u2144\u214B\u215B-\u215F\u2187-\u2188\u218A-\u218B\u2197\u2199\u21B0-\u21B2\u21B4\u21B6-\u21B9\u21BC\u21C0\u21CD\u21CF-\u21D4\u21E6\u21E8-\u21E9\u21F0\u2202\u2206-\u2207\u220F-\u2213\u2216\u221A\u221E\u222B\u2248\u2260\u2264-\u2265\u22EF\u2306\u2312\u2314\u239B-\u23A6\u23AA\u23CE\u2409-\u240D\u2423\u2427-\u2429\u2581-\u2583\u2585-\u2587\u2589-\u258B\u258D-\u258F\u2594-\u2595\u25A0\u25A3-\u25A9\u25AD\u25B1\u25B3\u25B5\u25BD\u25C3\u25C8\u25CA-\u25CB\u25CE-\u25CF\u25E2-\u25E5\u25EF\u2605-\u2606\u2609\u260F\u262F\u2700\u270E\u2713\u2758\u275F-\u2760\u27CE-\u27CF\u29F5\u2B4D-\u2B4F\u2B56-\u2B57\u2B59-\u2B5F\u2B66-\u2B73\u2B76-\u2B81\u2B84-\u2B8F\u2B92-\u2B94\u2B96-\u2BFF\s]/u;
+  function robotoOnly(s) { var out = ''; for (var ch of String(s).normalize('NFC')) if (ROBOTO_OK.test(ch)) out += ch; return out; }
   function font(w, size, fam) { return w + ' ' + size + 'px ' + (fam || SANS); }
   // Chrome on a Mac draws page text with font smoothing, which thickens strokes; canvas text gets none.
   // A hairline stroke in the fill colour gives canvas text the same weight as the v9 render.
@@ -800,13 +808,13 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
   }
 
   function layout(ctx, opt, img) {
-    var name = (opt.name || '').trim() || 'your host';
+    var name = robotoOnly(opt.name || '').replace(/\s+/g, ' ').trim() || 'your host';   // v16d: no fallback glyphs in the question
     var Q = curly(QUESTION.replace(/\{name\}/g, name));
     var s = {Q: Q, img: img};
     // partner mode: their logo in the header and on the end card, their message on the end card, a larger Obi label
     s.partner = opt.mode === 'partner'; s.pLogo = s.partner ? (opt.partnerLogo || null) : null; s.pBack = !!opt.logoBacking;
     ctx.save();
-    var words = curly(robotoOnly(opt.reply || '').replace(/\{name\}/g, name)).split(' ').filter(Boolean);
+    var words = curly(tidy(robotoOnly(opt.reply || '').replace(/\s+/g, ' ')).replace(/\{name\}/g, name)).split(' ').filter(Boolean);
     // the chat size: 60 px, stepped down 2 px at a time (never below 44) only if Obi's block (label row 68 +
     // bubble), centred on y 540, would reach above HDR.clear (24 px under the header rule) and crowd the header.
     // v16c: the header moved down under Zoom's title bar (rule y 136 → 228), so 5 lines at 60 px fit (was 7):
@@ -824,7 +832,7 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     if (s.partner) {
       ctx.font = font(500, PMSG); ctx.letterSpacing = '-0.5px';
       // "The Predictive Index" never splits across lines (no-break spaces, which wrap() does not break at)
-      var pm = curly((opt.partnerMessage || '').replace(/\{name\}/g, name).replace(/\s+/g, ' ').trim()).replace(/The Predictive Index/g, 'The\u00A0Predictive\u00A0Index');
+      var pm = curly(tidy(robotoOnly(opt.partnerMessage || '').replace(/\{name\}/g, name).replace(/\s+/g, ' ')).trim()).replace(/The Predictive Index/g, 'The\u00A0Predictive\u00A0Index');
       // balanced lines: the narrowest width (down to 60%) that keeps the line count, so no word is left alone
       var pw = 1320, pn = wrap(ctx, pm, pw).length;
       while (pw > 800 && wrap(ctx, pm, pw - 20).length === pn) pw -= 20;
@@ -1347,9 +1355,55 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
   var linkMode = /[?&]for=partner\b/.test(location.search) || /^#partner$/.test(location.hash) ? 'partner' : /[?&]for=internal\b/.test(location.search) ? 'internal' : null;
   state.mode = linkMode || state.mode || 'internal';
   if (state.pmsg == null) state.pmsg = DEFAULT_PMSG;
+  // v16d: only characters Roboto draws, in remembered values too (the name, the end-card message, edited
+  // replies); a removal shows the same quiet note as typing one would
+  // v16d2: the note is "Emoji removed". It stays until the field is next edited without a removal AND at least
+  // 2 s have passed since the removal (so "A😀B" typed quickly still shows it), and is announced once (polite).
+  var NOTES = {name: {on: false, t: 0}, pmsg: {on: false, t: 0}, reply: {on: false, t: 0}};
+  function noteStrip(key, stripped, quiet){
+    var n = NOTES[key]; clearTimeout(n.timer);
+    if (stripped) { n.on = true; n.t = Date.now(); if (!quiet) announce('Emoji removed'); return; }
+    if (!n.on) return;
+    var left = 2000 - (Date.now() - n.t);
+    if (left <= 0) n.on = false; else n.timer = setTimeout(function(){ n.on = false; rebuild(); }, left);
+  }
+  (function(){
+    var n = WR.robotoOnly(String(state.name || '')), m = WR.robotoOnly(String(state.pmsg));
+    noteStrip('name', n !== String(state.name || ''), true); noteStrip('pmsg', m !== String(state.pmsg), true);
+    state.name = n; state.pmsg = m;
+    Object.keys(state.replies).forEach(function(k){ var c = WR.robotoOnly(String(state.replies[k]));
+      if (c !== state.replies[k] && k === state.profile) noteStrip('reply', true, true); state.replies[k] = c; });
+  })();
   nameEl.value = state.name;
   function profile(){ return PROFILES.filter(function(p){ return p.name === state.profile; })[0] || PROFILES[0]; }
-  function cleanName(){ return nameEl.value.replace(/\s+/g,' ').trim(); }
+  function cleanName(){ return WR.robotoOnly(nameEl.value).replace(/\s+/g,' ').trim(); }
+  // v16d: strip what Roboto can't draw as it arrives (typed, emoji picker, paste, drop), keeping the caret and
+  // inserting only what fits the field's limit, so the limit counts after the strip. onStrip says one was removed.
+  function guardChars(el, onStrip){
+    el.addEventListener('beforeinput', function(e){
+      var txt = e.data != null ? e.data : (e.dataTransfer ? e.dataTransfer.getData('text/plain') : null);
+      if (txt == null || e.isComposing || WR.robotoOnly(txt) === txt) return;
+      e.preventDefault();
+      var clean = WR.robotoOnly(txt), s = el.selectionStart, en = el.selectionEnd, max = el.maxLength > 0 ? el.maxLength : Infinity;
+      if (el.tagName === 'INPUT') clean = clean.replace(/[\r\n]+/g, ' ');
+      clean = Array.from(clean).slice(0, Math.max(0, max - (el.value.length - (en - s)))).join('');
+      el.setRangeText(clean, s, en, 'end'); onStrip(); el.dispatchEvent(new Event('input', {bubbles: true}));
+    });
+    el.addEventListener('paste', function(e){
+      var txt = e.clipboardData ? e.clipboardData.getData('text/plain') : null;
+      if (txt == null || WR.robotoOnly(txt) === txt) return;
+      e.preventDefault();
+      var clean = WR.robotoOnly(txt), s = el.selectionStart, en = el.selectionEnd, max = el.maxLength > 0 ? el.maxLength : Infinity;
+      if (el.tagName === 'INPUT') clean = clean.replace(/[\r\n]+/g, ' ');
+      clean = Array.from(clean).slice(0, Math.max(0, max - (el.value.length - (en - s)))).join('');
+      el.setRangeText(clean, s, en, 'end'); onStrip(); el.dispatchEvent(new Event('input', {bubbles: true}));
+    });
+  }
+  // anything that still arrives (IME, autofill) is stripped on input, the caret kept where it was
+  function stripField(el){
+    var raw = el.value, clean = WR.robotoOnly(raw); if (clean === raw) return false;
+    var before = WR.robotoOnly(raw.slice(0, el.selectionStart)).length; el.value = clean; el.setSelectionRange(before, before); return true;
+  }
   function remember(){
     try { localStorage.setItem('wrb14', JSON.stringify(state)); }
     catch(e){ try { var lite = Object.assign({}, state); delete lite.plogo; localStorage.setItem('wrb14', JSON.stringify(lite)); } catch(e2){} }
@@ -1387,7 +1441,7 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
   // (real canvas text metrics, the current name), so the type never steps down. A character cap can't do this:
   // long words wrap to 6 lines from about 225 shown characters, while the approved Scholar reply with a
   // 24-character name is 228 characters and fits in 5.
-  var MAX_WORDS = 32, MAX_LINES = 5, blocked = false, replyStripped = false;
+  var MAX_WORDS = 32, MAX_LINES = 5, blocked = false;
   function replyFits(tpl){
     var s = WR.layout(vctx, {name: cleanName(), profile: profile().name, reply: tpl.replace(/\s+/g, ' ').trim()}, images);
     return {lines: s.aLines, ok: s.chat >= 60 && s.aLines <= MAX_LINES};
@@ -1408,9 +1462,10 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     var tall = !partner && (scene.chat < 60 || scene.aLines > MAX_LINES), over = !partner && (n > MAX_WORDS || tall);
     var full = !partner && !over && edited && (n === MAX_WORDS || scene.aLines === MAX_LINES);   // only once they've edited
     var h = $('replyHint');
-    h.textContent = n + ' / ' + MAX_WORDS + ' words' + (tall ? ' · too long to fit' : full ? ' · at the limit' : '') + (replyStripped && !partner ? ' · emoji and unsupported characters removed' : ''); h.classList.toggle('over', over);
+    h.textContent = n + ' / ' + MAX_WORDS + ' words' + (tall ? ' · too long to fit' : full ? ' · at the limit' : '') + (NOTES.reply.on && !partner ? ' · Emoji removed' : ''); h.classList.toggle('over', over);
     var pc = $('pmsgCount'), pOver = partner && pm.length > MAX_PMSG;
-    pc.textContent = pm.length + ' / ' + MAX_PMSG; pc.classList.toggle('over', pOver);
+    pc.textContent = pm.length + ' / ' + MAX_PMSG + (NOTES.pmsg.on ? ' · Emoji removed' : ''); pc.classList.toggle('over', pOver);
+    var nh = $('nameHint'); nh.hidden = !NOTES.name.on; nh.textContent = NOTES.name.on ? 'Emoji removed' : '';
     $('pmsgErr').textContent = pOver ? 'Shorten it to ' + MAX_PMSG + ' characters to download.' : '';
     replyEl.classList.toggle('bab-invalid', over); pmsgEl.classList.toggle('bab-invalid', pOver);
     replyEl.setAttribute('aria-invalid', String(over)); pmsgEl.setAttribute('aria-invalid', String(pOver));
@@ -1480,7 +1535,8 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
   //  - An edit that adds or replaces text is accepted only if the reply fits with every counted join split into
   //    its own word. So at the limit, the first letter that would glue is refused, and nothing is ever left
   //    half-joined. Retyping a whole word (select it, type over it) always works.
-  //  - Deleting is always allowed, so a reply pushed over by a longer name can be shortened.
+  //  - Deleting is allowed unless it would make a fitting reply stop fitting (v16d2), so a reply pushed over by a
+  //    longer name can always be shortened. maxlength is 600, so these limits, not the browser, stop typing.
   // Emoji and other characters Roboto can't draw are removed as they arrive (no silent font fallback).
   var WORDCH = /[\p{L}\p{N}\p{M}'’-]/u, lastReply = null, prov = null, refWords = null;
   function wordsOf(s){ return s.toLowerCase().split(/[^\p{L}\p{N}\p{M}'’-]+/u).filter(Boolean); }
@@ -1489,23 +1545,55 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     var i = 0; while (i < a.length && a[i] === b[i]) i++;
     return a.length === b.length ? a.slice(i + 1) === b.slice(i + 1) : a.slice(i) === b.slice(i + 1);
   }
-  function correction(tok){ tok = tok.toLowerCase(); for (var w of refWords) if (near(tok, w)) return true; return false; }
+  // v16d2: provenance is per word, not just original/typed. An original letter carries the number of the word it
+  // came from (1, 2, …); a typed letter carries the number of its typing run (-1, -2, …: one run while the person
+  // keeps typing at the same caret, a new run when the caret moves or text is pasted). Wherever two different
+  // numbers meet inside one word, that's a join: typed letters against an original word, a new word typed against
+  // a word typed earlier ("very" + "Steve"), or two original words whose space was deleted. A join is fine only as
+  // a correction of the word it sits in: for an original word w (all original letters from w), the same as w, or,
+  // with w's own letters at both ends, one letter changed or removed; for a word typed this session, its own letters
+  // at both ends and one letter from elsewhere. So replacing an inner letter and delete-then-retype work at the
+  // limit; letters added at either end of a word do not (v16d's near-any-word rule let "a" + "i" pass as "ia").
+  function correction(s, i, j, pv){
+    var tok = s.slice(i, j).toLowerCase(), ids = pv.slice(i, j), orig = ids.filter(function(x){ return x > 0; });
+    var one = orig.length && orig.every(function(x){ return x === orig[0]; }), w = one ? origWords[orig[0]] : null;
+    if (w && tok === w && ids.every(function(x){ return x > 0 ? x === orig[0] : x < 0; })) return true;
+    var base = ids[0]; if (ids[ids.length - 1] !== base) return false;
+    if (base > 0) return ids.every(function(x){ return x === base || x < 0; }) && near(tok, origWords[base]);
+    return ids.filter(function(x){ return x !== base; }).length <= 1;
+  }
   // the reply with every counted join split by a space
-  function splitJoins(s, pv){
+  // (only: split just the joins that touch this typing run, the state one more space would actually make)
+  function splitJoins(s, pv, only){
     var cuts = [], i = 0;
     while (i < s.length) {
       if (!WORDCH.test(s[i])) { i++; continue; }
       var j = i; while (j < s.length && WORDCH.test(s[j])) j++;
       var mixed = false; for (var k = i; k < j - 1; k++) if (pv[k] !== pv[k + 1]) mixed = true;
-      if (mixed && !correction(s.slice(i, j))) for (var k2 = i; k2 < j - 1; k2++) if (pv[k2] !== pv[k2 + 1]) cuts.push(k2 + 1);
+      // (v16d tried letting a pure suffix through, outcome → outcomes; it let " together" glue on as
+      // "outcometogether." when the space was refused, so every join counts again, as in v16c)
+      if (mixed && !correction(s, i, j, pv)) for (var k2 = i; k2 < j - 1; k2++) if (pv[k2] !== pv[k2 + 1] && (only == null || pv[k2] === only || pv[k2 + 1] === only)) cuts.push(k2 + 1);
       i = j;
     }
     for (var c = cuts.length - 1; c >= 0; c--) s = s.slice(0, cuts[c]) + ' ' + s.slice(cuts[c]);
     return s;
   }
-  function startEdit(){ lastReply = replyEl.value; prov = Array.from(lastReply, function(){ return 1; });
-    refWords = new Set(wordsOf(lastReply).concat(wordsOf(fillName(profile().reply)))); }
-  function announce(msg){ var n = $('srNote'); n.textContent = ''; if (msg) requestAnimationFrame(function(){ n.textContent = msg; }); }
+  var origWords = null, runId = 0, runEnd = -1, runBlocked = false;
+  function startEdit(){ lastReply = replyEl.value; prov = []; origWords = [null]; runId = 0; runEnd = -1; runBlocked = false;
+    for (var i = 0; i < lastReply.length;) {
+      if (!WORDCH.test(lastReply[i])) { prov.push(null); i++; continue; }
+      var j = i; while (j < lastReply.length && WORDCH.test(lastReply[j])) j++;
+      origWords.push(lastReply.slice(i, j).toLowerCase()); for (var k = i; k < j; k++) prov.push(origWords.length - 1); i = j;
+    }
+  }
+  // v16d: a refusal message stays for 2 s (or until a different one replaces it), so the next accepted
+  // keystroke doesn't cut it off; repeats clear first and set on the next frame, so they're announced again
+  var noteTimer = 0;
+  // (a new message is set at once; the same message again is cleared and set in the next task, so it re-announces)
+  function announce(msg){ var n = $('srNote'), same = n.textContent === msg; clearTimeout(noteTimer);
+    var set = function(){ n.textContent = msg; noteTimer = setTimeout(function(){ n.textContent = ''; }, 2000); };
+    if (!msg) { n.textContent = ''; return; }
+    if (same) { n.textContent = ''; noteTimer = setTimeout(set, 0); } else set(); }
   replyEl.addEventListener('focus', startEdit);
   replyEl.addEventListener('input', function(){
     if (lastReply === null) startEdit();
@@ -1513,19 +1601,48 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     // what changed: the common start and end are kept, the middle was inserted (and maybe replaced)
     var a = 0; while (a < P.length && a < R.length && P[a] === R[a]) a++;
     var e = 0; while (e < P.length - a && e < R.length - a && P[P.length - 1 - e] === R[R.length - 1 - e]) e++;
-    var ins = R.length - e - a, pv = prov.slice(0, a).concat(new Array(ins).fill(0), prov.slice(P.length - e));
+    // v16d2: a pure insertion is placed where the caret says it went ("e" typed before "ed" is "e|ed", not "ee|d")
+    var kk = R.length - P.length, cc = WR.robotoOnly(raw.slice(0, replyEl.selectionStart)).length;
+    if (kk > 0 && cc - kk >= 0 && R.slice(0, cc - kk) === P.slice(0, cc - kk) && R.slice(cc) === P.slice(cc - kk)) { a = cc - kk; e = P.length - a; }
+    // typed letters: the same run while typing continues at the caret, a new run otherwise (see correction)
+    var ins = R.length - e - a, pureIns = R.length - P.length === ins, rid = pureIns && a === runEnd ? runId : runId - 1;
+    var pv = prov.slice(0, a).concat(new Array(ins).fill(rid), prov.slice(P.length - e));
+    // v16d2: once a letter is refused, more letters typed at the same caret are refused too (until the caret moves
+    // or something is deleted), so a word can't come out with letters skipped ("clr") or half-glued ("eed")
+    if (ins > 0 && pureIns && a === runEnd && runBlocked && WORDCH.test(R.slice(a, a + ins))) {
+      replyEl.value = P; replyEl.setSelectionRange(a, a); announce(runBlocked); return;
+    }
     if (ins > 0) {
       var tpl = toTemplate(R).replace(/\s+/g, ' ').trim(), tplS = toTemplate(splitJoins(R, pv)).replace(/\s+/g, ' ').trim();
       var wR = WR.replyWords(tpl), wS = WR.replyWords(tplS), msg = '';
       if (tpl) {
         if (wR > MAX_WORDS) msg = 'That would go over the ' + MAX_WORDS + '-word limit.';
         else if (wS > MAX_WORDS) msg = 'That would join onto a word, and Obi’s reply is at the ' + MAX_WORDS + '-word limit.';
-        else if (!replyFits(tpl).ok || !replyFits(tplS).ok) msg = 'That would go past the ' + MAX_LINES + ' lines Obi’s bubble holds.';
+        else if (!replyFits(tpl).ok || !replyFits(tplS).ok || !replyFits(toTemplate(splitJoins(R, pv, rid)).replace(/\s+/g, ' ').trim()).ok) msg = 'That would go past the ' + MAX_LINES + ' lines Obi’s bubble holds.';
+        // v16d2: a space typed just before punctuation ("outcome| .") only makes sense if a word can follow it;
+        // if one more word wouldn't fit, the space is refused too, so no stray " ," is left behind
+        if (!msg && /^\s+$/.test(R.slice(a, a + ins)) && /[,.;:!?…]/.test(R[a + ins] || '')) {
+          var RX = R.slice(0, a + ins) + 'x' + R.slice(a + ins), pvX = pv.slice(0, a + ins).concat([rid - 1], pv.slice(a + ins));
+          var tplX = toTemplate(splitJoins(RX, pvX)).replace(/\s+/g, ' ').trim();
+          if (WR.replyWords(tplX) > MAX_WORDS) msg = 'That would go over the ' + MAX_WORDS + '-word limit.';
+          else if (!replyFits(tplX).ok) msg = 'That would go past the ' + MAX_LINES + ' lines Obi’s bubble holds.';
+        }
       }
-      if (msg) { replyEl.value = P; replyEl.setSelectionRange(a, a); announce(msg); return; }
+      if (msg) { replyEl.value = P; replyEl.setSelectionRange(a, a); announce(msg); runEnd = a; runBlocked = pureIns ? msg : false; return; }
+    } else if (R.length < P.length) {
+      // v16d2: deleting is allowed unless it would make a reply that fits stop fitting (deleting the space
+      // between two long words can push it to a 6th line; editing the name inside the reply turns {name} back
+      // into separate words). A reply that already doesn't fit can always be shortened.
+      var tP = toTemplate(P).replace(/\s+/g, ' ').trim(), tD = toTemplate(R).replace(/\s+/g, ' ').trim();
+      if (tD && WR.replyWords(tP) <= MAX_WORDS && replyFits(tP).ok) {
+        var dmsg = WR.replyWords(tD) > MAX_WORDS ? 'That would go over the ' + MAX_WORDS + '-word limit.' : !replyFits(tD).ok ? 'That would go past the ' + MAX_LINES + ' lines Obi’s bubble holds.' : '';
+        if (dmsg) { replyEl.value = P; replyEl.setSelectionRange(P.length - e, P.length - e); announce(dmsg); return; }
+      }
     }
     if (stripped) { replyEl.value = R; replyEl.setSelectionRange(a + Math.max(0, ins), a + Math.max(0, ins)); }
-    replyStripped = stripped; lastReply = R; prov = pv; announce('');
+    noteStrip('reply', stripped); lastReply = R; prov = pv;
+    if (ins > 0) { runId = rid; runEnd = a + ins; } else runEnd = (P.length - e === runEnd) ? a : -1;
+    runBlocked = false;
     var p = profile(), v = toTemplate(R), c = v.replace(/\s+/g,' ').trim();
     if (c && c !== p.reply) state.replies[p.name] = v; else delete state.replies[p.name];
     remember(); rebuild(); jump(scene.T.out0 - 1);
@@ -1533,7 +1650,10 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
   $('replyReset').addEventListener('click', function(){ delete state.replies[profile().name]; remember(); rebuild(); jump(scene.T.words0 + 3.2); });
 
   // typing the name replays the question, already typed, so the change shows right away
-  nameEl.addEventListener('input', function(){ state.name = nameEl.value; remember(); rebuild(); jump(scene.T.typeEnd); });
+  var namePending = false;
+  guardChars(nameEl, function(){ namePending = true; });
+  nameEl.addEventListener('input', function(){ noteStrip('name', stripField(nameEl) || namePending); namePending = false;
+    state.name = nameEl.value; remember(); rebuild(); jump(scene.T.typeEnd); });
 
   // ---------- partner mode ----------
   var segBtns = [].slice.call(document.querySelectorAll('.bab-seg [role="radio"]'));
@@ -1559,7 +1679,10 @@ if (typeof module !== 'undefined') module.exports = PROFILES;
     });
   });
   pmsgEl.value = state.pmsg;
-  pmsgEl.addEventListener('input', function(){ state.pmsg = pmsgEl.value; remember(); rebuild(); jump(scene.T.mk1 + .2); });
+  var pmsgPending = false;
+  guardChars(pmsgEl, function(){ pmsgPending = true; });
+  pmsgEl.addEventListener('input', function(){ noteStrip('pmsg', stripField(pmsgEl) || pmsgPending); pmsgPending = false;
+    state.pmsg = pmsgEl.value; remember(); rebuild(); jump(scene.T.mk1 + .2); });
   $('logoBack').checked = !!state.pback;
   $('logoBack').addEventListener('change', function(){ state.pback = this.checked; remember(); rebuild(); jump(scene.T.mk1 + .2); });
   // the logo never leaves the browser: it's read locally, scaled to 800 px on its long side, and remembered

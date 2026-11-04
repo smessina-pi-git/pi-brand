@@ -51,7 +51,7 @@ Usual flow: **edit** (wr-video, wr-ui or wr-copy) → **check** (wr-qa) → **sh
 - Builder UI: light and minimal on PI's Design System; flat, calm, no decorative gradients (the step numbers are flat gray), no stacked cards. Delight is welcome but flat and not overdone.
 - Obi's reply (v16c): at most 32 words (`{name}` counts as one) and at most 5 lines at the full 60 px size. The builder stops further typing or pasting at either limit, so the type never shrinks and the loop never stretches.
 - Copy is gender-neutral (tokens `{name}`, `{profile}`). Obi's words come from Obi output or approved copy. Say "Obi" or "Obi by The Predictive Index".
-- Fonts must really load: Roboto, Roboto Serif and Roboto Mono, embedded or installed. A silent fallback is a bug.
+- Fonts must really load: Roboto, Roboto Serif and Roboto Mono, embedded or installed. A silent fallback is a bug. Since v16d the builder removes emoji and any character Roboto can't draw from the name, the reply and the partner end-card message as they arrive (typed, pasted, dropped or remembered), with a quiet "Emoji removed" note. The renderer strips them again before drawing. The allowlist (`ROBOTO_OK`) is measured by drawing every character with Roboto as the page loads it; see `source/NOTES.md` v16d2.
 - **This repo is public.** Never commit real partner logos, old video cuts, rendered frames, internal links or anyone's personal data.
 
 ## Download tracking
