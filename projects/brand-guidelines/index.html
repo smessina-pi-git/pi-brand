@@ -828,6 +828,19 @@ button.tcard__name:hover { text-decoration: underline; text-decoration-color: va
 @media (min-width: 681px) { .toc { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
 @media (min-width: 681px) and (max-width: 1000px) { .toc { grid-template-columns: repeat(4, minmax(0, 1fr)); } .toc__wide { grid-column: span 2; } }
 
+/* Terminology: wrong forms get a red X, no strike-through */
+.no { display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px 4px 5px; border-radius: 999px; border: 1px solid rgba(239,51,64,.35); background: rgba(239,51,64,.06); font-style: normal; font-size: 13.5px; font-weight: 500; color: var(--ink); white-space: nowrap; }
+.no svg { flex: none; width: 18px; height: 18px; padding: 4px; border-radius: 50%; background: var(--red); fill: none; stroke: #fff; stroke-width: 1.8; stroke-linecap: round; }
+.tname .no { border-color: rgba(239,51,64,.55); background: rgba(239,51,64,.14); color: #fff; }
+.terms__not span { color: var(--muted); }
+.tname .terms__not span { color: #AAA69E; }
+.retired .no { font-size: 13.5px; }
+.terms__not > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.terms__not { position: relative; gap: 6px; }
+.no { padding: 3px 10px 3px 4px; }
+.retired { gap: 7px; }
+.retired li { align-items: center; }
+
 /* Claude callout on light pages */
 .claude--light { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 16px; padding: 14px 20px; border-radius: 12px; border: 1px solid var(--rule); background: var(--ivory); }
 .t-ivory .claude--light { background: var(--white); }
@@ -1231,18 +1244,18 @@ button.tcard__name:hover { text-decoration: underline; text-decoration-color: va
           <li><b>PI has no periods.</b> Two capitals. Possessive is PI’s.</li>
           <li><b>Never translate either name.</b></li>
         </ol>
-        <p class="terms__not"><span>Not</span><s>the Predictive Index</s><s>Predictive Index</s><s>P.I.</s><s>TPI</s></p>
+        <p class="terms__not"><span>Don’t write</span><em class="no"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6"/></svg>the Predictive Index</em><em class="no"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6"/></svg>Predictive Index</em><em class="no"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6"/></svg>P.I.</em><em class="no"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6"/></svg>TPI</em></p>
       </article>
       <div class="tprod">
         <article class="tcard" data-r>
           <button type="button" class="tcard__name" data-copy-text="Obi by The Predictive Index">Obi by The Predictive Index</button>
           <p>Short name <button type="button" class="nm" data-copy-text="Obi">Obi</button> or <button type="button" class="nm" data-copy-text="Obi by PI">Obi by PI</button>. No article. Write “Ask Obi.”</p>
-          <p class="terms__not"><span>Not</span><s>OBI</s><s>obi</s><s>the assistant</s></p>
+          <p class="terms__not"><span>Don’t write</span><em class="no"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6"/></svg>OBI</em><em class="no"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6"/></svg>obi</em><em class="no"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6"/></svg>the assistant</em></p>
         </article>
         <article class="tcard" data-r>
           <button type="button" class="tcard__name" data-copy-text="PI Behavioral Assessment">PI Behavioral Assessment</button>
           <p>A trademark. Use the full name every time.</p>
-          <p class="terms__not"><span>Not</span><s>BA in client material</s></p>
+          <p class="terms__not"><span>Don’t write</span><em class="no"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6"/></svg>BA in client material</em></p>
         </article>
         <article class="tcard" data-r>
           <button type="button" class="tcard__name" data-copy-text="PI Cognitive Assessment">PI Cognitive Assessment</button>
@@ -1251,7 +1264,7 @@ button.tcard__name:hover { text-decoration: underline; text-decoration-color: va
         <article class="tcard" data-r>
           <span class="tcard__name">Reference Profiles</span>
           <p>Capitalize all 17 names. Captain, Maverick, Analyzer.</p>
-          <p class="terms__not"><span>Not</span><s>captain</s><s>maverick</s></p>
+          <p class="terms__not"><span>Don’t write</span><em class="no"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6"/></svg>captain</em><em class="no"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6"/></svg>maverick</em></p>
         </article>
       </div>
     </div>
@@ -1267,10 +1280,10 @@ button.tcard__name:hover { text-decoration: underline; text-decoration-color: va
       <div class="twords__col twords__col--retired">
         <h3>Retired</h3>
         <ul class="retired">
-          <li><s>talent optimization</s><i aria-hidden="true">→</i><b>behavioral intelligence</b></li>
-          <li><s>PI Assistant</s><i aria-hidden="true">→</i><b>Obi</b></li>
-          <li><s>On-Demand Behavioral Intelligence</s><i aria-hidden="true">→</i><b>Obi</b></li>
-          <li><s>OBI</s><i aria-hidden="true">→</i><b>Obi</b></li>
+          <li><em class="no"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6"/></svg>talent optimization</em><i aria-hidden="true">→</i><b>behavioral intelligence</b></li>
+          <li><em class="no"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6"/></svg>PI Assistant</em><i aria-hidden="true">→</i><b>Obi</b></li>
+          <li><em class="no"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6"/></svg>On-Demand Behavioral Intelligence</em><i aria-hidden="true">→</i><b>Obi</b></li>
+          <li><em class="no"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6"/></svg>OBI</em><i aria-hidden="true">→</i><b>Obi</b></li>
         </ul>
       </div>
     </div>
